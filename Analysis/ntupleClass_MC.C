@@ -1,11 +1,12 @@
-#define ntupleClass_2017F_cxx
-#include "ntupleClass_2017F.h"
+#define ntupleClass_MC_cxx
+#include "ntupleClass_MC.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
-#include <TAxis.h>
 
-// #########################################    SIGNAL ANALYSIS NEW CUTFLOW
+
+
+// #########################################  MC DsTau3mu ANALYSIS NEW CUTFLOW
 
 // Cuts: (over triplets)
 // * cut[1] -> Chi2 triplet vertex (in 0 - 15)
@@ -15,21 +16,23 @@
 // * cut[5] -> The 3 possible pairs of mu of the triplet have proper |DeltaZ| (<0.5)
 // * cut[6] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
 
-void ntupleClass_2017F::Loop_New(){
+void ntupleClass_MC::LoopMC_New(){
     
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntriesFast();
     // Variables definition
     int ntripl, cut[7] = {0}, cutevt[7] = {0};
+    int IdsummaryDaughter_BC[38] = {0}, IdsummaryMother_BC[38] = {0}, IdsummaryDaughter_AC[38] = {0}, IdsummaryMother_AC[38] = {0};
     float ptmin = 2.0, ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0, ntripltot = 0;
     double massmin = 1.62, massmax = 2.00, sigma = 0.011, mumass = 0.1056583715; // Mass values in GeV
     double TripletVtx_Chi2max = 15, EtaMax = 2.4;
-    TString listCut[7];
+    TString pId[38], listCut[7];
     //Variables inizialization
     cutevt[0] = nentries;
+    particleName(pId);
     cutName_New(listCut);
     // Creation of the file with analysed data
-    TFile *fout = new TFile("AnalysedTree_Data2017F_final2.root", "RECREATE");
+    TFile *fout = new TFile("AnalysedTree_MC_DsTau3mu_final2.root", "RECREATE");
     fout->cd();
     // Creation of histograms for variables BEFORE cuts
     TDirectory *dirBeforeCuts = fout->mkdir("BeforeCuts");
@@ -41,6 +44,8 @@ void ntupleClass_2017F::Loop_New(){
     TH1F *hmassQuad_Other_Zero = new TH1F("QuadMuonMass_Zero_BC", "QuadMuonMass_Zero_BC", 400, -0.05, 79.95); // binning 200 MeV
     TH1D *hmassDi_Other_Zero = new TH1D("DiMuon_2glbMu_Zero_BC", "DiMuon_2glbMu_Zero_BC", 500, -0.05, 24.95); // binning 50 MeV
     TH1D *hmassDi_Other2_Zero = new TH1D("DiMuon_Other", "DiMuon_Other", 500, -0.05, 24.95); // binning 50 MeV
+    TH1I *hPdgId_BC = new TH1I("DaughterPdgId_BC", "DaughterPdgId_BC", 38, -0.5, 37.5);
+    TH1I *hMotherPdgId_BC = new TH1I("MotherPdgId_BC", "MotherPdgId_BC", 38, -0.5, 37.5);
     fout->cd();
     // Creation of INTERMEDIATE histograms
     TDirectory *dirIntermediate = fout->mkdir("Intermediate");
@@ -65,8 +70,6 @@ void ntupleClass_2017F::Loop_New(){
     TH1D *hEta_mu3 = new TH1D("Eta_mu3_AC", "Eta_mu3_AC", 100, -2.5, 2.5); // binning 0.05
     TH1D *hPhi = new TH1D("Phi_AC", "Phi_AC", 140, -3.5, 3.5); // binning 0.05
     TH1D *hPhi_tripl = new TH1D("Phi_tripl_AC", "Phi_tripl_AC", 140, -3.5, 3.5); // binning 0.05
-    TH1D *hIsolation_03 = new TH1D("Isolation03_AC", "Isolation03_AC", 30, -0.5, 29.5); // binning di 1
-    TH1D *hIsolation_05 = new TH1D("Isolation05_AC", "Isolation05_AC", 30, -0.5, 29.5); // binning di 1
     TH1F *hChi2Track = new TH1F("Chi2Track", "Chi2Track", 27, -0.3, 5.1); //binning di 0.2
     TH1D *hmasstri = new TH1D("TripletMass_AC", "TripletMass_AC", 42, 1.60, 2.02); // binning 10 MeV
     TH1D *hmassdi = new TH1D("DimuonMass_AC", "DimuonMass_AC", 60, -0.05, 2.95); //binning 50 MeV
@@ -76,6 +79,8 @@ void ntupleClass_2017F::Loop_New(){
     TH1D *hFlightDist = new TH1D("FlightDist_AC", "FlightDist_AC", 90, 0., 3.);
     TH1D *hFlightDist_Signif = new TH1D("FlightDist_Signif_AC", "FlightDist_Signif_AC", 100, 0., 100.);
     TH2D *hFlightDistvsP = new TH2D("FlightDistvsP_AC", "FlightDistvsP_AC", 20, 0., 0.3, 20, 0., 45.);
+    TH1I *hPdgId_AC = new TH1I("DaughterPdgId_AC", "DaughterPdgId_AC", 38, -0.5, 37.5);
+    TH1I *hMotherPdgId_AC = new TH1I("MotherPdgId_AC", "MotherPdgId_AC", 38, -0.5, 37.5);
     fout->cd();
     // Creation of total histograms
     TH1I *hCutEff = new TH1I("CutEff_Ntriplets", "CutEff_Ntriplets", 7, 0.5, 7.5);
@@ -83,22 +88,18 @@ void ntupleClass_2017F::Loop_New(){
     
     //Loop over the events
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
-        if (jentry == 1000000) cout << "We are at 1 M" << endl;
-        if (jentry == 2000000) cout << "We are at 2 M" << endl;
-        if (jentry == 3000000) cout << "We are at 3 M" << endl;
-        if (jentry == 4000000) cout << "We are at 4 M" << endl;
-        if (jentry == 5000000) cout << "We are at 5 M" << endl;
+        cout << "Events n." << jentry+1 << endl;
         ntripl = 0; int cutevt2[7] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
         fChain->GetEntry(ientry);
-        //Loop over the TRIPLETS
-        for (int j=0; j<TripletVtx_Chi2->size(); j++){
-            //Check sul numero di tracce nel vertice primario
-            if(RefittedPV_NTracks->at(j) > 1){
+        //Check sul numero di tracce nel vertice primario
+        if(PV_NTracks > 3){
+            //Loop over the TRIPLETS
+            for (int j=0; j<TripletVtx_Chi2->size(); j++){
                 ntripltot++;
                 // BEFORE cuts
                 // 4 muons inv mass
-//                if(MuonPt->size() > 3) QuadMuMass(hmassQuad_Other, hmassQuad_Other_Zero);
+                if(MuonPt->size() > 3) QuadMuMass(hmassQuad_Other, hmassQuad_Other_Zero);
                 // 2 GLB muons inv mass
                 if(MuonPt->size() > 1) DiMuMass(hmassDi_Other_Zero, hmassDi_Other2_Zero, ptmin);
                 //Matching tra gli indici dei singoli muoni dei tripletto (mu#_Ind) e quelli 'generali' (mu#)
@@ -109,6 +110,13 @@ void ntupleClass_2017F::Loop_New(){
                 int mu1 = MuonFinder(Mu1_Pt->at(mu1_Ind), Mu1_Eta->at(mu1_Ind), Mu1_Phi->at(mu1_Ind));
                 int mu2 = MuonFinder(Mu2_Pt->at(mu2_Ind), Mu2_Eta->at(mu2_Ind), Mu2_Phi->at(mu2_Ind));
                 int mu3 = MuonFinder(Mu3_Pt->at(mu3_Ind), Mu3_Eta->at(mu3_Ind), Mu3_Phi->at(mu3_Ind));
+                //PdgId histograms
+                particleId(Muon_PdgId->at(mu1), IdsummaryDaughter_BC);
+                particleId(Muon_PdgId->at(mu2), IdsummaryDaughter_BC);
+                particleId(Muon_PdgId->at(mu3), IdsummaryDaughter_BC);
+                particleId(Muon_MotherPdgId->at(mu1), IdsummaryMother_BC);
+                particleId(Muon_MotherPdgId->at(mu2), IdsummaryMother_BC);
+                particleId(Muon_MotherPdgId->at(mu3), IdsummaryMother_BC);
                 //Triplet histograms
                 hmasstriBeforeCuts->Fill(Triplet_Mass->at(j));
                 hChi2Vertex->Fill(TripletVtx_Chi2->at(j));
@@ -165,12 +173,6 @@ void ntupleClass_2017F::Loop_New(){
                                                 hPhi->Fill(Mu2_Phi->at(mu2_Ind));
                                                 hPhi->Fill(Mu3_Phi->at(mu3_Ind));
                                                 hPhi_tripl->Fill(Triplet_Phi->at(j));
-                                                hIsolation_03->Fill(Muon_emEt03->at(mu1));
-                                                hIsolation_03->Fill(Muon_emEt03->at(mu2));
-                                                hIsolation_03->Fill(Muon_emEt03->at(mu3));
-                                                hIsolation_05->Fill(Muon_emEt03->at(mu1));
-                                                hIsolation_05->Fill(Muon_emEt03->at(mu2));
-                                                hIsolation_05->Fill(Muon_emEt03->at(mu3));
                                                 hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu1));
                                                 hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu2));
                                                 hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu3));
@@ -178,6 +180,12 @@ void ntupleClass_2017F::Loop_New(){
                                                 hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu2));
                                                 hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu3));
                                                 hmasstri->Fill(Triplet_Mass->at(j));
+                                                particleId(Muon_PdgId->at(mu1), IdsummaryDaughter_AC);
+                                                particleId(Muon_PdgId->at(mu2), IdsummaryDaughter_AC);
+                                                particleId(Muon_PdgId->at(mu3), IdsummaryDaughter_AC);
+                                                particleId(Muon_MotherPdgId->at(mu1), IdsummaryMother_AC);
+                                                particleId(Muon_MotherPdgId->at(mu2), IdsummaryMother_AC);
+                                                particleId(Muon_MotherPdgId->at(mu3), IdsummaryMother_AC);
                                                 hFlightDist->Fill(FlightDistPVSV->at(j));
                                                 hFlightDist_Signif->Fill(FlightDistPVSV_Significance->at(j));
                                                 hFlightDistvsP->Fill(FlightDistPVSV->at(j), TripletP);
@@ -192,8 +200,8 @@ void ntupleClass_2017F::Loop_New(){
                         }
                     }
                 }
-            }
-        } // end loop sui tripletti
+            } // end loop sui tripletti
+        }
         // Conto numero di eventi passati dopo ogni taglio
         for (int k=1; k<7; k++){
             if(cutevt2[k] > 0) cutevt[k]++;
@@ -222,6 +230,10 @@ void ntupleClass_2017F::Loop_New(){
     hNMatchedStat->GetXaxis()->SetTitle("N. of matched muon stations");
     hFlightDist->GetXaxis()->SetTitle("Decay length (cm)");
     hFlightDist_Signif->GetXaxis()->SetTitle("Decay length significance");
+    TCanvas *PdgIdCanv_AC = new TCanvas("PdgId_Daughter_AC", "PdgId_Daughter_AC", 0, 0, 1600, 1000);
+    PdgIdHisto(PdgIdCanv_AC, hPdgId_AC, IdsummaryDaughter_AC, pId);
+    TCanvas *PdgIdMotherCanv_AC = new TCanvas("PdgId_Mother_AC", "PdgId_Mother_AC", 0, 0, 1600, 1000);
+    PdgIdHisto(PdgIdMotherCanv_AC, hMotherPdgId_AC, IdsummaryMother_AC, pId);
     hFlightDistvsP->GetXaxis()->SetTitle("FlightDist");
     hFlightDistvsP->GetYaxis()->SetTitle("P (GeV)");
     hFlightDistvsP->DrawCopy("colz");
@@ -234,6 +246,10 @@ void ntupleClass_2017F::Loop_New(){
     hmassQuad_Other_Zero->GetXaxis()->SetTitle("4 mu mass (GeV)");
     hmassDi_Other_Zero->GetXaxis()->SetTitle("2 mu mass (GeV)");
     hmassDi_Other2_Zero->GetXaxis()->SetTitle("2 mu mass (GeV)");
+    TCanvas *PdgIdCanv_BC = new TCanvas("PdgId_Daughter_BC", "PdgId_Daughter_BC", 0, 0, 1600, 1000);
+    PdgIdHisto(PdgIdCanv_BC, hPdgId_BC, IdsummaryDaughter_BC, pId);
+    TCanvas *PdgIdMotherCanv_BC = new TCanvas("PdgId_Mother_BC", "PdgId_Mother_BC", 0, 0, 1600, 1000);
+    PdgIdHisto(PdgIdMotherCanv_BC, hMotherPdgId_BC, IdsummaryMother_BC, pId);
     //Histo intermediate
     hmassdi_int->GetXaxis()->SetTitle("2 mu mass (GeV)");
     hmassQuad_int->GetXaxis()->SetTitle("4 mu mass (GeV)");
@@ -248,4 +264,4 @@ void ntupleClass_2017F::Loop_New(){
     fout->Close();
 }
 
-// #########################################  END SIGNAL ANALYSIS  NEW CUTFLOW
+// #########################################  END SIGNAL MC ANALYSIS  NEW CUTFLOW

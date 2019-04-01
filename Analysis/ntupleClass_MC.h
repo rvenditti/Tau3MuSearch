@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Mar 25 17:19:53 2019 by ROOT version 6.12/06
+// Fri Mar 29 08:02:08 2019 by ROOT version 6.12/06
 // from TTree ntuple/LFVTau ntuple
-// found on file: TreeData_Run2017F.root
+// found on file: DsTau3Mu.root
 //////////////////////////////////////////////////////////
 
-#ifndef ntupleClass_2017F_h
-#define ntupleClass_2017F_h
+#ifndef ntupleClass_MC_h
+#define ntupleClass_MC_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -17,7 +17,7 @@
 #include "vector"
 #include "vector"
 
-class ntupleClass_2017F {
+class ntupleClass_MC {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -316,13 +316,13 @@ public :
    TBranch        *b_FlightDistPVSV_Significance;   //!
    TBranch        *b_FlightDistPVSV_chi2;   //!
 
-   ntupleClass_2017F(TTree *tree=0);
-    virtual ~ntupleClass_2017F();
+    ntupleClass_MC(TTree *tree=0);
+    virtual ~ntupleClass_MC();
     virtual Int_t    Cut(Long64_t entry);
     virtual Int_t    GetEntry(Long64_t entry);
     virtual Long64_t LoadTree(Long64_t entry);
     virtual void     Init(TTree *tree);
-    virtual void     Loop_New();
+    virtual void     LoopMC_New();
     virtual Bool_t   Notify();
     virtual void     Show(Long64_t entry = -1);
     virtual Double_t MuonFinder(Double_t pt, Double_t eta, Double_t phi);
@@ -338,47 +338,47 @@ public :
     virtual void    QuadMuMass2(TH1F *h, TH1F *h_Zero, Int_t mu1, Int_t mu2, Int_t mu3);
     virtual Bool_t  isNotAPhi(Double_t dimumass, Double_t sigma);
     virtual Bool_t  isPairNotAPhi(Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3, Double_t sigma);
-    virtual void    particleName(TString pId[37]);
-    virtual void    particleId(Int_t pdgId, Int_t Idsummary[37]);
+    virtual void    particleName(TString pId[38]);
+    virtual void    particleId(Int_t pdgId, Int_t Idsummary[38]);
     virtual void    cutName(TString listCut[7]);
     virtual void    cutName_New(TString listCut[7]);
-    virtual void    PdgIdHisto(TCanvas *canv, TH1I *hist, Int_t Idsummary[37], TString pIdList[37]);
+    virtual void    PdgIdHisto(TCanvas *canv, TH1I *hist, Int_t Idsummary[38], TString pIdList[38]);
     virtual void    CutEffHisto(TCanvas *canv, TH1I *hist, Int_t cut[7], TString listCut[7]);
     virtual void    DiMuonHisto(TH1D *hist, Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3);
 };
 
 #endif
 
-#ifdef ntupleClass_2017F_cxx
-ntupleClass_2017F::ntupleClass_2017F(TTree *tree) : fChain(0) 
+#ifdef ntupleClass_MC_cxx
+ntupleClass_MC::ntupleClass_MC(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("TreeData_Run2017F.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("DsTau3Mu.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("TreeData_Run2017F.root");
+         f = new TFile("DsTau3Mu.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("TreeData_Run2017F.root:/TreeMakerBkg");
+      TDirectory * dir = (TDirectory*)f->Get("DsTau3Mu.root:/Tree3Mu");
       dir->GetObject("ntuple",tree);
 
    }
    Init(tree);
 }
 
-ntupleClass_2017F::~ntupleClass_2017F()
+ntupleClass_MC::~ntupleClass_MC()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t ntupleClass_2017F::GetEntry(Long64_t entry)
+Int_t ntupleClass_MC::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t ntupleClass_2017F::LoadTree(Long64_t entry)
+Long64_t ntupleClass_MC::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -391,7 +391,7 @@ Long64_t ntupleClass_2017F::LoadTree(Long64_t entry)
    return centry;
 }
 
-void ntupleClass_2017F::Init(TTree *tree)
+void ntupleClass_MC::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -688,7 +688,7 @@ void ntupleClass_2017F::Init(TTree *tree)
    Notify();
 }
 
-Bool_t ntupleClass_2017F::Notify()
+Bool_t ntupleClass_MC::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -699,14 +699,14 @@ Bool_t ntupleClass_2017F::Notify()
    return kTRUE;
 }
 
-void ntupleClass_2017F::Show(Long64_t entry)
+void ntupleClass_MC::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t ntupleClass_2017F::Cut(Long64_t entry)
+Int_t ntupleClass_MC::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
@@ -736,7 +736,7 @@ Int_t ntupleClass_2017F::Cut(Long64_t entry)
 //      -> Vedi chi ha l'innerTrackChi2 minore
 //      -> A parità di Chi2: guarda chi ha il numero di matches maggiore
 
-Double_t ntupleClass_2017F::MuonFinder(Double_t pt, Double_t eta, Double_t phi){
+Double_t ntupleClass_MC::MuonFinder(Double_t pt, Double_t eta, Double_t phi){
     int n=0, m=0, badOuterChi2=0;
     for(int g=0; g<MuonPt->size(); g++){
         if(pt == MuonPt->at(g) && eta == MuonEta->at(g) && phi == MuonPhi->at(g)){
@@ -925,7 +925,7 @@ Double_t ntupleClass_2017F::MuonFinder(Double_t pt, Double_t eta, Double_t phi){
 }
 
 // Given 2 muons it returns 'true' if DeltaR < DeltaRmax
-Bool_t ntupleClass_2017F::isDeltaRGood(Float_t eta1, Float_t eta2, Float_t phi1, Float_t phi2, Float_t DeltaRmax){
+Bool_t ntupleClass_MC::isDeltaRGood(Float_t eta1, Float_t eta2, Float_t phi1, Float_t phi2, Float_t DeltaRmax){
     float n=0;
     n=TMath::Sqrt(pow((eta1-eta2),2)+pow((phi1-phi2),2));
     if(n<DeltaRmax) return true;
@@ -933,34 +933,34 @@ Bool_t ntupleClass_2017F::isDeltaRGood(Float_t eta1, Float_t eta2, Float_t phi1,
 }
 
 // Given 2 muons it returns 'true' if |DeltaZ| < DeltaZmax
-Bool_t ntupleClass_2017F::isDeltaZGood(Float_t vz1, Float_t vz2, Float_t DeltaZmax){
+Bool_t ntupleClass_MC::isDeltaZGood(Float_t vz1, Float_t vz2, Float_t DeltaZmax){
     float n = TMath::Abs(vz2 - vz1);
     if(n<DeltaZmax) return true;
     else return false;
 }
 
 // Given the 'DeltaZ' value of each of the 3 muons of the triplet & the DeltaZmax value, the function returns true if all of the 3 possible pairs of muons satisfy isDeltaZGood
-Bool_t ntupleClass_2017F::isPairDeltaZGood(Float_t DeltaZ1, Float_t DeltaZ2, Float_t DeltaZ3, Float_t DeltaZmax){
+Bool_t ntupleClass_MC::isPairDeltaZGood(Float_t DeltaZ1, Float_t DeltaZ2, Float_t DeltaZ3, Float_t DeltaZmax){
     if(isDeltaZGood(DeltaZ1, DeltaZ2, DeltaZmax) == true && isDeltaZGood(DeltaZ2, DeltaZ3, DeltaZmax) == true && isDeltaZGood(DeltaZ1, DeltaZ3, DeltaZmax) == true)
         return true;
     else return false;
 }
 //Given the "refering number" of the triplet & the DeltaZmax value, the function returns true if all of the 3 possible pairs of muons satisfy isDeltaRGood
-Bool_t ntupleClass_2017F::isPairDeltaRGood(Int_t ntriplet, Float_t DeltaRmax){
+Bool_t ntupleClass_MC::isPairDeltaRGood(Int_t ntriplet, Float_t DeltaRmax){
     if(isDeltaRGood(Mu1_Eta->at(ntriplet), Mu2_Eta->at(ntriplet), Mu1_Phi->at(ntriplet), Mu2_Phi->at(ntriplet), DeltaRmax) == true && isDeltaRGood(Mu2_Eta->at(ntriplet), Mu3_Eta->at(ntriplet), Mu2_Phi->at(ntriplet), Mu3_Phi->at(ntriplet), DeltaRmax) == true && isDeltaRGood(Mu1_Eta->at(ntriplet), Mu3_Eta->at(ntriplet), Mu1_Phi->at(ntriplet), Mu3_Phi->at(ntriplet), DeltaRmax) == true)
         return true;
     else return false;
 }
 
 //Given the energy, eta, phi of a muon, the function returns the value of the momentum of the muon
-Double_t ntupleClass_2017F::MuonP(Double_t pt, Double_t eta, Double_t phi, Double_t mass){
+Double_t ntupleClass_MC::MuonP(Double_t pt, Double_t eta, Double_t phi, Double_t mass){
     TLorentzVector mu;
     mu.SetPtEtaPhiM(pt, eta, phi, mass);
     return mu.P();
 }
 
 //Given the energy, eta, phi, pt of 2 muons, if their charge is opposite the function returns their invariant mass, otherwise it returns 0
-Double_t ntupleClass_2017F::DimuonMass(Double_t charge1, Double_t charge2, Double_t pt1, Double_t pt2, Double_t eta1, Double_t eta2, Double_t phi1, Double_t phi2, Double_t mass){
+Double_t ntupleClass_MC::DimuonMass(Double_t charge1, Double_t charge2, Double_t pt1, Double_t pt2, Double_t eta1, Double_t eta2, Double_t phi1, Double_t phi2, Double_t mass){
     double inv = 0;
     if(charge1 + charge2 != 0){
         return inv;
@@ -975,7 +975,7 @@ Double_t ntupleClass_2017F::DimuonMass(Double_t charge1, Double_t charge2, Doubl
 }
 
 // It loops over the muons and fills the histo w/ the inv mass of o.s. GLB muons w/ |DeltaZ| < 0.5 and other conditions...
-void ntupleClass_2017F::DiMuMass(TH1D *h_Zero, TH1D *h_Zero2, Double_t ptmin){
+void ntupleClass_MC::DiMuMass(TH1D *h_Zero, TH1D *h_Zero2, Double_t ptmin){
     double mumass = 0.1056583715;
     for (int k=0; k<(MuonPt->size()-1); k++){
         for (int l=k+1; l<(MuonPt->size()); l++){
@@ -991,7 +991,7 @@ void ntupleClass_2017F::DiMuMass(TH1D *h_Zero, TH1D *h_Zero2, Double_t ptmin){
 }
 
 //Given the energy, eta, phi, pt of 4 muons it returns their invariant mass
-Float_t ntupleClass_2017F::QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4, Double_t mass){
+Float_t ntupleClass_MC::QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4, Double_t mass){
     TLorentzVector mu1, mu2, mu3, mu4, mutot;
     mu1.SetPtEtaPhiM(pt1, eta1, phi1, mass);
     mu2.SetPtEtaPhiM(pt2, eta2, phi2, mass);
@@ -1002,7 +1002,7 @@ Float_t ntupleClass_2017F::QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, F
 }
 
 // Computes the invariant mass of 4 muons w/ |DeltaZ| < 0.5 and fills the histo
-void ntupleClass_2017F::QuadMuMass(TH1F *h, TH1F *h_Zero){
+void ntupleClass_MC::QuadMuMass(TH1F *h, TH1F *h_Zero){
     double mumass = 0.1056583715;
     for (int k=0; k<(MuonPt->size()-3); k++){
         for (int l=k+1; l <(MuonPt->size()-2); l++){
@@ -1021,7 +1021,7 @@ void ntupleClass_2017F::QuadMuMass(TH1F *h, TH1F *h_Zero){
 }
 
 // Computes the invariant mass of 4 muons (3mu of the triplet + another tracker mu) w/ |DeltaZ| < 0.5 and fills the histo
-void ntupleClass_2017F::QuadMuMass2(TH1F *h, TH1F *h_Zero, Int_t mu1, Int_t mu2, Int_t mu3){
+void ntupleClass_MC::QuadMuMass2(TH1F *h, TH1F *h_Zero, Int_t mu1, Int_t mu2, Int_t mu3){
     double mumass = 0.1056583715;
     for(int k=0; k<MuonPt->size(); k++){
         if(k != mu1 && k!= mu2 && k!= mu3){
@@ -1037,9 +1037,8 @@ void ntupleClass_2017F::QuadMuMass2(TH1F *h, TH1F *h_Zero, Int_t mu1, Int_t mu2,
     }
 }
 
-
 // Given the dimuon mass and a value for sigma, the function return true if the dimuon mass is NOT compatible w/ the mass of a Phi(1020) in 2 sigmas
-Bool_t ntupleClass_2017F::isNotAPhi(Double_t dimumass, Double_t sigma){
+Bool_t ntupleClass_MC::isNotAPhi(Double_t dimumass, Double_t sigma){
     const double PhiMass = 1.019461; //Phi Mass in GeV
     if (dimumass < (PhiMass-2*sigma) || dimumass > (PhiMass+2*sigma))
         return true;
@@ -1047,7 +1046,7 @@ Bool_t ntupleClass_2017F::isNotAPhi(Double_t dimumass, Double_t sigma){
 }
 
 //Given 3 muons it checks, for all the pairs having opposite charges, if the corresponding dimuon mass is NOT compatible w/ the Phi mass(1020)
-Bool_t ntupleClass_2017F::isPairNotAPhi(Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3, Double_t sigma){
+Bool_t ntupleClass_MC::isPairNotAPhi(Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3, Double_t sigma){
     if(dimu1_2!=0 && dimu2_3!=0 && dimu1_3!=0){
         cout << "ERROR!!! There are 3 pairs of muons w/ opposite charges !!!" << endl;
         return false;
@@ -1087,7 +1086,7 @@ Bool_t ntupleClass_2017F::isPairNotAPhi(Double_t dimu1_2, Double_t dimu2_3, Doub
 }
 
 // Given a vector of strings the function initializes it with the names of particles
-void ntupleClass_2017F::particleName(TString pId[37]){
+void ntupleClass_MC::particleName(TString pId[38]){
     //Particle name list
     pId[0] = "#mu^{-}";
     pId[1] = "#mu^{+}";
@@ -1121,15 +1120,16 @@ void ntupleClass_2017F::particleName(TString pId[37]){
     pId[29] = "n";
     pId[30] = "#Lambda^{+}_{c}";
     pId[31] = "#Lambda^{-}_{c}";
-    pId[32] = "#Lambda^{0}_{b}";
-    pId[33] = "#bar{#Lambda}^{0}_{b}";
-    pId[34] = "#bar{p}";
-    pId[35] = "#Phi"; //Phi(1020)
-    pId[36] = "NN";
+    pId[32] = "#eta";
+    pId[33] = "J/#psi";
+    pId[34] = "#bar{#Lambda}^{0}_{b}";
+    pId[35] = "#bar{p}";
+    pId[36] = "#Phi"; //Phi(1020)
+    pId[37] = "NN";
 }
 
 // Given the particle Id, it checks at which particle corresponds and increases the relative counter
-void ntupleClass_2017F::particleId(Int_t pdgId, Int_t IdSummary[37]){
+void ntupleClass_MC::particleId(Int_t pdgId, Int_t IdSummary[38]){
     
     switch (pdgId) {
         case 13: // is a mu-
@@ -1228,20 +1228,23 @@ void ntupleClass_2017F::particleId(Int_t pdgId, Int_t IdSummary[37]){
         case -4122: // is a Lambda-_c
             IdSummary[31]++;
             break;
-        case 5122: // is a Lambda0_b
+        case 221: // is a Eta
             IdSummary[32]++;
             break;
-        case -5122: // is an antiLambda0_b
+        case 443: // is a J/psi(1S)
             IdSummary[33]++;
             break;
-        case -2212: // is an antip
+        case -5122: // is an antiLambda0_b
             IdSummary[34]++;
             break;
-        case 333: // is a Phi(1020)
+        case -2212: // is an antip
             IdSummary[35]++;
             break;
-        case 0: // is a UNKNOWN
+        case 333: // is a Phi(1020)
             IdSummary[36]++;
+            break;
+        case 0: // is a UNKNOWN
+            IdSummary[37]++;
             break;
             
         default: cout << "Unknown particle! PdgId = " << pdgId << endl;
@@ -1250,7 +1253,7 @@ void ntupleClass_2017F::particleId(Int_t pdgId, Int_t IdSummary[37]){
 }
 
 // Given a vector of strings the function initializes it with the names of the cuts
-void ntupleClass_2017F::cutName(TString listCut[7]){
+void ntupleClass_MC::cutName(TString listCut[7]){
     //    List of the names of the cuts
     listCut[0] = "BeforeCuts";
     listCut[1] = "Chi2Triplet";
@@ -1262,7 +1265,7 @@ void ntupleClass_2017F::cutName(TString listCut[7]){
 }
 
 // Given a vector of strings the function initializes it with the names of the cuts
-void ntupleClass_2017F::cutName_New(TString listCut[7]){
+void ntupleClass_MC::cutName_New(TString listCut[7]){
     //    List of the names of the cuts
     listCut[0] = "BeforeCuts";
     listCut[1] = "Chi2Triplet";
@@ -1274,26 +1277,25 @@ void ntupleClass_2017F::cutName_New(TString listCut[7]){
 }
 
 // This function writes on the canvas the histo w/ the particle names
-void ntupleClass_2017F::PdgIdHisto(TCanvas *canv, TH1I *hist, Int_t Idsummary[37], TString pIdList[37]){
-    for(int k=0; k<37; k++){
+void ntupleClass_MC::PdgIdHisto(TCanvas *canv, TH1I *hist, Int_t Idsummary[38], TString pIdList[38]){
+    for(int k=0; k<38; k++){
         hist->Fill(k, Idsummary[k]);
         hist->GetXaxis()->SetBinLabel(k+1, pIdList[k]);
     }
     canv->SetLogy();
-    hist->DrawCopy();
+    hist->SetMarkerSize(0.7);
     hist->DrawCopy("HIST TEXT0");
     canv->Write();
     canv->Close();
 }
 
 // This function writes on the canvas the histo of the cuts efficiency
-void ntupleClass_2017F::CutEffHisto(TCanvas *canv, TH1I *hist, Int_t cut[7], TString listCut[7]){
+void ntupleClass_MC::CutEffHisto(TCanvas *canv, TH1I *hist, Int_t cut[7], TString listCut[7]){
     for(int k=0; k<7; k++){
         hist->Fill(k+1, cut[k]);
         hist->GetXaxis()->SetBinLabel(k+1, listCut[k]);
     }
     canv->SetLogy();
-    hist->DrawCopy();
     hist->DrawCopy("HIST TEXT0");
     canv->Write();
     canv->Close();
@@ -1301,7 +1303,7 @@ void ntupleClass_2017F::CutEffHisto(TCanvas *canv, TH1I *hist, Int_t cut[7], TSt
 
 
 // This function writes on the canvas the histo of the cuts efficiency
-void ntupleClass_2017F::DiMuonHisto(TH1D *hist, Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3){
+void ntupleClass_MC::DiMuonHisto(TH1D *hist, Double_t dimu1_2, Double_t dimu2_3, Double_t dimu1_3){
     if(dimu1_2 != 0) hist->Fill(dimu1_2);
     if(dimu2_3 != 0) hist->Fill(dimu2_3);
     if(dimu1_3 != 0) hist->Fill(dimu1_3);
@@ -1310,4 +1312,5 @@ void ntupleClass_2017F::DiMuonHisto(TH1D *hist, Double_t dimu1_2, Double_t dimu2
 
 
 
-#endif // #ifdef ntupleClass_2017F_cxx
+
+#endif // #ifdef ntupleClass_MC_cxx
