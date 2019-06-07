@@ -157,7 +157,7 @@ private:
      */
     //tree
     TTree*      tree_;
-    std::vector<float>  MuonPt, MuonEta, MuonPhi, MuonChi2P, MuonChi2LocalPosition, MuonGlbTrackProbability, MuonTrkRelChi2, MuonTrkKink;
+    std::vector<float>  MuonPt, MuonEta, MuonPhi;
     std::vector<double> MuonEnergy,  MuonCharge;
     
     std::vector<int> GenParticle_PdgId, GenParticle_MotherPdgId;
@@ -1002,11 +1002,7 @@ private:
         MuonPt.clear();
         MuonEta.clear();
         MuonPhi.clear();
-        MuonChi2P.clear();
-        MuonChi2LocalPosition.clear();
-        MuonGlbTrackProbability.clear();
-        MuonTrkRelChi2.clear();
-        MuonTrkKink.clear();
+        
         Muon_simPdgId.clear();
         Muon_simMotherPdgId.clear();
         Muon_simFlavour.clear();
@@ -1280,13 +1276,6 @@ private:
 	//	tree_->Branch("Muon_simTpEvent", &Muon_simTpEvent);
 	//	tree_->Branch("Muon_simMatchQuality", &Muon_simMatchQuality);
 
-        tree_->Branch("MuonChi2P", &MuonChi2P);
-        tree_->Branch("MuonChi2LocalPosition", &MuonChi2LocalPosition);
-        tree_->Branch("MuonGlbTrackProbability", &MuonGlbTrackProbability);
-        tree_->Branch("MuonTrkRelChi2", &MuonTrkRelChi2);
-        tree_->Branch("MuonTrkKink", &MuonTrkKink);
-        
-        
         
         //Vtx position
         tree_->Branch("Muon_vx", &Muon_vx);
@@ -1366,6 +1355,15 @@ private:
         tree_->Branch("Muon_hadVetoEt03", &Muon_hadVetoEt03);
         tree_->Branch("Muon_emVetoEt03", &Muon_emVetoEt03);
         tree_->Branch("Muon_trackerVetoPt03", &Muon_trackerVetoPt03);
+
+        tree_->Branch("Muon_emEt05", &Muon_emEt05);
+        tree_->Branch("Muon_hadEt05", &Muon_hadEt05);
+        tree_->Branch("Muon_nJets05", &Muon_nJets05);
+        tree_->Branch("Muon_nTracks05", &Muon_nTracks05);
+        tree_->Branch("Muon_sumPt05", &Muon_sumPt05);
+        tree_->Branch("Muon_hadVetoEt05", &Muon_hadVetoEt05);
+        tree_->Branch("Muon_emVetoEt05", &Muon_emVetoEt05);
+        tree_->Branch("Muon_trackerVetoPt05", &Muon_trackerVetoPt05);
 
         tree_->Branch("PVCollection_Size", &PVCollection_Size);
         tree_->Branch("PV_x", &PV_x);
