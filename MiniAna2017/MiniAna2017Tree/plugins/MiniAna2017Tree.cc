@@ -187,6 +187,7 @@ private:
     std::vector<double>     Triplet_mindca_iso, Triplet_relativeiso;
  
     std::vector<int>  Mu1_TripletIndex,  Mu2_TripletIndex,  Mu3_TripletIndex;
+    std::vector<int>  Mu1_NTracks03iso,  Mu2_NTracks03iso,  Mu3_NTracks03iso;
     
     int TripletCollectionSize, PVCollection_Size, MuonCollectionSize;
     std::vector<double>  TripletVtx_x,  TripletVtx_y,  TripletVtx_z,  TripletVtx_Chi2,  TripletVtx_NDOF,  Triplet_Mass,  Triplet_Pt,  Triplet_Eta,  Triplet_Phi, Triplet_Charge;
@@ -606,6 +607,7 @@ private:
             edm::View<reco::Track>::const_iterator trIt  = trackCollection->begin();
             edm::View<reco::Track>::const_iterator trEnd = trackCollection->end();
 
+            int nTracks03_mu1=0, nTracks03_mu2=0, nTracks03_mu3=0;
             double mindist=9999;
             double sumPtTrack1=0, sumPtTrack2=0, sumPtTrack3=0, maxSumPtTracks=0;
             for (; trIt != trEnd; ++trIt) {
@@ -623,9 +625,18 @@ private:
                   //for each muon in the triplet, if deltaR<0.3 and the DCA is smaller than 1 mm
                   //the pt of the track is added -> I will take the largest total pt from the three muons
                   if (dca_fv < 0.1) {
-                     if (dR1<0.3) sumPtTrack1+=track.pt();
-                     if (dR2<0.3) sumPtTrack2+=track.pt();
-                     if (dR3<0.3) sumPtTrack3+=track.pt();
+                     if (dR1<0.3) {
+                        sumPtTrack1+=track.pt();
+                        nTracks03_mu1++;
+                     }
+                     if (dR2<0.3) {
+                        sumPtTrack2+=track.pt();
+                        nTracks03_mu2++;
+                     }
+                     if (dR3<0.3) {
+                        sumPtTrack3+=track.pt();
+                        nTracks03_mu3++;
+                     }
                   }
                }
             }
@@ -633,6 +644,10 @@ private:
             maxSumPtTracks = std::max(sumPtTrack1, std::max(sumPtTrack2,sumPtTrack3));
             double relativeiso = maxSumPtTracks/LVTau.Pt();
             Triplet_relativeiso.push_back(relativeiso);
+            
+            Mu1_NTracks03iso.push_back(nTracks03_mu1);
+            Mu2_NTracks03iso.push_back(nTracks03_mu2);
+            Mu3_NTracks03iso.push_back(nTracks03_mu3);
  
             if(pvTracks_refit.size() >1){
                 KalmanVertexFitter PV_fitter (true);
@@ -1110,14 +1125,17 @@ private:
         Mu1_Pt.clear();
         Mu1_Eta.clear();
         Mu1_Phi.clear();
+        Mu1_NTracks03iso.clear();
         
         Mu2_Pt.clear();
         Mu2_Eta.clear();
         Mu2_Phi.clear();
+        Mu2_NTracks03iso.clear();
         
         Mu3_Pt.clear();
         Mu3_Eta.clear();
         Mu3_Phi.clear();
+        Mu3_NTracks03iso.clear();
         
         Mu1_TripletIndex.clear();
         Mu2_TripletIndex.clear();
@@ -1375,16 +1393,19 @@ private:
         tree_->Branch("Mu1_Pt",&Mu1_Pt);
         tree_->Branch("Mu1_Eta", &Mu1_Eta);
         tree_->Branch("Mu1_Phi", &Mu1_Phi);
-        tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex); 
-        
+        tree_->Branch("Mu1_NTracks03iso", &Mu1_NTracks03iso); 
+        tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex);
+ 
         tree_->Branch("Mu2_Pt", &Mu2_Pt);
         tree_->Branch("Mu2_Eta", &Mu2_Eta);
         tree_->Branch("Mu2_Phi", &Mu2_Phi);
+        tree_->Branch("Mu2_NTracks03iso", &Mu2_NTracks03iso); 
         tree_->Branch("Mu2_TripletIndex", &Mu2_TripletIndex); 
         
         tree_->Branch("Mu3_Pt", &Mu3_Pt);
         tree_->Branch("Mu3_Eta",&Mu3_Eta);
         tree_->Branch("Mu3_Phi", &Mu3_Phi);
+        tree_->Branch("Mu3_NTracks03iso", &Mu3_NTracks03iso); 
         tree_->Branch("Mu3_TripletIndex", &Mu3_TripletIndex); 
 
 	tree_->Branch("dxy_mu1", &dxy_mu1);
