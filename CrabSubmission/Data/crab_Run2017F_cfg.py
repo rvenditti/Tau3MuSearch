@@ -1,7 +1,7 @@
 from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
-config.General.requestName = 'SkimTau3Mu_DoubleMuonLowMass_Run2017F_v0'
+config.General.requestName = 'SkimAndTree_DoubleMuonLowMass_Run2017F'
 config.General.workArea = 'crab_projects'
 config.General.transferOutputs = True
 config.General.transferLogs = False
@@ -10,7 +10,7 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '/lustrehome/venditti/TestMiniAOD2017/CMSSW_9_4_4/src/SkimTools/SkimTau3Mu/test/run_Data2017_PatAndTree_cfg.py'
 
 
-config.Data.inputDataset = '/DoubleMuonLowMass/Run2017F-09May2018-v1/AOD'
+config.Data.inputDataset = '/DoubleMuonLowMass/Run2017F-17Nov2017-v1/AOD'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'
 #config.Data.splitting = 'Automatic'
@@ -19,7 +19,7 @@ config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/
 #config.Data.runRange = '193093-193999' # '193093-194075'
 config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 config.Data.publication = True
-config.Data.outputDatasetTag = 'SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v0'
+config.Data.outputDatasetTag = 'SkimAndTree_DoubleMuonLowMass_Run2017F_AOD'
 
 config.Site.storageSite = 'T2_IT_Bari'
 

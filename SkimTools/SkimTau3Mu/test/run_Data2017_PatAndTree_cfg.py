@@ -16,7 +16,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load("SkimTools.SkimTau3Mu.Tau3MuSkimAOD_cff")
 
 #process.GlobalTag.globaltag = '94X_mc2017_realistic_v14'
-process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' #data2017 
+process.GlobalTag.globaltag = '94X_dataRun2_v11' #data2017 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 
@@ -38,7 +38,7 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("TreeData.root"))
 
 
-process.TreeMakerBkg = cms.EDAnalyzer("MiniAna2017Tree",
+process.TreeMaker = cms.EDAnalyzer("MiniAna2017Tree",
                               isMcLabel = cms.untracked.bool(False),
                               muonLabel=cms.InputTag("looseMuons"),
                               VertexLabel=cms.InputTag("offlinePrimaryVertices"),
@@ -51,7 +51,7 @@ process.TreeMakerBkg = cms.EDAnalyzer("MiniAna2017Tree",
 
 
 process.Tau3MuSkim = cms.Path(process.ThreeMuonSelSeq*
-                              process.TreeMakerBkg
+                              process.TreeMaker
                      )
 
 
