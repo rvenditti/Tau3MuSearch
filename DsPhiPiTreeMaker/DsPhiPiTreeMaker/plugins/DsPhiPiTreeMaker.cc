@@ -466,23 +466,23 @@ private:
 	      //if (fabs(c1->eta()-c3->eta())> 1.e-6) Ov1=true;
 	      //if (fabs(c2->eta()-c3->eta())> 1.e-6) Ov2=true;
 	      //	      if(Ov1 && Ov2){
-		cout<<TripletIndex2<<" Reco mu1 pt="<<c1->pt()<<" eta="<<c1->eta()<<" phi="<<c1->phi()<<" DEta(mu1,c3)="<<fabs(c1->eta()-c3->eta())<<endl;
-		cout<<TripletIndex2<<" Reco mu2 pt="<<c2->pt()<<" eta="<<c2->eta()<<" phi="<<c2->phi()<<" DEta(mu2,c3)="<<fabs(c2->eta()-c3->eta())<<endl;
-		cout<<TripletIndex2<<" Reco mu3 pt="<<c3->pt()<<" eta="<<c3->eta()<<" phi="<<c3->phi()<<endl;
-		//				}
-		Mu01_Pt.push_back(mu1->pt());
-		Mu01_Eta.push_back(mu1->eta());
-		Mu01_Phi.push_back(mu1->phi());
-		Mu01_TripletIndex.push_back(TripletIndex2);
+              cout<<TripletIndex2<<" Reco mu1 pt="<<c1->pt()<<" eta="<<c1->eta()<<" phi="<<c1->phi()<<" DEta(mu1,c3)="<<fabs(c1->eta()-c3->eta())<<endl;
+              cout<<TripletIndex2<<" Reco mu2 pt="<<c2->pt()<<" eta="<<c2->eta()<<" phi="<<c2->phi()<<" DEta(mu2,c3)="<<fabs(c2->eta()-c3->eta())<<endl;
+              cout<<TripletIndex2<<" Reco mu3 pt="<<c3->pt()<<" eta="<<c3->eta()<<" phi="<<c3->phi()<<endl;
+              //				}
+              Mu01_Pt.push_back(mu1->pt());
+              Mu01_Eta.push_back(mu1->eta());
+              Mu01_Phi.push_back(mu1->phi());
+              Mu01_TripletIndex.push_back(TripletIndex2);
               
               Mu02_Pt.push_back(mu2->pt());
               Mu02_Eta.push_back(mu2->eta());
               Mu02_Phi.push_back(mu2->phi());
               Mu02_TripletIndex.push_back(TripletIndex2);
               
-              Tr_Pt.push_back(PhiIt->daughter(2)->pt());
-              Tr_Eta.push_back(PhiIt->daughter(2)->eta());
-              Tr_Phi.push_back(PhiIt->daughter(2)->phi());
+              Tr_Pt.push_back(Track3.pt());
+              Tr_Eta.push_back(Track3.eta());
+              Tr_Phi.push_back(Track3.phi());
               Tr_TripletIndex.push_back(TripletIndex2);
 
               //cout<<"Reco mu1 eta="<<mu1->eta()<<" mu2 eta="<<mu2->eta()<<" mu3 eta="<<c3->eta()<<endl;
