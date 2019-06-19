@@ -66,7 +66,7 @@ OneTrackFilter = cms.EDFilter("CandViewCountFilter",
 DiMuonCand  = cms.EDProducer("CandViewShallowCloneCombiner",
                               checkCharge = cms.bool(False),
                               #cut = cms.string('(mass < 10) && (mass >0.5)  && (abs(charge)=1) && (abs(daughter(0).vz - daughter(1).vz) < 1) && (abs(daughter(1).vz - daughter(2).vz) < 1) && (abs(daughter(0).vz - daughter(2).vz) < 1)'),
-                              cut = cms.string('(abs(charge)=0)'),
+                              cut = cms.string('(abs(charge)=0) && (mass < 3) && (mass >0.5)'),
                               decay = cms.string("looseMuons looseMuons")
                               )
 
@@ -151,19 +151,25 @@ TwoMuOneTrackSelSeq = cms.Sequence(InitialPlots *
                                PatMuons *
                                PlotsAfterTrigger *
                                looseMuons *
-                               LooseTrack *
-                               LooseTrackCandidate *
-                               TwoMuonsFilter *
                                PlotsAfterLooseMuon *
-                               OneTrackFilter *
-                               PlotsAfter2Mu1Track *
+                               TwoMuonsFilter *
                                DiMuonCand *
                                DiMuonCandFilter *
                                PlotsAfterDiMuonCand *
                                DiMuonsVtxFit *
+                               LooseTrack *
+                               LooseTrackCandidate *
+                               #TwoMuonsFilter *
+                               OneTrackFilter *
+                               PlotsAfter2Mu1Track *
+                               #DiMuonCand *
+                               #DiMuonCandFilter *
+                               #PlotsAfterDiMuonCand *
+                               #DiMuonsVtxFit *
                                TwoMuonsOneTrackCand *
                                TwoMuonsOneTrackKalmanVtxFit *
-                               TwoMuonsOneTrackCandFilter
+                               TwoMuonsOneTrackCandFilter *
+                               PlotsAfterPhiPiCandSel 
                             )
 
 
