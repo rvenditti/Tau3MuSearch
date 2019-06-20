@@ -10,7 +10,7 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '/lustrehome/venditti/TestMiniAOD2017/CMSSW_9_4_4/src/SkimTools/SkimTau3Mu/test/run_Data2017_PatAndTree_cfg.py'
 
 
-config.Data.inputDataset = '/DoubleMuonLowMass/Run2017B-23Jun2017-v1/AOD'
+config.Data.inputDataset = '/DoubleMuonLowMass/Run2017B-17Nov2017-v1/AOD'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'
 #config.Data.splitting = 'Automatic'

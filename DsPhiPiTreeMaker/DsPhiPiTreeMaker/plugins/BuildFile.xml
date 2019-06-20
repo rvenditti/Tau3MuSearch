@@ -4,6 +4,7 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
+<use name="TrackingTools/IPTools"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="DataFormats/TrackReco"/>
 <use name="RecoVertex/KalmanVertexFit"/>

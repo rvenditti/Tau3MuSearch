@@ -157,7 +157,7 @@ private:
      */
     //tree
     TTree*      tree_;
-    std::vector<float>  MuonPt, MuonEta, MuonPhi, MuonChi2P, MuonChi2LocalPosition, MuonGlbTrackProbability, MuonTrkRelChi2, MuonTrkKink;
+    std::vector<float>  MuonPt, MuonEta, MuonPhi;
     std::vector<double> MuonEnergy,  MuonCharge;
     
     std::vector<int> GenParticle_PdgId, GenParticle_MotherPdgId;
@@ -167,7 +167,7 @@ private:
     std::vector<double>  Muon_vx,  Muon_vy,  Muon_vz;
     
     //MuonID
-    std::vector<double>  Muon_isGlobal,  Muon_isTracker,  Muon_isSoft,  Muon_isLoose,  Muon_isPF,  Muon_isRPCMuon,  Muon_isStandAloneMuon,  Muon_isTrackerMuon,  Muon_isCaloMuon,  Muon_isQualityValid,  Muon_isTimeValid,  Muon_isIsolationValid,  Muon_numberOfMatchedStations,  Muon_numberOfMatches;
+    std::vector<double>  Muon_isGlobal,  Muon_isTracker,  Muon_isSoft,  Muon_isLoose, Muon_isTight,  Muon_isPF,  Muon_isRPCMuon,  Muon_isStandAloneMuon,  Muon_isTrackerMuon,  Muon_isCaloMuon,  Muon_isQualityValid,  Muon_isTimeValid,  Muon_isIsolationValid,  Muon_numberOfMatchedStations,  Muon_numberOfMatches;
     
     //MuonTime
     std::vector<double>  Muon_timeAtIpInOut,Muon_timeAtIpInOutErr;
@@ -177,14 +177,17 @@ private:
     Muon_outerTrack_phi,  Muon_outerTrack_normalizedChi2,  Muon_outerTrack_muonStationsWithValidHits,  Muon_innerTrack_p,  Muon_innerTrack_eta,  Muon_innerTrack_phi,  Muon_innerTrack_normalizedChi2,  Muon_QInnerOuter;
     
   std::vector<double>   Muon_combinedQuality_updatedSta,  Muon_combinedQuality_trkKink,  Muon_combinedQuality_glbKink,  Muon_combinedQuality_trkRelChi2,  Muon_combinedQuality_staRelChi2,  Muon_combinedQuality_chi2LocalPosition,  Muon_combinedQuality_chi2LocalMomentum,  Muon_combinedQuality_localDistance,  Muon_combinedQuality_globalDeltaEtaPhi,  Muon_combinedQuality_tightMatch,  Muon_combinedQuality_glbTrackProbability,  Muon_calEnergy_em,  Muon_calEnergy_emS9,  Muon_calEnergy_emS25,  Muon_calEnergy_had,  Muon_calEnergy_hadS9,  Muon_segmentCompatibility,  Muon_caloCompatibility,  Muon_ptErrOverPt, Muon_BestTrackPt,  Muon_BestTrackPtErr;
-  std::vector<int>  Muon_PdgId, Muon_MotherPdgId, Muon_simFlavour,  Muon_simType, Muon_simBX, Muon_simTpEvent, Muon_simMatchQuality;
+  std::vector<int>  Muon_simPdgId, Muon_simMotherPdgId, Muon_simFlavour,  Muon_simType, Muon_simBX, Muon_simTpEvent, Muon_simMatchQuality;
     std::vector<double>  Mu1_Pt,  Mu1_Eta,  Mu1_Phi,  Mu2_Pt,  Mu2_Eta,  Mu2_Phi,  Mu3_Pt,  Mu3_Eta,  Mu3_Phi, GenMatchMu1_SimPt, GenMatchMu2_SimPt, GenMatchMu3_SimPt,GenMatchMu1_SimEta, GenMatchMu2_SimEta, GenMatchMu3_SimEta, GenMatchMu1_SimPhi, GenMatchMu2_SimPhi, GenMatchMu3_SimPhi,  GenMatchMu1_Pt,  GenMatchMu2_Pt,  GenMatchMu3_Pt,  GenMatchMu1_Eta,  GenMatchMu2_Eta,  GenMatchMu3_Eta,  GenMatchMu1_Phi,  GenMatchMu2_Phi,  GenMatchMu3_Phi;
     
     std::vector<double>     Muon_emEt03, Muon_hadEt03, Muon_nJets03, Muon_nTracks03, Muon_sumPt03, Muon_emEt05,    Muon_hadEt05, Muon_nJets05, Muon_nTracks05, Muon_sumPt05,
     Muon_hadVetoEt03,Muon_emVetoEt03,    Muon_trackerVetoPt03,    Muon_hadVetoEt05,    Muon_emVetoEt05,    Muon_trackerVetoPt05;
-    //  Mu1_SimPt,  Mu1_SimEta,  Mu1_SimPhi,  Mu2_SimPt,  Mu2_SimEta,  Mu2_SimPhi, Mu3_SimPt,  Mu3_SimEta,  Mu3_SimPhi,
+    //dd  Mu1_SimPt,  Mu1_SimEta,  Mu1_SimPhi,  Mu2_SimPt,  Mu2_SimEta,  Mu2_SimPhi, Mu3_SimPt,  Mu3_SimEta,  Mu3_SimPhi,
     
+    std::vector<double>     Triplet_mindca_iso, Triplet_relativeiso;
+ 
     std::vector<int>  Mu1_TripletIndex,  Mu2_TripletIndex,  Mu3_TripletIndex;
+    std::vector<int>  Mu1_NTracks03iso,  Mu2_NTracks03iso,  Mu3_NTracks03iso;
     
     int TripletCollectionSize, PVCollection_Size, MuonCollectionSize;
     std::vector<double>  TripletVtx_x,  TripletVtx_y,  TripletVtx_z,  TripletVtx_Chi2,  TripletVtx_NDOF,  Triplet_Mass,  Triplet_Pt,  Triplet_Eta,  Triplet_Phi, Triplet_Charge;
@@ -592,7 +595,60 @@ private:
              //TrackRef pvTrRef = pvTr.get<TrackRef>();
              cout<<i<<"PV track ID="<<tr.id()<<endl;
              }*/
+
+            //Defining ISO VAR related to the triplet
+            math::XYZPoint SVertexPoint = math::XYZPoint(TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
+            TLorentzVector LV1=TLorentzVector( mu1->px(), mu1->py(), mu1->pz(), mu1->energy() );
+            TLorentzVector LV2=TLorentzVector( mu2->px(), mu2->py(), mu2->pz(), mu2->energy() );
+            TLorentzVector LV3=TLorentzVector( mu3->px(), mu3->py(), mu3->pz(), mu3->energy() );
+            TLorentzVector LVTau = LV1 + LV2 + LV3;
+
+
+            edm::View<reco::Track>::const_iterator trIt  = trackCollection->begin();
+            edm::View<reco::Track>::const_iterator trEnd = trackCollection->end();
+
+            int nTracks03_mu1=0, nTracks03_mu2=0, nTracks03_mu3=0;
+            double mindist=9999;
+            double sumPtTrack1=0, sumPtTrack2=0, sumPtTrack3=0, maxSumPtTracks=0;
+            for (; trIt != trEnd; ++trIt) {
+               const reco::Track track = (*trIt);
+               if(  (track.pt()>1) && (fabs(track.eta())<2.4) && (track.hitPattern().trackerLayersWithMeasurement()>5) && (track.hitPattern().pixelLayersWithMeasurement()>1)  ){
+                  double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
+                  double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
+                  double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
+                  if (dR1 == 0 || dR2 == 0 || dR3 == 0) { cout<<"Skip muon track"<<endl; continue;}
+                  double dz = abs(track.dz(SVertexPoint));
+                  double dxy = abs(track.dxy(SVertexPoint));
+                  double dca_fv = sqrt(dz*dz+dxy*dxy);
+                  if(dca_fv<mindist && dca_fv>0) { cout<<"dca_fv"<<dca_fv<<endl; mindist = dca_fv;}
+                  //for eack track having pt>1, excluded the muon tracks,
+                  //for each muon in the triplet, if deltaR<0.3 and the DCA is smaller than 1 mm
+                  //the pt of the track is added -> I will take the largest total pt from the three muons
+                  if (dca_fv < 0.1) {
+                     if (dR1<0.3) {
+                        sumPtTrack1+=track.pt();
+                        nTracks03_mu1++;
+                     }
+                     if (dR2<0.3) {
+                        sumPtTrack2+=track.pt();
+                        nTracks03_mu2++;
+                     }
+                     if (dR3<0.3) {
+                        sumPtTrack3+=track.pt();
+                        nTracks03_mu3++;
+                     }
+                  }
+               }
+            }
+            Triplet_mindca_iso.push_back(mindist);
+            maxSumPtTracks = std::max(sumPtTrack1, std::max(sumPtTrack2,sumPtTrack3));
+            double relativeiso = maxSumPtTracks/LVTau.Pt();
+            Triplet_relativeiso.push_back(relativeiso);
             
+            Mu1_NTracks03iso.push_back(nTracks03_mu1);
+            Mu2_NTracks03iso.push_back(nTracks03_mu2);
+            Mu3_NTracks03iso.push_back(nTracks03_mu3);
+ 
             if(pvTracks_refit.size() >1){
                 KalmanVertexFitter PV_fitter (true);
                 TransientVertex PVertex = PV_fitter.vertex(pvTracks_refit);
@@ -654,8 +710,7 @@ private:
 		    //AnalyticalImpactPointExtrapolator extrapolator3D(transTrk.field());
 		    //GlobalPoint pos3d = extrapolator3D.extrapolate(transTrk.impactPointState(),RecoVertex::convertPos(PV->position())).globalPosition();
 		    //ip3d_poca=reco::Vertex::Point(pos3d.x(),pos3d.y(),pos3d.z());
-
-                    
+      
                 }else{
                     RefittedPV_x.push_back(-99);
                     RefittedPV_y.push_back(-99);
@@ -716,8 +771,8 @@ private:
             MuonEnergy.push_back(mu->energy());
             MuonCharge.push_back(mu->charge());
             
-            Muon_PdgId.push_back(mu->simPdgId());
-            Muon_MotherPdgId.push_back(mu->simMotherPdgId());
+            Muon_simPdgId.push_back(mu->simPdgId());
+            Muon_simMotherPdgId.push_back(mu->simMotherPdgId());
             Muon_simFlavour.push_back(mu->simFlavour());
 	    Muon_simType.push_back(mu->simType());
 	    Muon_simBX.push_back(mu->simBX());
@@ -732,9 +787,9 @@ private:
             
             //MuonID
             Muon_isGlobal.push_back(mu->isGlobalMuon());
-            //Muon_isTracker.push_back(mu->isTrackerMuon());
             Muon_isSoft.push_back(mu->isSoftMuon(PV));
             Muon_isLoose.push_back(mu->isLooseMuon());
+            Muon_isTight.push_back(mu->isTightMuon(PV));
             Muon_isPF.push_back(mu->isPFMuon());
             Muon_isRPCMuon.push_back(mu->isRPCMuon());
             Muon_isStandAloneMuon.push_back(mu->isStandAloneMuon());
@@ -745,12 +800,6 @@ private:
             Muon_isIsolationValid.push_back(mu->isIsolationValid());
             Muon_numberOfMatchedStations.push_back(mu->numberOfMatchedStations());
             Muon_numberOfMatches.push_back(mu->numberOfMatches(reco::Muon::SegmentArbitration));
-            
-            MuonChi2P.push_back(mu->combinedQuality().chi2LocalMomentum);
-            MuonChi2LocalPosition.push_back(mu->combinedQuality().chi2LocalPosition);
-            MuonGlbTrackProbability.push_back(mu->combinedQuality().glbTrackProbability);
-            MuonTrkRelChi2.push_back(mu->combinedQuality().trkRelChi2);
-            MuonTrkKink.push_back(mu->combinedQuality().trkKink);
             
             Muon_timeAtIpInOut.push_back(mu->time().timeAtIpInOut);
             Muon_timeAtIpInOutErr.push_back(mu->time().timeAtIpInOutErr);
@@ -953,8 +1002,10 @@ private:
          nmuons = -999;
          */
         run= -999;
-        evt= -999;                                                                                                                                                      lumi= -999;
+        evt= -999;
+        lumi= -999;
 	puN= -999;
+ 
         
         GenParticle_PdgId.clear();
         GenParticle_Pt.clear();
@@ -966,13 +1017,9 @@ private:
         MuonPt.clear();
         MuonEta.clear();
         MuonPhi.clear();
-        MuonChi2P.clear();
-        MuonChi2LocalPosition.clear();
-        MuonGlbTrackProbability.clear();
-        MuonTrkRelChi2.clear();
-        MuonTrkKink.clear();
-        Muon_PdgId.clear();
-        Muon_MotherPdgId.clear();
+        
+        Muon_simPdgId.clear();
+        Muon_simMotherPdgId.clear();
         Muon_simFlavour.clear();
 	Muon_simType.clear();
 	Muon_simBX.clear();
@@ -988,9 +1035,9 @@ private:
         
         //MuonID
         Muon_isGlobal.clear();
-        //Muon_isTracker.clear();
         Muon_isSoft.clear();
         Muon_isLoose.clear();
+        Muon_isTight.clear();
         Muon_isPF.clear();
         Muon_isRPCMuon.clear();
         Muon_isStandAloneMuon.clear();
@@ -1067,7 +1114,9 @@ private:
         Muon_emVetoEt05.clear();
         Muon_trackerVetoPt05.clear();
         
-        
+        Triplet_mindca_iso.clear();
+        Triplet_relativeiso.clear();
+
         PV_x=-99;
         PV_y=-99;
         PV_z=-99;
@@ -1076,14 +1125,17 @@ private:
         Mu1_Pt.clear();
         Mu1_Eta.clear();
         Mu1_Phi.clear();
+        Mu1_NTracks03iso.clear();
         
         Mu2_Pt.clear();
         Mu2_Eta.clear();
         Mu2_Phi.clear();
+        Mu2_NTracks03iso.clear();
         
         Mu3_Pt.clear();
         Mu3_Eta.clear();
         Mu3_Phi.clear();
+        Mu3_NTracks03iso.clear();
         
         Mu1_TripletIndex.clear();
         Mu2_TripletIndex.clear();
@@ -1234,21 +1286,14 @@ private:
         tree_->Branch("MuonCharge", &MuonCharge);
         tree_->Branch("MuonEta",&MuonEta);
         tree_->Branch("MuonPhi",&MuonPhi);
-        tree_->Branch("Muon_PdgId", &Muon_PdgId);
-        tree_->Branch("Muon_MotherPdgId", &Muon_MotherPdgId);
+        tree_->Branch("Muon_simPdgId", &Muon_simPdgId);
+        tree_->Branch("Muon_simMotherPdgId", &Muon_simMotherPdgId);
         tree_->Branch("Muon_simFlavour", &Muon_simFlavour);
 	tree_->Branch("Muon_simType", &Muon_simType);
 	tree_->Branch("Muon_simBX", &Muon_simBX);
 	//	tree_->Branch("Muon_simTpEvent", &Muon_simTpEvent);
 	//	tree_->Branch("Muon_simMatchQuality", &Muon_simMatchQuality);
 
-        tree_->Branch("MuonChi2P", &MuonChi2P);
-        tree_->Branch("MuonChi2LocalPosition", &MuonChi2LocalPosition);
-        tree_->Branch("MuonGlbTrackProbability", &MuonGlbTrackProbability);
-        tree_->Branch("MuonTrkRelChi2", &MuonTrkRelChi2);
-        tree_->Branch("MuonTrkKink", &MuonTrkKink);
-        
-        
         
         //Vtx position
         tree_->Branch("Muon_vx", &Muon_vx);
@@ -1260,6 +1305,7 @@ private:
         //tree_->Branch("Muon_isTracker", &Muon_isTracker);
         tree_->Branch("Muon_isSoft", &Muon_isSoft);
         tree_->Branch("Muon_isLoose", &Muon_isLoose);
+        tree_->Branch("Muon_isTight", &Muon_isTight);
         tree_->Branch("Muon_isPF", &Muon_isPF);
         tree_->Branch("Muon_isRPCMuon", &Muon_isRPCMuon);
         tree_->Branch("Muon_isStandAloneMuon", &Muon_isStandAloneMuon);
@@ -1328,7 +1374,6 @@ private:
         tree_->Branch("Muon_emVetoEt03", &Muon_emVetoEt03);
         tree_->Branch("Muon_trackerVetoPt03", &Muon_trackerVetoPt03);
 
-        
         tree_->Branch("Muon_emEt05", &Muon_emEt05);
         tree_->Branch("Muon_hadEt05", &Muon_hadEt05);
         tree_->Branch("Muon_nJets05", &Muon_nJets05);
@@ -1338,8 +1383,6 @@ private:
         tree_->Branch("Muon_emVetoEt05", &Muon_emVetoEt05);
         tree_->Branch("Muon_trackerVetoPt05", &Muon_trackerVetoPt05);
 
-        
-        
         tree_->Branch("PVCollection_Size", &PVCollection_Size);
         tree_->Branch("PV_x", &PV_x);
         tree_->Branch("PV_y", &PV_y);
@@ -1350,16 +1393,19 @@ private:
         tree_->Branch("Mu1_Pt",&Mu1_Pt);
         tree_->Branch("Mu1_Eta", &Mu1_Eta);
         tree_->Branch("Mu1_Phi", &Mu1_Phi);
-        tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex); 
-        
+        tree_->Branch("Mu1_NTracks03iso", &Mu1_NTracks03iso); 
+        tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex);
+ 
         tree_->Branch("Mu2_Pt", &Mu2_Pt);
         tree_->Branch("Mu2_Eta", &Mu2_Eta);
         tree_->Branch("Mu2_Phi", &Mu2_Phi);
+        tree_->Branch("Mu2_NTracks03iso", &Mu2_NTracks03iso); 
         tree_->Branch("Mu2_TripletIndex", &Mu2_TripletIndex); 
         
         tree_->Branch("Mu3_Pt", &Mu3_Pt);
         tree_->Branch("Mu3_Eta",&Mu3_Eta);
         tree_->Branch("Mu3_Phi", &Mu3_Phi);
+        tree_->Branch("Mu3_NTracks03iso", &Mu3_NTracks03iso); 
         tree_->Branch("Mu3_TripletIndex", &Mu3_TripletIndex); 
 
 	tree_->Branch("dxy_mu1", &dxy_mu1);
@@ -1416,6 +1462,9 @@ private:
         tree_->Branch("Triplet_Eta", &Triplet_Eta);
         tree_->Branch("Triplet_Phi", &Triplet_Phi);
         tree_->Branch("Triplet_Charge", &Triplet_Charge);
+        
+        tree_->Branch("Triplet_mindca_iso", &Triplet_mindca_iso);
+        tree_->Branch("Triplet_relativeiso", &Triplet_relativeiso);
         
         tree_->Branch("RefittedPV_x", &RefittedPV_x);
         tree_->Branch("RefittedPV_y", &RefittedPV_y);
