@@ -11,7 +11,10 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <iostream>
 
+double pileup_weight[100] = {0};
+double pileupFactor = 0;
 
 Int_t ntupleClass_MC::BestTripletFinder(Int_t triplIndex[1000], Int_t n){
     // Given the index of all the triplets of an event that passed all the cuts, it returns the index of the one with the smallest Chi2 of the vertex
@@ -194,21 +197,21 @@ void ntupleClass_MC::Fill_MuonVariablesGen_Sim(Int_t muGen[NMU], Double_t ptSimG
 void ntupleClass_MC::Fill_ParticleIdSummary(Int_t mu[NMU], Int_t IdsummaryDaughter[NPARTICLES], Int_t IdsummaryMother[NPARTICLES], Int_t IdSummary2D[NPARTICLES][NPARTICLES]){
     // This function fills the IdSummary vector w/ the all the particles (daughter and mother) present
     for(int i=0; i<NMU; i++){
-        Fill_particleId(Muon_PdgId->at(mu[i]), IdsummaryDaughter);
-        Fill_particleId(Muon_MotherPdgId->at(mu[i]), IdsummaryMother);
-        Fill_particleId_2D(Muon_PdgId->at(mu[i]), Muon_MotherPdgId->at(mu[i]), IdSummary2D);
+        Fill_particleId(Muon_simPdgId->at(mu[i]), IdsummaryDaughter);
+        Fill_particleId(Muon_simMotherPdgId->at(mu[i]), IdsummaryMother);
+        Fill_particleId_2D(Muon_simPdgId->at(mu[i]), Muon_simMotherPdgId->at(mu[i]), IdSummary2D);
     }
 }
 
 void ntupleClass_MC::FillHistoAC(Int_t ind, Int_t mu[NMU], TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NMU], TH1F *hmassQuad, TH1F *hmassQuad_Zero){
     // Fills the histograms after cuts
     for(int k=0; k<NMU; k++){
-        hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu[k]));
-        hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu[k]));
-        hPtErrOverPt->Fill(Muon_ptErrOverPt->at(mu[k]));
+        hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu[k]), pileupFactor);
+        hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu[k]), pileupFactor);
+        hPtErrOverPt->Fill(Muon_ptErrOverPt->at(mu[k]), pileupFactor);
     }
-    hFlightDist->Fill(FlightDistPVSV->at(ind));
-    hFlightDist_Signif->Fill(FlightDistPVSV_Significance->at(ind));
+    hFlightDist->Fill(FlightDistPVSV->at(ind), pileupFactor);
+    hFlightDist_Signif->Fill(FlightDistPVSV_Significance->at(ind), pileupFactor);
     double TripletP = MuonP(Triplet_Pt->at(ind), Triplet_Eta->at(ind), Triplet_Phi->at(ind));
     hFlightDistvsP->Fill(FlightDistPVSV->at(ind), TripletP);
     FillHistoDiMuMass_AC(hmassdi, dimu);
@@ -217,8 +220,8 @@ void ntupleClass_MC::FillHistoAC(Int_t ind, Int_t mu[NMU], TH1F *hChi2Track, TH1
 
 void ntupleClass_MC::FillHistoBC(TString type, Int_t ind, TH1D *hMass_tripl, TH1D *hChi2Vertex, TH2D *hMassvsChi2, TH1F *hMass_quad, TH1F *hMass_quad_Zero, TH1D *hMass_di, TH1D *hMass_di2, TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D *hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *hPtResEndcap, TH1D *hPtResEndcap_mu[NMU], Int_t IdsummaryDaughter_Gen[NPARTICLES], Int_t IdsummaryMother_Gen[NPARTICLES], Int_t Idsummary2D_Gen[NPARTICLES][NPARTICLES]){
     // Fills the histograms before cuts
-    hMass_tripl->Fill(Triplet_Mass->at(ind));
-    hChi2Vertex->Fill(TripletVtx_Chi2->at(ind));
+    hMass_tripl->Fill(Triplet_Mass->at(ind), pileupFactor);
+    hChi2Vertex->Fill(TripletVtx_Chi2->at(ind), pileupFactor);
     hMassvsChi2->Fill(Triplet_Mass->at(ind), TripletVtx_Chi2->at(ind));
     if(MuonPt->size() > NMU) FillHistoQuadMuMass_BC(hMass_quad, hMass_quad_Zero);
     if(MuonPt->size() > 1) FillHistoDiMuMass_BC(hMass_di, hMass_di2);
@@ -234,7 +237,7 @@ void ntupleClass_MC::FillHistoBC(TString type, Int_t ind, TH1D *hMass_tripl, TH1
 void ntupleClass_MC::FillHistoDiMuMass_AC(TH1D *hist, Double_t dimu[NMU]){
     // This function fills the dimuon mass histogram
     for(int i=0; i<NMU; i++){
-        if(dimu[i] != 0) hist->Fill(dimu[i]);
+        if(dimu[i] != 0) hist->Fill(dimu[i], pileupFactor);
     }
 }
 
@@ -244,15 +247,14 @@ void ntupleClass_MC::FillHistoDiMuMass_BC(TH1D *h_Zero, TH1D *h_Zero2){
         for (int l=k+1; l<(MuonPt->size()); l++){
             if(Muon_isGlobal->at(k) == 1 && Muon_isGlobal->at(l) == 1 && MuonPt->at(k) > ptmin && MuonPt->at(l) > ptmin && abs(Muon_vz->at(k) - Muon_vz->at(l)) < 0.5){
                 double dimass = DimuonMass(MuonCharge->at(k), MuonCharge->at(l), MuonPt->at(k), MuonPt->at(l), MuonEta->at(k), MuonEta->at(l), MuonPhi->at(k), MuonPhi->at(l));
-                if(dimass != 0) h_Zero->Fill(dimass);
+                if(dimass != 0) h_Zero->Fill(dimass, pileupFactor);
                 if(MuonPt->at(k) >= 5 && MuonPt->at(l) >= 5){
-                    if(dimass != 0) h_Zero2->Fill(dimass);
+                    if(dimass != 0) h_Zero2->Fill(dimass, pileupFactor);
                 }
             }
         }
     }
 }
-
 
 void ntupleClass_MC::FillHistoQuadMuMass_AC(TH1F *h, TH1F *h_Zero, Int_t mu[NMU]){
     // Computes the invariant mass of 4 muons (3mu of the triplet + another tracker mu) w/ |DeltaZ| < 0.5 and fills the histo
@@ -261,9 +263,9 @@ void ntupleClass_MC::FillHistoQuadMuMass_AC(TH1F *h, TH1F *h_Zero, Int_t mu[NMU]
             if(Muon_isTrackerMuon->at(k) == 1 && MuonPt->at(k) > 0.5){
                 if (isPairDeltaZGood(Muon_vz->at(k), Muon_vz->at(mu[0]), Muon_vz->at(mu[1]), 0.5) == true && isDeltaZGood(Muon_vz->at(k), Muon_vz->at(mu[2]), 0.5) == true){
                     float quadMass = QuadMuonMass(MuonPt->at(mu[0]), MuonPt->at(mu[1]), MuonPt->at(mu[2]), MuonPt->at(k), MuonEta->at(mu[0]), MuonEta->at(mu[1]), MuonEta->at(mu[2]), MuonEta->at(k), MuonPhi->at(mu[0]), MuonPhi->at(mu[1]), MuonPhi->at(mu[2]), MuonPhi->at(k));
-                    h->Fill(quadMass);
+                    h->Fill(quadMass, pileupFactor);
                     if((MuonCharge->at(mu[0])+MuonCharge->at(mu[1])+MuonCharge->at(mu[2])+MuonCharge->at(k)) == 0)
-                        h_Zero->Fill(quadMass);
+                        h_Zero->Fill(quadMass, pileupFactor);
                 }
             }
         }
@@ -278,9 +280,9 @@ void ntupleClass_MC::FillHistoQuadMuMass_BC(TH1F *h, TH1F *h_Zero){
                 for (int g=m+1; g<(MuonPt->size()); g++){
                     if (isPairDeltaZGood(Muon_vz->at(k), Muon_vz->at(l), Muon_vz->at(m), 0.5) == true && isDeltaZGood(Muon_vz->at(m), Muon_vz->at(g), 0.5) == true && isDeltaZGood(Muon_vz->at(k), Muon_vz->at(g), 0.5) == true && isDeltaZGood(Muon_vz->at(l), Muon_vz->at(g), 0.5) == true){
                         float quadMuMass = QuadMuonMass(MuonPt->at(k), MuonPt->at(l), MuonPt->at(m), MuonPt->at(g), MuonEta->at(k), MuonEta->at(l), MuonEta->at(m), MuonEta->at(g), MuonPhi->at(k), MuonPhi->at(l), MuonPhi->at(m), MuonPhi->at(g));
-                        h->Fill(quadMuMass);
+                        h->Fill(quadMuMass, pileupFactor);
                         if((MuonCharge->at(k) + MuonCharge->at(l) + MuonCharge->at(m) + MuonCharge->at(g)) == 0)
-                            h_Zero->Fill(quadMuMass);
+                            h_Zero->Fill(quadMuMass, pileupFactor);
                     }
                 }
             }
@@ -295,15 +297,15 @@ void ntupleClass_MC::FillHistoResoPt_AC(Int_t muGen[NMU], TH1D *hPtRes, TH1D *hP
     Fill_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
     for(int k=0; k<NMU; k++){
         ptResMu[k] = (ptSimGEN[k] - ptGEN[k])/ptSimGEN[k];
-        hPtRes_mu[k]->Fill(ptResMu[k]);
-        hPtRes->Fill(ptResMu[k]);
+        hPtRes_mu[k]->Fill(ptResMu[k], pileupFactor);
+        hPtRes->Fill(ptResMu[k], pileupFactor);
         if(etaGEN[k] < 1.4){
-            hPtResBarrel_mu[k]->Fill(ptResMu[k]);
-            hPtResBarrel->Fill(ptResMu[k]);
+            hPtResBarrel_mu[k]->Fill(ptResMu[k], pileupFactor);
+            hPtResBarrel->Fill(ptResMu[k], pileupFactor);
         }
         else {
-            hPtResEndcap_mu[k]->Fill(ptResMu[k]);
-            hPtResEndcap->Fill(ptResMu[k]);
+            hPtResEndcap_mu[k]->Fill(ptResMu[k], pileupFactor);
+            hPtResEndcap->Fill(ptResMu[k], pileupFactor);
         }
     }
 }
@@ -320,43 +322,28 @@ void ntupleClass_MC::FillHistoResoPt_BC(TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D
         Fill_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
         for (int k=0; k<NMU; k++){
             ptResMu[k] = (ptSimGEN[k] - ptGEN[k])/ptSimGEN[k];
-            hPtRes_mu[k]->Fill(ptResMu[k]);
-            hPtRes->Fill(ptResMu[k]);
+            hPtRes_mu[k]->Fill(ptResMu[k], pileupFactor);
+            hPtRes->Fill(ptResMu[k], pileupFactor);
             if(abs(etaGEN[k]) < 1.4){
-                hPtResBarrel_mu[k]->Fill(ptResMu[k]);
-                hPtResBarrel->Fill(ptResMu[k]);
+                hPtResBarrel_mu[k]->Fill(ptResMu[k], pileupFactor);
+                hPtResBarrel->Fill(ptResMu[k], pileupFactor);
             }
             else {
-                hPtResEndcap_mu[k]->Fill(ptResMu[k]);
-                hPtResEndcap->Fill(ptResMu[k]);
+                hPtResEndcap_mu[k]->Fill(ptResMu[k], pileupFactor);
+                hPtResEndcap->Fill(ptResMu[k], pileupFactor);
             }
         }
     }
 }
 
 void ntupleClass_MC::FillHistoResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hMassTriRes, TH1D *hMassTriResBarrel, TH1D *hMassTriResEndcap){
-    // Triplet mass resolution
-    double pt[NMU] = {0}, ptNO[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0}, pt_res[NMU] = {0}, pt_bis[NMU] = {0}, dm[NMU] = {0};
-    TLorentzVector muon[NMU], muon_bis[NMU], mutot, mutot_bis[NMU];
-    
+    // Fill the histo of triplet mass resolution
+    double ptNO[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
     Fill_MuonVariables(mu_Ind, ptNO, eta, phi);
-    for(int k=0; k<NMU; k++){
-        pt[k] = Muon_BestTrackPt->at(mu[k]);
-        pt_bis[k] = pt[k] + Muon_BestTrackPtErr->at(mu[k]);
-        muon[k].SetPtEtaPhiM(pt[k], eta[k], phi[k], mumass);
-        muon_bis[k].SetPtEtaPhiM(pt_bis[k], eta[k], phi[k], mumass);
-    }
-    mutot = muon[0] + muon[1] + muon[2];
-    mutot_bis[0] = muon_bis[0] + muon[1] + muon[2];
-    mutot_bis[1] = muon[0] + muon_bis[1] + muon[2];
-    mutot_bis[2] = muon[0] + muon[1] + muon_bis[2];
-    for(int k=0; k<NMU; k++){
-        dm[k] = mutot_bis[k].M() - mutot.M();
-    }
-    double trimassReso = sqrt(pow(dm[0],2)+pow(dm[1],2)+pow(dm[2],2))/mutot.M();
-    hMassTriRes->Fill(trimassReso);
-    if(abs(eta[0]) < 1.4 && abs(eta[1]) < 1.4 && abs(eta[2]) < 1.4)   hMassTriResBarrel->Fill(trimassReso);
-    if(abs(eta[0]) >= 1.4 && abs(eta[1]) >= 1.4 && abs(eta[2]) >= 1.4)    hMassTriResEndcap->Fill(trimassReso);
+    double trimassReso = ResoTriplMass(mu_Ind, mu);
+    hMassTriRes->Fill(trimassReso, pileupFactor);
+    if(abs(eta[0]) < 1.4 && abs(eta[1]) < 1.4 && abs(eta[2]) < 1.4)   hMassTriResBarrel->Fill(trimassReso, pileupFactor);
+    if(abs(eta[0]) >= 1.4 && abs(eta[1]) >= 1.4 && abs(eta[2]) >= 1.4)    hMassTriResEndcap->Fill(trimassReso, pileupFactor);
 }
 
 void ntupleClass_MC::FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hist_pt, TH1D *hist_pt_mu[NMU], TH1D *hist_eta, TH1D *hist_eta_mu[NMU], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz){
@@ -364,14 +351,14 @@ void ntupleClass_MC::FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *h
     double pt[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
     Fill_MuonVariables(mu_Ind, pt, eta, phi);
     for(int i=0; i<NMU; i++){
-        hist_pt->Fill(pt[i]);
-        hist_pt_mu[i]->Fill(pt[i]);
-        hist_eta->Fill(eta[i]);
-        hist_eta_mu[i]->Fill(eta[i]);
-        hist_phi->Fill(phi[i]);
-        hVx->Fill(Muon_vx->at(mu[i]));
-        hVy->Fill(Muon_vy->at(mu[i]));
-        hVz->Fill(Muon_vz->at(mu[i]));
+        hist_pt->Fill(pt[i], pileupFactor);
+        hist_pt_mu[i]->Fill(pt[i], pileupFactor);
+        hist_eta->Fill(eta[i], pileupFactor);
+        hist_eta_mu[i]->Fill(eta[i], pileupFactor);
+        hist_phi->Fill(phi[i], pileupFactor);
+        hVx->Fill(Muon_vx->at(mu[i]), pileupFactor);
+        hVy->Fill(Muon_vy->at(mu[i]), pileupFactor);
+        hVz->Fill(Muon_vz->at(mu[i]), pileupFactor);
     }
 }
 
@@ -384,10 +371,10 @@ void ntupleClass_MC::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[N
 
 void ntupleClass_MC::FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, TH1D *hist_phi, TH1D *hist_mass){
     // Fills histograms w/ variables of the triplet
-    hist_pt->Fill(Triplet_Pt->at(ind));
-    hist_eta->Fill(Triplet_Eta->at(ind));
-    hist_phi->Fill(Triplet_Phi->at(ind));
-    hist_mass->Fill(Triplet_Mass->at(ind));
+    hist_pt->Fill(Triplet_Pt->at(ind), pileupFactor);
+    hist_eta->Fill(Triplet_Eta->at(ind), pileupFactor);
+    hist_phi->Fill(Triplet_Phi->at(ind), pileupFactor);
+    hist_mass->Fill(Triplet_Mass->at(ind), pileupFactor);
 }
 
 void ntupleClass_MC::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake){
@@ -932,6 +919,29 @@ Float_t ntupleClass_MC::QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Floa
     return mutot.M();
 }
 
+Double_t ntupleClass_MC::ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]){
+    // It computes the triplet mass resolution
+    double pt[NMU] = {0}, ptNO[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0}, pt_res[NMU] = {0}, pt_bis[NMU] = {0}, dm[NMU] = {0};
+    TLorentzVector muon[NMU], muon_bis[NMU], mutot, mutot_bis[NMU];
+    
+    Fill_MuonVariables(mu_Ind, ptNO, eta, phi);
+    for(int k=0; k<NMU; k++){
+        pt[k] = Muon_BestTrackPt->at(mu[k]);
+        pt_bis[k] = pt[k] + Muon_BestTrackPtErr->at(mu[k]);
+        muon[k].SetPtEtaPhiM(pt[k], eta[k], phi[k], mumass);
+        muon_bis[k].SetPtEtaPhiM(pt_bis[k], eta[k], phi[k], mumass);
+    }
+    mutot = muon[0] + muon[1] + muon[2];
+    mutot_bis[0] = muon_bis[0] + muon[1] + muon[2];
+    mutot_bis[1] = muon[0] + muon_bis[1] + muon[2];
+    mutot_bis[2] = muon[0] + muon[1] + muon_bis[2];
+    for(int k=0; k<NMU; k++){
+        dm[k] = mutot_bis[k].M() - mutot.M();
+    }
+    double trimassReso = sqrt(pow(dm[0],2)+pow(dm[1],2)+pow(dm[2],2))/mutot.M();
+    return trimassReso;
+}
+
 void ntupleClass_MC::StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl){
     // Deep study on triplets
     /*
@@ -972,54 +982,261 @@ void ntupleClass_MC::StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D
      }
      }
      */
-    hDeltaX->Fill(abs(Muon_vx->at(mu[0]) - Muon_vx->at(mu[1])));
-    hDeltaX->Fill(abs(Muon_vx->at(mu[0]) - Muon_vx->at(mu[2])));
-    hDeltaX->Fill(abs(Muon_vx->at(mu[1]) - Muon_vx->at(mu[2])));
-    hDeltaY->Fill(abs(Muon_vy->at(mu[0]) - Muon_vy->at(mu[1])));
-    hDeltaY->Fill(abs(Muon_vy->at(mu[0]) - Muon_vy->at(mu[2])));
-    hDeltaY->Fill(abs(Muon_vy->at(mu[1]) - Muon_vy->at(mu[2])));
-    hDeltaZ->Fill(abs(Muon_vz->at(mu[0]) - Muon_vz->at(mu[1])));
-    hDeltaZ->Fill(abs(Muon_vz->at(mu[0]) - Muon_vz->at(mu[2])));
-    hDeltaZ->Fill(abs(Muon_vz->at(mu[1]) - Muon_vz->at(mu[2])));
-    hPt_tripl->Fill(Triplet_Pt->at(ind));
+    hDeltaX->Fill(abs(Muon_vx->at(mu[0]) - Muon_vx->at(mu[1])), pileupFactor);
+    hDeltaX->Fill(abs(Muon_vx->at(mu[0]) - Muon_vx->at(mu[2])), pileupFactor);
+    hDeltaX->Fill(abs(Muon_vx->at(mu[1]) - Muon_vx->at(mu[2])), pileupFactor);
+    hDeltaY->Fill(abs(Muon_vy->at(mu[0]) - Muon_vy->at(mu[1])), pileupFactor);
+    hDeltaY->Fill(abs(Muon_vy->at(mu[0]) - Muon_vy->at(mu[2])), pileupFactor);
+    hDeltaY->Fill(abs(Muon_vy->at(mu[1]) - Muon_vy->at(mu[2])), pileupFactor);
+    hDeltaZ->Fill(abs(Muon_vz->at(mu[0]) - Muon_vz->at(mu[1])), pileupFactor);
+    hDeltaZ->Fill(abs(Muon_vz->at(mu[0]) - Muon_vz->at(mu[2])), pileupFactor);
+    hDeltaZ->Fill(abs(Muon_vz->at(mu[1]) - Muon_vz->at(mu[2])), pileupFactor);
+    hPt_tripl->Fill(Triplet_Pt->at(ind), pileupFactor);
 }
 
-void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+Double_t ntupleClass_MC::TreeFin_Angle(Int_t ind){
+    // Computes the angle between the momentum vector of the 3mu triplet (b) and the vector from the primary vertex (a)
+    double a_x = TripletVtx_x->at(ind) - RefittedPV_x->at(ind);
+    double a_y = TripletVtx_y->at(ind) - RefittedPV_y->at(ind);
+    double a_z = TripletVtx_z->at(ind) - RefittedPV_z->at(ind);
+    TLorentzVector b;
+    b.SetPtEtaPhiM(Triplet_Pt->at(ind), Triplet_Eta->at(ind), Triplet_Phi->at(ind), mumass);
+    double b_x = b.Px();
+    double b_y = b.Py();
+    double b_z = b.Pz();
+    double a_mod = abs(FlightDistPVSV->at(ind));
+    double b_mod = abs(b.P());
+    double cos = ((a_x*b_x)+(a_y*b_y)+(a_z*b_z))/(a_mod*b_mod);
+    double angle = acos(min(max(cos,-1.0),1.0));
+    return angle;
+}
+
+void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
     // Fills the tree branches
-    TLorentzVector trMu;
-    trMu.SetPtEtaPhiM(Mu3_Pt->at(mu_Ind[2]), Mu3_Eta->at(mu_Ind[2]), Mu3_Phi->at(mu_Ind[2]), mumass);
-    Pmu3 = trMu.P();
-    cLP = 0; tKink = 0; segmComp = 1; double temp[NMU] = {0};
+    // 2016 variables
+    Pmu3 = MuonP(Mu3_Pt->at(mu_Ind[2]), Mu3_Eta->at(mu_Ind[2]), Mu3_Phi->at(mu_Ind[2]));
+    cLP = 1000; tKink = 0; segmComp = 1; double temp1[NMU] = {0}, temp[NMU] = {0};
+    temp1[0] = dxy_mu1->at(mu_Ind[0]);
+    temp1[1] = dxy_mu2->at(mu_Ind[1]);
+    temp1[2] = dxy_mu3->at(mu_Ind[2]);
+    d0 = temp1[0];
     temp[0] = abs(dxy_mu1->at(mu_Ind[0])/ dxyErr_mu1->at(mu_Ind[0]));
     temp[1] = abs(dxy_mu2->at(mu_Ind[1])/ dxyErr_mu2->at(mu_Ind[1]));
     temp[2] = abs(dxy_mu3->at(mu_Ind[2])/ dxyErr_mu3->at(mu_Ind[2]));
     d0sig = temp[0];
+    mindca_iso = Triplet_mindca_iso->at(ind);
+    trkRel = Triplet_relativeiso->at(ind);
+    
     for (int k=0; k<NMU; k++){
         //  * cLP MAX
         //  * kink MAX
         //  * segmComp MIN
         //  * d0sig MIN
-        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) > cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
-        if (MuonTrkKink->at(mu[k]) > tKink) tKink = MuonTrkKink->at(mu[k]);
+        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) < cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
+        if (Muon_combinedQuality_trkKink->at(mu[k]) > tKink) tKink = Muon_combinedQuality_trkKink->at(mu[k]);
         if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
+        if (temp1[k] < d0) d0 = temp1[k];
         if (temp[k] < d0sig) d0sig = temp[k];
     }
     fv_nC = TripletVtx_Chi2->at(ind)/3;
+    fv_dphi3D = TreeFin_Angle(ind);
     fv_d3Dsig = FlightDistPVSV_Significance->at(ind);
+    
+    
+    // Other variables
+        // Single mu variables
+    Pmu1 = MuonP(Mu1_Pt->at(mu_Ind[0]), Mu1_Eta->at(mu_Ind[0]), Mu1_Phi->at(mu_Ind[0]));
+    Ptmu1 = Mu1_Pt->at(mu_Ind[0]);
+    etamu1 = Mu1_Eta->at(mu_Ind[0]);
+    Pmu2 = MuonP(Mu2_Pt->at(mu_Ind[1]), Mu2_Eta->at(mu_Ind[1]), Mu2_Phi->at(mu_Ind[1]));
+    Ptmu2 = Mu2_Pt->at(mu_Ind[1]);
+    etamu2 = Mu2_Eta->at(mu_Ind[1]);
+    Ptmu3 = Mu3_Pt->at(mu_Ind[2]);
+    etamu3 = Mu3_Eta->at(mu_Ind[2]);
+    nStationsMu1 = Muon_numberOfMatchedStations->at(mu[0]);
+    nStationsMu2 = Muon_numberOfMatchedStations->at(mu[1]);
+    nStationsMu3 = Muon_numberOfMatchedStations->at(mu[2]);
+    Iso03Mu1 = Mu1_NTracks03iso->at(mu_Ind[0]);
+    Iso03Mu2 = Mu2_NTracks03iso->at(mu_Ind[1]);
+    Iso03Mu3 = Mu3_NTracks03iso->at(mu_Ind[2]);
+    Iso05Mu1 = Muon_emEt05->at(mu[0]);
+    Iso05Mu2 = Muon_emEt05->at(mu[1]);
+    Iso05Mu3 = Muon_emEt05->at(mu[2]);
+         // Triplet variables
+    P_trip = MuonP(Triplet_Pt->at(ind), Triplet_Eta->at(ind), Triplet_Phi->at(ind));
+    Pt_trip = Triplet_Pt->at(ind);
+    eta_trip = Triplet_Eta->at(ind);
+        //
+    nMatchesMu1 = Muon_numberOfMatches->at(mu[0]);
+    nMatchesMu2 = Muon_numberOfMatches->at(mu[1]);
+    nMatchesMu3 = Muon_numberOfMatches->at(mu[2]);
+    timeAtIpInOutMu1 = Muon_timeAtIpInOut->at(mu[0]);
+    timeAtIpInOutMu2 = Muon_timeAtIpInOut->at(mu[1]);
+    timeAtIpInOutMu3 = Muon_timeAtIpInOut->at(mu[2]);
+    cQ_uS = 0; cQ_tK = 0; cQ_gK = 0; cQ_tRChi2 = 0; cQ_sRChi2 = 0; cQ_Chi2LM = 0;
+    cQ_Chi2lD = 0; cQ_gDEP = 0; cQ_tM = 0; cQ_gTP = 0; caloComp = 1;
+    for (int k=0; k<NMU; k++){
+        //  * cQ_* MAX
+        if (Muon_combinedQuality_updatedSta->at(mu[k]) > cQ_uS) cQ_uS = Muon_combinedQuality_updatedSta->at(mu[k]);
+        if (Muon_combinedQuality_trkKink->at(mu[k]) > cQ_tK) cQ_tK = Muon_combinedQuality_trkKink->at(mu[k]);
+        if (Muon_combinedQuality_glbKink->at(mu[k]) > cQ_gK) cQ_gK = Muon_combinedQuality_glbKink->at(mu[k]);
+        if (Muon_combinedQuality_trkRelChi2->at(mu[k]) > cQ_tRChi2) cQ_tRChi2 = Muon_combinedQuality_trkRelChi2->at(mu[k]);
+        if (Muon_combinedQuality_staRelChi2->at(mu[k]) > cQ_sRChi2) cQ_sRChi2 = Muon_combinedQuality_staRelChi2->at(mu[k]);
+        if (Muon_combinedQuality_chi2LocalMomentum->at(mu[k]) > cQ_Chi2LM) cQ_Chi2LM = Muon_combinedQuality_chi2LocalMomentum->at(mu[k]);
+        if (Muon_combinedQuality_localDistance->at(mu[k]) > cQ_Chi2lD) cQ_Chi2lD = Muon_combinedQuality_localDistance->at(mu[k]);
+        if (Muon_combinedQuality_globalDeltaEtaPhi->at(mu[k]) > cQ_gDEP) cQ_gDEP = Muon_combinedQuality_globalDeltaEtaPhi->at(mu[k]);
+        if (Muon_combinedQuality_tightMatch->at(mu[k]) > cQ_tM) cQ_tM = Muon_combinedQuality_tightMatch->at(mu[k]);
+        if (Muon_combinedQuality_glbTrackProbability->at(mu[k]) > cQ_gTP) cQ_gTP = Muon_combinedQuality_glbTrackProbability->at(mu[k]);
+        if (Muon_caloCompatibility->at(mu[k]) < caloComp) caloComp = Muon_caloCompatibility->at(mu[k]);
+    }
+    calEn_emMu1 = Muon_calEnergy_em->at(mu[0]);
+    calEn_emMu2 = Muon_calEnergy_em->at(mu[1]);
+    calEn_emMu3 = Muon_calEnergy_em->at(mu[2]);
+    calEn_hadMu1 = Muon_calEnergy_had->at(mu[0]);
+    calEn_hadMu2 = Muon_calEnergy_had->at(mu[1]);
+    calEn_hadMu3 = Muon_calEnergy_had->at(mu[2]);
+    fliDistPVSV_Chi2 = FlightDistPVSV_chi2->at(ind);
+    //muon ID
+    isGlb3 = Muon_isGlobal->at(mu[2]);
+    isTracker3 = Muon_isTrackerMuon->at(mu[2]);
+    isLoose3 = Muon_isLoose->at(mu[2]);
+    isSoft3 = Muon_isSoft->at(mu[2]);
+    isPF3 = Muon_isPF->at(mu[2]);
+    isRPC3 = Muon_isRPCMuon->at(mu[2]);
+    isSA3 = Muon_isStandAloneMuon->at(mu[2]);
+    isCalo3 = Muon_isCaloMuon->at(mu[2]);
+    //
+    Vx1 = Muon_vx->at(mu[0]);
+    Vx2 = Muon_vx->at(mu[1]);
+    Vx3 = Muon_vx->at(mu[2]);
+    Vy1 = Muon_vy->at(mu[0]);
+    Vy2 = Muon_vy->at(mu[1]);
+    Vy3 = Muon_vy->at(mu[2]);
+    Vz1 = Muon_vz->at(mu[0]);
+    Vz2 = Muon_vz->at(mu[1]);
+    Vz3 = Muon_vz->at(mu[2]);
+    RefVx1 = RefittedPV_x->at(ind);
+    RefVy1 = RefittedPV_y->at(ind);
+    RefVz1 = RefittedPV_z->at(ind);
+    SVx = TripletVtx_x->at(ind);
+    SVy = TripletVtx_y->at(ind);
+    SVz = TripletVtx_z->at(ind);
+    had03 = Muon_hadEt03->at(mu[2]);
+    had05 = Muon_hadEt05->at(mu[2]);
+    nJets03 = Muon_nJets03->at(mu[2]);
+    nJets05 = Muon_nJets05->at(mu[2]);
+    nTracks03 = Muon_nTracks03->at(mu[2]);
+    nTracks05 = Muon_nTracks05->at(mu[2]);
+    sumPt03 = Muon_sumPt03->at(mu[2]);
+    sumPt05 = Muon_sumPt05->at(mu[2]);
+    hadVeto03 = Muon_hadVetoEt03->at(mu[2]);
+    hadVeto05 = Muon_hadVetoEt05->at(mu[2]);
+    emVeto03 = Muon_emVetoEt03->at(mu[2]);
+    emVeto05 = Muon_emVetoEt05->at(mu[2]);
+    trVeto03 = Muon_trackerVetoPt03->at(mu[2]);
+    trVeto05 = Muon_trackerVetoPt05->at(mu[2]);
+    
     tree->Fill();
 }
 
-void ntupleClass_MC::TreeFin_Init(TTree *&tree, UInt_t &evt, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+void ntupleClass_MC::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
     // Set tree branches
-    tree->Branch("Event", &evt);
-    tree->Branch("P", &Pmu3);
+    tree->Branch("Pmu3", &Pmu3);
     tree->Branch("cLP", &cLP);
     tree->Branch("tKink", &tKink);
     tree->Branch("segmComp", &segmComp);
     tree->Branch("fv_nC", &fv_nC);
     tree->Branch("fv_dphi3D", &fv_dphi3D);
     tree->Branch("fv_d3Dsig", &fv_d3Dsig);
+    tree->Branch("d0", &d0);
     tree->Branch("d0sig", &d0sig);
     tree->Branch("mindca_iso", &mindca_iso);
     tree->Branch("trkRel", &trkRel);
+    tree->Branch("Pmu1", &Pmu1);
+    tree->Branch("Ptmu1", &Ptmu1);
+    tree->Branch("Etamu1", &etamu1);
+    tree->Branch("Pmu2", &Pmu2);
+    tree->Branch("Ptmu2", &Ptmu2);
+    tree->Branch("Etamu2", &etamu2);
+    tree->Branch("Ptmu3", &Ptmu3);
+    tree->Branch("Etamu3", &etamu3);
+    tree->Branch("P_tripl", &P_trip);
+    tree->Branch("Pt_tripl", &Pt_trip);
+    tree->Branch("Eta_tripl", &eta_trip);
+    tree->Branch("nStMu1", &nStationsMu1);
+    tree->Branch("nStMu2", &nStationsMu2);
+    tree->Branch("nStMu3", &nStationsMu3);
+    tree->Branch("Iso03Mu1", &Iso03Mu1);
+    tree->Branch("Iso03Mu2", &Iso03Mu2);
+    tree->Branch("Iso03Mu3", &Iso03Mu3);
+    tree->Branch("Iso05Mu1", &Iso05Mu1);
+    tree->Branch("Iso05Mu2", &Iso05Mu2);
+    tree->Branch("Iso05Mu3", &Iso05Mu3);
+    tree->Branch("nMatchesMu1", &nMatchesMu1);
+    tree->Branch("nMatchesMu2", &nMatchesMu2);
+    tree->Branch("nMatchesMu3", &nMatchesMu3);
+    tree->Branch("timeAtIpInOut1", &timeAtIpInOutMu1);
+    tree->Branch("timeAtIpInOut2", &timeAtIpInOutMu2);
+    tree->Branch("timeAtIpInOut3", &timeAtIpInOutMu3);
+    tree->Branch("cQ_uS", &cQ_uS);
+    tree->Branch("cQ_tK", &cQ_tK);
+    tree->Branch("cQ_gK", &cQ_gK);
+    tree->Branch("cQ_tRChi2", &cQ_tRChi2);
+    tree->Branch("cQ_sRChi2", &cQ_sRChi2);
+    tree->Branch("cQ_Chi2LM", &cQ_Chi2LM);
+    tree->Branch("cQ_Chi2lD", &cQ_Chi2lD);
+    tree->Branch("cQ_gDEP", &cQ_gDEP);
+    tree->Branch("cQ_tM", &cQ_tM);
+    tree->Branch("cQ_gTP", &cQ_gTP);
+    tree->Branch("calEn_emMu1", &calEn_emMu1);
+    tree->Branch("calEn_emMu2", &calEn_emMu2);
+    tree->Branch("calEn_emMu3", &calEn_emMu3);
+    tree->Branch("calEn_hadMu1", &calEn_hadMu1);
+    tree->Branch("calEn_hadMu2", &calEn_hadMu2);
+    tree->Branch("calEn_hadMu3", &calEn_hadMu3);
+    tree->Branch("caloComp", &caloComp);
+    tree->Branch("fliDistPVSV_Chi2", &fliDistPVSV_Chi2);
+    tree->Branch("isGlb3", &isGlb3);
+    tree->Branch("isTracker3", &isTracker3);
+    tree->Branch("isLoose3", &isLoose3);
+    tree->Branch("isSoft3", &isSoft3);
+    tree->Branch("isPF3", &isPF3);
+    tree->Branch("isRPC3", &isRPC3);
+    tree->Branch("isSA3", &isSA3);
+    tree->Branch("isCalo3", &isCalo3);
+    tree->Branch("Vx1", &Vx1);
+    tree->Branch("Vx2", &Vx2);
+    tree->Branch("Vx3", &Vx3);
+    tree->Branch("Vy1", &Vy1);
+    tree->Branch("Vy2", &Vy2);
+    tree->Branch("Vy3", &Vy3);
+    tree->Branch("Vz1", &Vz1);
+    tree->Branch("Vz2", &Vz2);
+    tree->Branch("Vz3", &Vz3);
+    tree->Branch("RefVx1", &RefVx1);
+    tree->Branch("RefVx2", &RefVx2);
+    tree->Branch("RefVx3", &RefVx3);
+    tree->Branch("RefVy1", &RefVy1);
+    tree->Branch("RefVy2", &RefVy2);
+    tree->Branch("RefVy3", &RefVy3);
+    tree->Branch("RefVz1", &RefVz1);
+    tree->Branch("RefVz2", &RefVz2);
+    tree->Branch("RefVz3", &RefVz3);
+    tree->Branch("SVx", &SVx);
+    tree->Branch("SVy", &SVy);
+    tree->Branch("SVz", &SVz);
+    tree->Branch("had03", &had03);
+    tree->Branch("had05", &had05);
+    tree->Branch("nJets03", &nJets03);
+    tree->Branch("nJets05", &nJets05);
+    tree->Branch("nTracks03", &nTracks03);
+    tree->Branch("nTracks05", &nTracks05);
+    tree->Branch("sumPt03", &sumPt03);
+    tree->Branch("sumPt05", &sumPt05);
+    tree->Branch("hadVeto03", &hadVeto03);
+    tree->Branch("hadVeto05", &hadVeto05);
+    tree->Branch("emVeto03", &emVeto03);
+    tree->Branch("emVeto05", &emVeto05);
+    tree->Branch("trVeto03", &trVeto03);
+    tree->Branch("trVeto05", &trVeto05);
 }

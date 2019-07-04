@@ -576,8 +576,8 @@ void ntupleClass_Control::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *h
         hPt[i]->Sumw2();
         hEta[i]->Sumw2();
         hPhi[i]->Sumw2();
-        hVx[i]->Sumw2();
-        hVy[i]->Sumw2();
+//        hVx[i]->Sumw2();
+//        hVy[i]->Sumw2();
         hVz[i]->Sumw2();
         // Single mu histo
         for(int k=0; k<NTOT; k++){
@@ -674,9 +674,18 @@ Bool_t ntupleClass_Control::isPairNotAPhi(Double_t dimu[NTOT], Double_t sigma){
 
 void ntupleClass_Control::MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NTOT], Int_t mu[NTOT]){
     // This function matches the index of muons in different cases (ID or GEN muons)
-    mu_Ind[0] = ind;
+    /*
+    mu_Ind[0] = Mu01_TripletIndex->at(ind);
+    cout << "Triplet index : " << ind << " || mu1 index : " << mu_Ind[0] << endl;
     mu_Ind[1] = Mu02_TripletIndex->at(ind);
+    cout << "Triplet index : " << ind << " || mu2 index : " << mu_Ind[1] << endl;
     mu_Ind[2] = Tr_TripletIndex->at(ind);
+    cout << "Triplet index : " << ind << " || mu3 index : " << mu_Ind[2] << endl;
+     */
+    mu_Ind[0] = ind;
+    mu_Ind[1] = ind;
+    mu_Ind[2] = ind;
+    
     if (mu_Ind[0] != ind || mu_Ind[1] != ind || mu_Ind[2] != ind) cout << "Error : Different triplet mu indices!" << endl;
     double pt[NTOT] = {0}, eta[NTOT] = {0}, phi[NTOT] = {0};
     Fill_MuonAndTrackVariables(mu_Ind, pt, eta, phi);
@@ -950,6 +959,7 @@ Double_t ntupleClass_Control::TrackFinder(Double_t pt, Double_t eta, Double_t ph
     int n=0, m=0, badChi2=0;
     for(int g=0; g<Track_pt->size(); g++){
         if(pt == Track_pt->at(g) && eta == Track_eta->at(g) && phi == Track_phi->at(g)){
+//        if(abs(pt-Track_pt->at(g)) < 0.0001 && abs(eta-Track_eta->at(g))< 0.0001 && abs(phi-Track_phi->at(g))< 0.0001){
             n++;
             m = g;
             if(Track_normalizedChi2->at(g) == -999)
@@ -957,5 +967,60 @@ Double_t ntupleClass_Control::TrackFinder(Double_t pt, Double_t eta, Double_t ph
         }
     }
     if(n>1) cout << "Error: There is more than 1 track that matches the conditions!" << endl;
+    if(n==0) cout << "Error: There is NOT a track that matches the condition!" << endl;
     return m;
+}
+
+Double_t ntupleClass_Control::TreeFin_Angle(Int_t ind){
+    // Computes the angle between the momentum vector of the 3mu triplet (b) and the vector from the primary vertex (a)
+    double a_x = TripletVtx2_x->at(ind) - RefittedPV2_x->at(ind);
+    double a_y = TripletVtx2_y->at(ind) - RefittedPV2_y->at(ind);
+    double a_z = TripletVtx2_z->at(ind) - RefittedPV2_z->at(ind);
+    TLorentzVector b;
+    b.SetPtEtaPhiM(Triplet2_Pt->at(ind), Triplet2_Eta->at(ind), Triplet2_Phi->at(ind), mumass);
+    double b_x = b.Px();
+    double b_y = b.Py();
+    double b_z = b.Pz();
+    double a_mod = abs(FlightDistPVSV2->at(ind));
+    double b_mod = abs(b.P());
+    double cos = ((a_x*b_x)+(a_y*b_y)+(a_z*b_z))/(a_mod*b_mod);
+    double angle = acos(min(max(cos,-1.0),1.0));
+    return angle;
+}
+
+void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+    // Fills the tree branches
+    Pmu3 = MuonP(Mu02_Pt->at(mu_Ind[1]), Mu02_Eta->at(mu_Ind[1]), Mu02_Phi->at(mu_Ind[1]));
+    cLP = 0; tKink = 0; segmComp = 1; double temp[NMU_C] = {0};
+//    temp[0] = abs(dxy_mu1->at(mu_Ind[0])/ dxyErr_mu1->at(mu_Ind[0]));
+//    temp[1] = abs(dxy_mu2->at(mu_Ind[1])/ dxyErr_mu2->at(mu_Ind[1]));
+    d0sig = temp[0];
+    for (int k=0; k<NMU_C; k++){
+        //  * cLP MAX
+        //  * kink MAX
+        //  * segmComp MIN
+        //  * d0sig MIN
+        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) > cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
+        if (MuonTrkKink->at(mu[k]) > tKink) tKink = MuonTrkKink->at(mu[k]);
+        if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
+        if (temp[k] < d0sig) d0sig = temp[k];
+    }
+    fv_nC = TripletVtx2_Chi2->at(ind)/3;
+    fv_dphi3D = TreeFin_Angle(ind);
+    fv_d3Dsig = FlightDistPVSV2_Significance->at(ind);
+    tree->Fill();
+}
+
+void ntupleClass_Control::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+    // Set tree branches
+    tree->Branch("P", &Pmu3);
+    tree->Branch("cLP", &cLP);
+    tree->Branch("tKink", &tKink);
+    tree->Branch("segmComp", &segmComp);
+    tree->Branch("fv_nC", &fv_nC);
+    tree->Branch("fv_dphi3D", &fv_dphi3D);
+    tree->Branch("fv_d3Dsig", &fv_d3Dsig);
+    tree->Branch("d0sig", &d0sig);
+    tree->Branch("mindca_iso", &mindca_iso);
+    tree->Branch("trkRel", &trkRel);
 }

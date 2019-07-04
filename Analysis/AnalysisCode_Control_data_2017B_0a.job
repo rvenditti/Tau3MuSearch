@@ -1,0 +1,4 @@
+#!/bin/bash
+source login.sh
+cd code
+./AnalysisCode "data_control" "2017B_0a"

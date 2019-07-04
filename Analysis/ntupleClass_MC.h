@@ -16,6 +16,18 @@
 #include "vector"
 #include "vector"
 #include "vector"
+#include <iostream>
+#include <TH1.h>
+#include <TString.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TDirectory.h>
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TLorentzVector.h>
+
+using namespace std;
 
 class ntupleClass_MC {
 public :
@@ -40,16 +52,11 @@ public :
    vector<double>  *MuonCharge;
    vector<float>   *MuonEta;
    vector<float>   *MuonPhi;
-   vector<int>     *Muon_PdgId;
-   vector<int>     *Muon_MotherPdgId;
+   vector<int>     *Muon_simPdgId;
+   vector<int>     *Muon_simMotherPdgId;
    vector<int>     *Muon_simFlavour;
    vector<int>     *Muon_simType;
    vector<int>     *Muon_simBX;
-   vector<float>   *MuonChi2P;
-   vector<float>   *MuonChi2LocalPosition;
-   vector<float>   *MuonGlbTrackProbability;
-   vector<float>   *MuonTrkRelChi2;
-   vector<float>   *MuonTrkKink;
    vector<double>  *Muon_vx;
    vector<double>  *Muon_vy;
    vector<double>  *Muon_vz;
@@ -67,6 +74,7 @@ public :
    vector<double>  *Muon_numberOfMatchedStations;
    vector<double>  *Muon_numberOfMatches;
    vector<double>  *Muon_timeAtIpInOut;
+   vector<double>  *Muon_timeAtIpInOutErr;
    vector<double>  *Muon_GLnormChi2;
    vector<double>  *Muon_GLhitPattern_numberOfValidMuonHits;
    vector<double>  *Muon_trackerLayersWithMeasurement;
@@ -127,14 +135,17 @@ public :
    vector<double>  *Mu1_Pt;
    vector<double>  *Mu1_Eta;
    vector<double>  *Mu1_Phi;
+   vector<int>     *Mu1_NTracks03iso;
    vector<int>     *Mu1_TripletIndex;
    vector<double>  *Mu2_Pt;
    vector<double>  *Mu2_Eta;
    vector<double>  *Mu2_Phi;
+   vector<int>     *Mu2_NTracks03iso;
    vector<int>     *Mu2_TripletIndex;
    vector<double>  *Mu3_Pt;
    vector<double>  *Mu3_Eta;
    vector<double>  *Mu3_Phi;
+   vector<int>     *Mu3_NTracks03iso;
    vector<int>     *Mu3_TripletIndex;
    vector<double>  *dxy_mu1;
    vector<double>  *dxy_mu2;
@@ -170,6 +181,8 @@ public :
    vector<double>  *Triplet_Eta;
    vector<double>  *Triplet_Phi;
    vector<double>  *Triplet_Charge;
+   vector<double>  *Triplet_mindca_iso;
+   vector<double>  *Triplet_relativeiso;
    vector<double>  *RefittedPV_x;
    vector<double>  *RefittedPV_y;
    vector<double>  *RefittedPV_z;
@@ -196,16 +209,11 @@ public :
    TBranch        *b_MuonCharge;   //!
    TBranch        *b_MuonEta;   //!
    TBranch        *b_MuonPhi;   //!
-   TBranch        *b_Muon_PdgId;   //!
-   TBranch        *b_Muon_MotherPdgId;   //!
+   TBranch        *b_Muon_simPdgId;   //!
+   TBranch        *b_Muon_simMotherPdgId;   //!
    TBranch        *b_Muon_simFlavour;   //!
    TBranch        *b_Muon_simType;   //!
    TBranch        *b_Muon_simBX;   //!
-   TBranch        *b_MuonChi2P;   //!
-   TBranch        *b_MuonChi2LocalPosition;   //!
-   TBranch        *b_MuonGlbTrackProbability;   //!
-   TBranch        *b_MuonTrkRelChi2;   //!
-   TBranch        *b_MuonTrkKink;   //!
    TBranch        *b_Muon_vx;   //!
    TBranch        *b_Muon_vy;   //!
    TBranch        *b_Muon_vz;   //!
@@ -223,6 +231,7 @@ public :
    TBranch        *b_Muon_numberOfMatchedStations;   //!
    TBranch        *b_Muon_numberOfMatches;   //!
    TBranch        *b_Muon_timeAtIpInOut;   //!
+   TBranch        *b_Muon_timeAtIpInOutErr;   //!
    TBranch        *b_Muon_GLnormChi2;   //!
    TBranch        *b_Muon_GLhitPattern_numberOfValidMuonHits;   //!
    TBranch        *b_Muon_trackerLayersWithMeasurement;   //!
@@ -283,14 +292,17 @@ public :
    TBranch        *b_Mu1_Pt;   //!
    TBranch        *b_Mu1_Eta;   //!
    TBranch        *b_Mu1_Phi;   //!
+   TBranch        *b_Mu1_NTracks03iso;   //!
    TBranch        *b_Mu1_TripletIndex;   //!
    TBranch        *b_Mu2_Pt;   //!
    TBranch        *b_Mu2_Eta;   //!
    TBranch        *b_Mu2_Phi;   //!
+   TBranch        *b_Mu2_NTracks03iso;   //!
    TBranch        *b_Mu2_TripletIndex;   //!
    TBranch        *b_Mu3_Pt;   //!
    TBranch        *b_Mu3_Eta;   //!
    TBranch        *b_Mu3_Phi;   //!
+   TBranch        *b_Mu3_NTracks03iso;   //!
    TBranch        *b_Mu3_TripletIndex;   //!
    TBranch        *b_dxy_mu1;   //!
    TBranch        *b_dxy_mu2;   //!
@@ -326,6 +338,8 @@ public :
    TBranch        *b_Triplet_Eta;   //!
    TBranch        *b_Triplet_Phi;   //!
    TBranch        *b_Triplet_Charge;   //!
+   TBranch        *b_Triplet_mindca_iso;   //!
+   TBranch        *b_Triplet_relativeiso;   //!
    TBranch        *b_RefittedPV_x;   //!
    TBranch        *b_RefittedPV_y;   //!
    TBranch        *b_RefittedPV_z;   //!
@@ -345,9 +359,9 @@ public :
     virtual Bool_t   Notify();
     virtual void     Show(Long64_t entry = -1);
     // in "ntupleClass_MC.C"
-    virtual void     LoopMC_New(TString datasetName);
+    virtual void     LoopMC_New(TString type, TString datasetName);
     // in "ntupleClass_data.C"
-    virtual void     LoopData_New(TString datasetName);
+    virtual void     LoopData_New(TString type, TString datasetName);
     // in "PdgId_list.C"
     virtual void    Fill_particleId(Int_t pdgId, Int_t Idsummary[NPARTICLES]);
     virtual void    Fill_particleId_2D(Int_t pdgId, Int_t pdgIdMother, Int_t IdSummary[NPARTICLES][NPARTICLES]);
@@ -380,7 +394,7 @@ public :
     virtual void     FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hist_pt, TH1D *hist_pt_mu[NMU], TH1D *hist_eta, TH1D *hist_eta_mu[NMU], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz);
     virtual void     FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Int_t Ncut, TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS],  TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]);
     virtual void     FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, TH1D *hist_phi, TH1D *hist_mass);
-        // Functions for initialize histograms
+        // Functions for initializing histograms
     virtual void     InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake);
     virtual void     InitHistoBC(TH1D *&hMass_tripl, TH1D *&hChi2Vertex, TH2D *&hMassvsChi2, TH1F *&hMass_quad, TH1F *&hMass_quad_Zero, TH1D *&hMass_di, TH1D *&hMass_di2, TH1D *&hPtRes_BC, TH1D *hPtRes_BC_mu[NMU], TH1D *&hPtResBarrel_BC, TH1D *hPtResBarrel_BC_mu[NMU], TH1D *&hPtResEndcap_BC, TH1D *hPtResEndcap_BC_mu[NMU], TH1I *&hPdgId_Gen, TH1I *&hMotherPdgId_Gen, TH2I *&hPdgId2D_Gen);
     virtual void     InitHistoStepByStep_PdgId(TH1I *hPdgId_cut[NCUTS], TH1I *hMotherPdgId_cut[NCUTS], TH2I *hPdgId2D_cut[NCUTS]);
@@ -400,10 +414,12 @@ public :
     virtual Double_t MuonFinderGen(Int_t muind, Double_t pt, Double_t eta, Double_t phi);
     virtual Double_t MuonP(Double_t pt, Double_t eta, Double_t phi);
     virtual Float_t  QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4);
+    virtual Double_t ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]);
     virtual void     StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl);
         // Functions for the final tree
-    virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel);
-    virtual void     TreeFin_Init(TTree *&tree, UInt_t &evt, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel);
+    virtual Double_t TreeFin_Angle(Int_t ind);
+    virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
+    virtual void     TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
 };
 
 #endif
@@ -460,16 +476,11 @@ void ntupleClass_MC::Init(TTree *tree)
    MuonCharge = 0;
    MuonEta = 0;
    MuonPhi = 0;
-   Muon_PdgId = 0;
-   Muon_MotherPdgId = 0;
+   Muon_simPdgId = 0;
+   Muon_simMotherPdgId = 0;
    Muon_simFlavour = 0;
    Muon_simType = 0;
    Muon_simBX = 0;
-   MuonChi2P = 0;
-   MuonChi2LocalPosition = 0;
-   MuonGlbTrackProbability = 0;
-   MuonTrkRelChi2 = 0;
-   MuonTrkKink = 0;
    Muon_vx = 0;
    Muon_vy = 0;
    Muon_vz = 0;
@@ -487,6 +498,7 @@ void ntupleClass_MC::Init(TTree *tree)
    Muon_numberOfMatchedStations = 0;
    Muon_numberOfMatches = 0;
    Muon_timeAtIpInOut = 0;
+   Muon_timeAtIpInOutErr = 0;
    Muon_GLnormChi2 = 0;
    Muon_GLhitPattern_numberOfValidMuonHits = 0;
    Muon_trackerLayersWithMeasurement = 0;
@@ -541,14 +553,17 @@ void ntupleClass_MC::Init(TTree *tree)
    Mu1_Pt = 0;
    Mu1_Eta = 0;
    Mu1_Phi = 0;
+   Mu1_NTracks03iso = 0;
    Mu1_TripletIndex = 0;
    Mu2_Pt = 0;
    Mu2_Eta = 0;
    Mu2_Phi = 0;
+   Mu2_NTracks03iso = 0;
    Mu2_TripletIndex = 0;
    Mu3_Pt = 0;
    Mu3_Eta = 0;
    Mu3_Phi = 0;
+   Mu3_NTracks03iso = 0;
    Mu3_TripletIndex = 0;
    dxy_mu1 = 0;
    dxy_mu2 = 0;
@@ -584,6 +599,8 @@ void ntupleClass_MC::Init(TTree *tree)
    Triplet_Eta = 0;
    Triplet_Phi = 0;
    Triplet_Charge = 0;
+   Triplet_mindca_iso = 0;
+   Triplet_relativeiso = 0;
    RefittedPV_x = 0;
    RefittedPV_y = 0;
    RefittedPV_z = 0;
@@ -614,16 +631,11 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("MuonCharge", &MuonCharge, &b_MuonCharge);
    fChain->SetBranchAddress("MuonEta", &MuonEta, &b_MuonEta);
    fChain->SetBranchAddress("MuonPhi", &MuonPhi, &b_MuonPhi);
-   fChain->SetBranchAddress("Muon_PdgId", &Muon_PdgId, &b_Muon_PdgId);
-   fChain->SetBranchAddress("Muon_MotherPdgId", &Muon_MotherPdgId, &b_Muon_MotherPdgId);
+   fChain->SetBranchAddress("Muon_simPdgId", &Muon_simPdgId, &b_Muon_simPdgId);
+   fChain->SetBranchAddress("Muon_simMotherPdgId", &Muon_simMotherPdgId, &b_Muon_simMotherPdgId);
    fChain->SetBranchAddress("Muon_simFlavour", &Muon_simFlavour, &b_Muon_simFlavour);
    fChain->SetBranchAddress("Muon_simType", &Muon_simType, &b_Muon_simType);
    fChain->SetBranchAddress("Muon_simBX", &Muon_simBX, &b_Muon_simBX);
-   fChain->SetBranchAddress("MuonChi2P", &MuonChi2P, &b_MuonChi2P);
-   fChain->SetBranchAddress("MuonChi2LocalPosition", &MuonChi2LocalPosition, &b_MuonChi2LocalPosition);
-   fChain->SetBranchAddress("MuonGlbTrackProbability", &MuonGlbTrackProbability, &b_MuonGlbTrackProbability);
-   fChain->SetBranchAddress("MuonTrkRelChi2", &MuonTrkRelChi2, &b_MuonTrkRelChi2);
-   fChain->SetBranchAddress("MuonTrkKink", &MuonTrkKink, &b_MuonTrkKink);
    fChain->SetBranchAddress("Muon_vx", &Muon_vx, &b_Muon_vx);
    fChain->SetBranchAddress("Muon_vy", &Muon_vy, &b_Muon_vy);
    fChain->SetBranchAddress("Muon_vz", &Muon_vz, &b_Muon_vz);
@@ -641,6 +653,7 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Muon_numberOfMatchedStations", &Muon_numberOfMatchedStations, &b_Muon_numberOfMatchedStations);
    fChain->SetBranchAddress("Muon_numberOfMatches", &Muon_numberOfMatches, &b_Muon_numberOfMatches);
    fChain->SetBranchAddress("Muon_timeAtIpInOut", &Muon_timeAtIpInOut, &b_Muon_timeAtIpInOut);
+   fChain->SetBranchAddress("Muon_timeAtIpInOutErr", &Muon_timeAtIpInOutErr, &b_Muon_timeAtIpInOutErr);
    fChain->SetBranchAddress("Muon_GLnormChi2", &Muon_GLnormChi2, &b_Muon_GLnormChi2);
    fChain->SetBranchAddress("Muon_GLhitPattern_numberOfValidMuonHits", &Muon_GLhitPattern_numberOfValidMuonHits, &b_Muon_GLhitPattern_numberOfValidMuonHits);
    fChain->SetBranchAddress("Muon_trackerLayersWithMeasurement", &Muon_trackerLayersWithMeasurement, &b_Muon_trackerLayersWithMeasurement);
@@ -701,14 +714,17 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Mu1_Pt", &Mu1_Pt, &b_Mu1_Pt);
    fChain->SetBranchAddress("Mu1_Eta", &Mu1_Eta, &b_Mu1_Eta);
    fChain->SetBranchAddress("Mu1_Phi", &Mu1_Phi, &b_Mu1_Phi);
+   fChain->SetBranchAddress("Mu1_NTracks03iso", &Mu1_NTracks03iso, &b_Mu1_NTracks03iso);
    fChain->SetBranchAddress("Mu1_TripletIndex", &Mu1_TripletIndex, &b_Mu1_TripletIndex);
    fChain->SetBranchAddress("Mu2_Pt", &Mu2_Pt, &b_Mu2_Pt);
    fChain->SetBranchAddress("Mu2_Eta", &Mu2_Eta, &b_Mu2_Eta);
    fChain->SetBranchAddress("Mu2_Phi", &Mu2_Phi, &b_Mu2_Phi);
+   fChain->SetBranchAddress("Mu2_NTracks03iso", &Mu2_NTracks03iso, &b_Mu2_NTracks03iso);
    fChain->SetBranchAddress("Mu2_TripletIndex", &Mu2_TripletIndex, &b_Mu2_TripletIndex);
    fChain->SetBranchAddress("Mu3_Pt", &Mu3_Pt, &b_Mu3_Pt);
    fChain->SetBranchAddress("Mu3_Eta", &Mu3_Eta, &b_Mu3_Eta);
    fChain->SetBranchAddress("Mu3_Phi", &Mu3_Phi, &b_Mu3_Phi);
+   fChain->SetBranchAddress("Mu3_NTracks03iso", &Mu3_NTracks03iso, &b_Mu3_NTracks03iso);
    fChain->SetBranchAddress("Mu3_TripletIndex", &Mu3_TripletIndex, &b_Mu3_TripletIndex);
    fChain->SetBranchAddress("dxy_mu1", &dxy_mu1, &b_dxy_mu1);
    fChain->SetBranchAddress("dxy_mu2", &dxy_mu2, &b_dxy_mu2);
@@ -744,6 +760,8 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Triplet_Eta", &Triplet_Eta, &b_Triplet_Eta);
    fChain->SetBranchAddress("Triplet_Phi", &Triplet_Phi, &b_Triplet_Phi);
    fChain->SetBranchAddress("Triplet_Charge", &Triplet_Charge, &b_Triplet_Charge);
+   fChain->SetBranchAddress("Triplet_mindca_iso", &Triplet_mindca_iso, &b_Triplet_mindca_iso);
+   fChain->SetBranchAddress("Triplet_relativeiso", &Triplet_relativeiso, &b_Triplet_relativeiso);
    fChain->SetBranchAddress("RefittedPV_x", &RefittedPV_x, &b_RefittedPV_x);
    fChain->SetBranchAddress("RefittedPV_y", &RefittedPV_y, &b_RefittedPV_y);
    fChain->SetBranchAddress("RefittedPV_z", &RefittedPV_z, &b_RefittedPV_z);
