@@ -191,7 +191,7 @@ void ntupleClass_Control::Fill_ParticleIdSummary(Int_t mu[NTOT], Int_t Idsummary
     }
 }
 
-void ntupleClass_Control::FillHistoAC(Int_t ind, Int_t mu[NTOT], TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NTOT], TH1F *hmassQuad, TH1F *hmassQuad_Zero){
+void ntupleClass_Control::FillHistoAC(Int_t ind, Int_t mu[NTOT], TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NTOT], TH1F *hmassQuad, TH1F *hmassQuad_Zero, TH1D *hChi2VertexNorm, TH1D *hSegmComp, TH1D *hDeltaR, TH1D *hTrIPSign){
     // Fills the histograms after cuts
     for(int k=0; k<NMU_C; k++){
         hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu[k]));
@@ -204,6 +204,11 @@ void ntupleClass_Control::FillHistoAC(Int_t ind, Int_t mu[NTOT], TH1F *hChi2Trac
     hFlightDistvsP->Fill(FlightDistPVSV2->at(ind), TripletP);
     FillHistoDiMuMass_AC(hmassdi, dimu);
     FillHistoQuadMuMass_AC(hmassQuad, hmassQuad_Zero, mu);
+    hChi2VertexNorm->Fill(TripletVtx2_Chi2->at(ind)/3);
+    hSegmComp->Fill(Muon_segmentCompatibility->at(mu[1]));
+    double dR = TMath::Sqrt(pow((MuonEta->at(mu[0])-MuonEta->at(mu[1])),2)+pow((MuonPhi->at(mu[0])-MuonPhi->at(mu[1])),2));
+    hDeltaR->Fill(dR);
+    hTrIPSign->Fill(Track_dxyError->at(mu[2])/Track_dxy->at(mu[2]));
 }
 
 void ntupleClass_Control::FillHistoBC(TString type, Int_t ind, TH1D *hMass_tripl, TH1D *hChi2Vertex, TH2D *hMassvsChi2, TH1F *hMass_quad, TH1F *hMass_quad_Zero, TH1D *hMass_di, TH1D *hMass_di2, TH1D *hPtRes, TH1D *hPtRes_mu[NMU_C], TH1D *hPtResBarrel, TH1D *hPtResBarrel_mu[NMU_C], TH1D *hPtResEndcap, TH1D *hPtResEndcap_mu[NMU_C], Int_t IdsummaryDaughter_Gen[NPARTICLES], Int_t IdsummaryMother_Gen[NPARTICLES], Int_t Idsummary2D_Gen[NPARTICLES][NPARTICLES]){
@@ -324,15 +329,15 @@ void ntupleClass_Control::FillHistoResoPt_BC(TH1D *hPtRes, TH1D *hPtRes_mu[NMU_C
     }
 }
 
-void ntupleClass_Control::FillHistoSingleMu(Int_t mu_Ind[NTOT], Int_t mu[NTOT], TH1D *hist_pt, TH1D *hist_pt_mu[NTOT], TH1D *hist_eta, TH1D *hist_eta_mu[NTOT], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz){
+void ntupleClass_Control::FillHistoSingleMu(Int_t mu_Ind[NTOT], Int_t mu[NTOT], TH1D *hist_pt, TH1D *hist_pt_mu[NMU_C], TH1D *hist_eta, TH1D *hist_eta_mu[NMU_C], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz, TH1D *hPt_Tr, TH1D *hEta_Tr){
     // Fills histograms w/ variables of single mu
     double pt[NTOT] = {0}, eta[NTOT] = {0}, phi[NTOT] = {0};
     Fill_MuonAndTrackVariables(mu_Ind, pt, eta, phi);
-    for(int i=0; i<NTOT; i++){
+    for(int i=0; i<NMU_C; i++){
         hist_pt->Fill(pt[i]);
         hist_pt_mu[i]->Fill(pt[i]);
-        hist_eta->Fill(eta[i]);
-        hist_eta_mu[i]->Fill(eta[i]);
+        hist_eta->Fill(abs(eta[i]));
+        hist_eta_mu[i]->Fill(abs(eta[i]));
         hist_phi->Fill(phi[i]);
     }
     for(int i=0; i<NMU_C; i++){
@@ -343,11 +348,13 @@ void ntupleClass_Control::FillHistoSingleMu(Int_t mu_Ind[NTOT], Int_t mu[NTOT], 
     hVx->Fill(Track_vx->at(mu[2]));
     hVy->Fill(Track_vy->at(mu[2]));
     hVz->Fill(Track_vz->at(mu[2]));
+    hPt_Tr->Fill(Track_pt->at(mu[2]));
+    hEta_Tr->Fill(abs(Track_eta->at(mu[2])));
 }
 
-void ntupleClass_Control::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NTOT], Int_t mu[NTOT], Int_t Ncut, TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NTOT], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NTOT], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]){
+void ntupleClass_Control::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NTOT], Int_t mu[NTOT], Int_t Ncut, TH1D *hPt[NMU_C], TH1D *hPt_mu[NCUTS][NMU_C], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU_C], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hPt_Tr[NCUTS], TH1D *hEta_Tr[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]){
     // Fills the "StepByStep" histograms
-    FillHistoSingleMu(mu_Ind, mu, hPt[Ncut], hPt_mu[Ncut], hEta[Ncut], hEta_mu[Ncut], hPhi[Ncut], hVx[Ncut], hVy[Ncut], hVz[Ncut]);
+    FillHistoSingleMu(mu_Ind, mu, hPt[Ncut], hPt_mu[Ncut], hEta[Ncut], hEta_mu[Ncut], hPhi[Ncut], hVx[Ncut], hVy[Ncut], hVz[Ncut], hPt_Tr[Ncut], hEta_Tr[Ncut]);
     FillHistoTriplet(ind, hPt_tripl[Ncut], hEta_tripl[Ncut], hPhi_tripl[Ncut], hMass_tripl[Ncut]);
     if (strcmp(type, "data") != 0) Fill_ParticleIdSummary(mu, IdsummaryDaughter[Ncut], IdsummaryMother[Ncut], Idsummary2D[Ncut]);
 }
@@ -355,12 +362,12 @@ void ntupleClass_Control::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_
 void ntupleClass_Control::FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, TH1D *hist_phi, TH1D *hist_mass){
     // Fills histograms w/ variables of the triplet
     hist_pt->Fill(Triplet2_Pt->at(ind));
-    hist_eta->Fill(Triplet2_Eta->at(ind));
+    hist_eta->Fill(abs(Triplet2_Eta->at(ind)));
     hist_phi->Fill(Triplet2_Phi->at(ind));
     hist_mass->Fill(Triplet2_Mass->at(ind));
 }
 
-void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU_C], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU_C], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU_C], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake){
+void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU_C], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU_C], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU_C], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake, TH1D *&hChi2VertexNorm, TH1D *&hSegmComp, TH1D *&hDeltaR, TH1D *&hTrIPSign){
     // Init histograms for variables After Cuts
     hNtripl = new TH1I("Ntripl", "Ntripl", 5, -0.5, 4.5);
     hNtripl->GetXaxis()->SetTitle("N. triplets survived per event");
@@ -397,11 +404,11 @@ void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&
     hNMatchedStat->GetXaxis()->SetTitle("N. of matched muon stations");
     hNMatchedStat->GetYaxis()->SetTitle("N. muons");
     hNMatchedStat->Sumw2();
-    hFlightDist = new TH1D("FlightDist", "FlightDist", 90, 0., 3.);
+    hFlightDist = new TH1D("FlightDist", "FlightDist", 20, 0., 2.); // binning 0.1 cm
     hFlightDist->GetXaxis()->SetTitle("Decay length (cm)");
     hFlightDist->GetYaxis()->SetTitle("N. triplets");
     hFlightDist->Sumw2();
-    hFlightDist_Signif = new TH1D("FlightDist_Signif", "FlightDist_Signif", 100, 0., 100.);
+    hFlightDist_Signif = new TH1D("FlightDist_Signif", "FlightDist_Signif", 20, 0., 50.); // binning 2.5
     hFlightDist_Signif->GetXaxis()->SetTitle("Decay length significance");
     hFlightDist_Signif->GetYaxis()->SetTitle("N. triplets");
     hFlightDist_Signif->Sumw2();
@@ -443,6 +450,23 @@ void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&
         hPtResBarrel_mu[k]->Sumw2();
         hPtResEndcap_mu[k]->Sumw2();
     }
+    // Other control plots
+    hChi2VertexNorm = new TH1D("SV_Chi2_norm", "SV_Chi2_norm", 20, 0., 5.); // binning 0.25
+    hChi2VertexNorm->GetXaxis()->SetTitle("SV #chi^{2} norm");
+    hChi2VertexNorm->GetYaxis()->SetTitle("N. triplets");
+    hChi2VertexNorm->Sumw2();
+    hSegmComp = new TH1D("SegmComp_mu2", "SegmComp_mu2", 20, 0., 1.); // binning 0.05
+    hSegmComp->GetXaxis()->SetTitle("Segment Compatibility (#mu 2)");
+    hSegmComp->GetYaxis()->SetTitle("N. muons");
+    hSegmComp->Sumw2();
+    hDeltaR = new TH1D("DeltaR", "DeltaR", 20, 0., 0.4); // binning 0.02
+    hDeltaR->GetXaxis()->SetTitle("#Delta R muons");
+    hDeltaR->GetYaxis()->SetTitle("N. muons");
+    hDeltaR->Sumw2();
+    hTrIPSign = new TH1D("TrIPSign_track", "TrIPSign_track", 20, 0., 30); // binning 1.5
+    hTrIPSign->GetXaxis()->SetTitle("Transverse IP significance track");
+    hTrIPSign->GetYaxis()->SetTitle("N. muons");
+    hTrIPSign->Sumw2();
     // For study on fake triplets
     hPt_tripl_good = new TH1D("Pt_tripl_good", "Pt_tripl_good", 160, -0.05, 39.95); // binning 250 MeV
     hPt_tripl_fake = new TH1D("Pt_tripl_fake", "Pt_tripl_fake", 160, -0.05, 39.95); // binning 250 MeV
@@ -545,7 +569,7 @@ void ntupleClass_Control::InitHistoStepByStep_PdgId(TH1I *hPdgId_cut[NCUTS], TH1
     }
 }
 
-void ntupleClass_Control::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NTOT], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NTOT], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS]){
+void ntupleClass_Control::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU_C], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU_C], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hPt_Tr[NCUTS], TH1D *hEta_Tr[NCUTS]){
     // Init histograms StepByStep w/ variables of single mu
     for (int i=0; i<NCUTS; i++){
         // General mu histo
@@ -555,15 +579,15 @@ void ntupleClass_Control::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *h
         TString hVxName = "MuonVx_cut"; hVxName += i;
         TString hVyName = "MuonVy_cut"; hVyName += i;
         TString hVzName = "MuonVz_cut"; hVzName += i;
-        hPt[i] = new TH1D(hptName, hptName, 100, -0.05, 24.95); // binning 250 MeV
-        hEta[i] = new TH1D(hetaName, hetaName, 100, -2.5, 2.5); // binning 0.05
-        hPhi[i] = new TH1D(hphiName, hphiName, 140, -3.5, 3.5); // binning 0.05
+        hPt[i] = new TH1D(hptName, hptName, 30, 0, 30); // binning 1 GeV
+        hEta[i] = new TH1D(hetaName, hetaName, 50, 0, 2.5); // binning 0.125
+        hPhi[i] = new TH1D(hphiName, hphiName, 70, -3.5, 3.5); // binning 0.1
         hVx[i] = new TH1D(hVxName, hVxName, 300, -15., 15.); // binning 0.1
         hVy[i] = new TH1D(hVyName, hVyName, 300, -15., 15.); // binning 0.1
         hVz[i] = new TH1D(hVzName, hVzName, 1200, -60., 60.); // binning 0.1
         hPt[i]->GetXaxis()->SetTitle("p_{T} (GeV/c)");
         hPt[i]->GetYaxis()->SetTitle("N. muons");
-        hEta[i]->GetXaxis()->SetTitle("#eta");
+        hEta[i]->GetXaxis()->SetTitle("|#eta|");
         hEta[i]->GetYaxis()->SetTitle("N. muons");
         hPhi[i]->GetXaxis()->SetTitle("#Phi");
         hPhi[i]->GetYaxis()->SetTitle("N. muons");
@@ -580,20 +604,31 @@ void ntupleClass_Control::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *h
 //        hVy[i]->Sumw2();
         hVz[i]->Sumw2();
         // Single mu histo
-        for(int k=0; k<NTOT; k++){
+        for(int k=0; k<NMU_C; k++){
             TString hptMuName = "MuonPt_mu"; hptMuName += k+1; hptMuName += "_cut"; hptMuName += i;
             TString hetaMuName = "MuonEta_mu"; hetaMuName += k+1; hetaMuName += "_cut"; hetaMuName += i;
-            hPt_mu[i][k] = new TH1D(hptMuName, hptMuName, 100, -0.05, 24.95); // binning 250 MeV
-            hEta_mu[i][k] = new TH1D(hetaMuName, hetaMuName, 100, -2.5, 2.5); // binning 0.05
+            hPt_mu[i][k] = new TH1D(hptMuName, hptMuName, 30, 0, 30); // binning 1 GeV
+            hEta_mu[i][k] = new TH1D(hetaMuName, hetaMuName, 50, 0, 2.5); // binning 0.125
             hptMuName = "Mu"; hptMuName += k+1; hptMuName += " p_{T} (GeV/c)";
             hPt_mu[i][k]->GetXaxis()->SetTitle(hptMuName);
             hPt_mu[i][k]->GetYaxis()->SetTitle("N. muons");
-            hetaMuName = "Mu"; hetaMuName += k+1; hetaMuName += " #eta";
+            hetaMuName = "Mu"; hetaMuName += k+1; hetaMuName += " |#eta|";
             hEta_mu[i][k]->GetXaxis()->SetTitle(hetaMuName);
             hEta_mu[i][k]->GetYaxis()->SetTitle("N. muons");
             hPt_mu[i][k]->Sumw2();
             hEta_mu[i][k]->Sumw2();
         }
+        // Track histo
+        TString hptTrName = "TrackPt_cut"; hptTrName += i;
+        TString hEtaTrName = "TrackEta_cut"; hEtaTrName += i;
+        hPt_Tr[i] = new TH1D(hptTrName, hptTrName, 30, 0, 30); // binning 1 GeV
+        hEta_Tr[i] = new TH1D(hEtaTrName, hEtaTrName, 50, 0, 2.5); // binning 0.125
+        hPt_Tr[i]->GetXaxis()->SetTitle("Track p_{T} (GeV/c)");
+        hPt_Tr[i]->GetYaxis()->SetTitle("N. tracks");
+        hEta_Tr[i]->GetXaxis()->SetTitle("Track |#eta|");
+        hEta_Tr[i]->GetYaxis()->SetTitle("N. tracks");
+        hPt_Tr[i]->Sumw2();
+        hEta_Tr[i]->Sumw2();
     }
 }
 
@@ -604,13 +639,13 @@ void ntupleClass_Control::InitHistoStepByStep_Triplet(TH1D *hPt_tripl[NCUTS], TH
         TString hEtaTriplName = "Eta triplet_cut"; hEtaTriplName += i;
         TString hPhiTriplName = "Phi triplet_cut"; hPhiTriplName += i;
         TString hMassTriplName = "Mass triplet_cut"; hMassTriplName += i;
-        hPt_tripl[i] = new TH1D(hPtTriplName, hPtTriplName, 160, -0.05, 39.95); // binning 250 MeV
-        hEta_tripl[i] = new TH1D(hEtaTriplName, hEtaTriplName, 100, -2.5, 2.5); // binning 0.05
-        hPhi_tripl[i] = new TH1D(hPhiTriplName, hPhiTriplName, 140, -3.5, 3.5); // binning 0.05
+        hPt_tripl[i] = new TH1D(hPtTriplName, hPtTriplName, 30, 0, 30); // binning 1 GeV
+        hEta_tripl[i] = new TH1D(hEtaTriplName, hEtaTriplName, 50, 0, 2.5); // binning 0.125
+        hPhi_tripl[i] = new TH1D(hPhiTriplName, hPhiTriplName, 70, -3.5, 3.5); // binning 0.1
         hMass_tripl[i] = new TH1D(hMassTriplName, hMassTriplName, 42, 1.60, 2.02); // binning 10 MeV
         hPt_tripl[i]->GetXaxis()->SetTitle("p_{T} triplet (GeV/c)");
         hPt_tripl[i]->GetYaxis()->SetTitle("N. triplets");
-        hEta_tripl[i]->GetXaxis()->SetTitle("#eta triplet");
+        hEta_tripl[i]->GetXaxis()->SetTitle("|#eta| triplet");
         hEta_tripl[i]->GetYaxis()->SetTitle("N. triplets");
         hPhi_tripl[i]->GetXaxis()->SetTitle("#Phi triplet");
         hPhi_tripl[i]->GetYaxis()->SetTitle("N. triplets");
@@ -625,7 +660,7 @@ void ntupleClass_Control::InitHistoStepByStep_Triplet(TH1D *hPt_tripl[NCUTS], TH
 
 Bool_t ntupleClass_Control::DuplicateFinder(Double_t eta1, Double_t eta2, Double_t etaTr, Double_t phi1, Double_t phi2, Double_t phiTr, Double_t pt1, Double_t pt2, Double_t ptTr){
     // Given 2 mu and a track, the function returns true if both the mu are different from the track
-    if (abs(eta1-etaTr)>0.001 && abs(eta2-etaTr)>0.001 && abs(phi1-phiTr)>0.001 && abs(phi2-phiTr)>0.001 && abs(pt1-ptTr)>0.001 && abs(pt2-ptTr)>0.001)
+    if (abs(eta1-etaTr)>0.0001 && abs(eta2-etaTr)>0.0001 && abs(phi1-phiTr)>0.0001 && abs(phi2-phiTr)>0.0001 && abs(pt1-ptTr)>0.0001 && abs(pt2-ptTr)>0.0001)
         return true;
     else return false;
 }
