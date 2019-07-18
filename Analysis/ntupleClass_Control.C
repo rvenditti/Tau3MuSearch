@@ -228,7 +228,7 @@ void ntupleClass_Control::LoopControl(){
 // * cut[4] -> Invariant dimuon mass in (1-1.04) GeV
 // * cut[5] -> Longitudianl IP of the track w.r.t. the beam spot < 20 cm
 // * cut[6] -> Transverse IP of the track w.r.t. the beam spot < 0.3 cm
-// * cut[7] -> Invariant mass in signal (Ds) region
+// * cut[7] -> Additional requets on invariant mass
 
 void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     if (fChain == 0) return;
@@ -347,8 +347,8 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                     if (Track_dxy->at(mu[2]) < 0.3){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-                                        // CUT 7 : Null at the moment
-                                        if(Triplet2_Mass->at(j) > 1.93){
+                                        // CUT 7 : additional requests on the inv mass
+                                        if(Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01){
                                             Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
                                         }
                                     }
