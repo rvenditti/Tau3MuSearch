@@ -38,20 +38,24 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("TreeData.root"))
 
 
-process.TreeMaker = cms.EDAnalyzer("MiniAna2017Tree",
+process.TreeMakerBkg = cms.EDAnalyzer("MiniAna2017Tree",
                               isMcLabel = cms.untracked.bool(False),
+                              isAnaLabel = cms.untracked.bool(True),        
                               muonLabel=cms.InputTag("looseMuons"),
                               VertexLabel=cms.InputTag("offlinePrimaryVertices"),
                               genParticleLabel=cms.InputTag("genParticles"),
                               pileupSummary = cms.InputTag("addPileupInfo"),
                               Cand3MuLabel=cms.InputTag("ThreeMuonsVtxKalmanFit"),
+                              triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
+                              triggerSummary = cms.InputTag("hltTriggerSummaryAOD", "", "HLT"),
+                              AlgInputTag = cms.InputTag( "gtStage2Digis" )
 )
 
 
 
 
 process.Tau3MuSkim = cms.Path(process.ThreeMuonSelSeq*
-                              process.TreeMaker
+                              process.TreeMakerBkg
                      )
 
 
