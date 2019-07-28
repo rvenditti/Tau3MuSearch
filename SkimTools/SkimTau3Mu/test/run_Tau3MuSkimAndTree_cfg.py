@@ -50,12 +50,15 @@ process.TFileService = cms.Service("TFileService",
 
 process.Tree3Mu = cms.EDAnalyzer("MiniAna2017Tree",
                               isMcLabel = cms.untracked.bool(True),
-                                 isAnaLabel = cms.untracked.bool(True),
+                              isAnaLabel = cms.untracked.bool(True),
                               muonLabel=cms.InputTag("looseMuons"),
                               VertexLabel=cms.InputTag("offlinePrimaryVertices"),
                               genParticleLabel=cms.InputTag("genParticles"),
                               Cand3MuLabel=cms.InputTag("ThreeMuonsVtxKalmanFit"),
-                              pileupSummary = cms.InputTag("addPileupInfo")
+                              pileupSummary = cms.InputTag("addPileupInfo"),
+                              triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
+                              triggerSummary = cms.InputTag("hltTriggerSummaryAOD", "", "HLT"),
+                              AlgInputTag = cms.InputTag( "gtStage2Digis" )   
 )
 
 

@@ -29,7 +29,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
+#include "FWCore/Utilities/interface/EDGetToken.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include <DataFormats/MuonReco/interface/MuonFwd.h>
@@ -110,6 +110,20 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
+
+
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "L1Trigger/L1TGlobal/interface/L1TGlobalUtil.h"
+#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1TGlobalPrescalesVetosRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TGlobalPrescalesVetos.h"
 ////
 class MiniAna2017Tree : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 public:
@@ -131,6 +145,9 @@ private:
     edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > Cand3Mu_;
     edm::EDGetTokenT<edm::View<reco::GenParticle> > genParticles_;
     edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puToken_ ;
+    edm::EDGetTokenT<edm::TriggerResults> triggerToken_;
+    edm::EDGetTokenT<trigger::TriggerEvent> trigeventToken_;
+    edm::EDGetToken algToken_;
     bool isMc;
     bool isAna;
     //  edm::EDGetTokenT<edm::TriggerResults> trigResultsToken;
@@ -140,9 +157,10 @@ private:
     //  TPMERegexp* _re;
     
     edm::Service<TFileService> fs;
+    l1t::L1TGlobalUtil* gtUtil_;
     
     TH1F *hEvents;
-    
+   edm::InputTag algInputTag_;
     /*
      TH1F *hEvents_3Mu, *hEvents_MuFilter, *hEvents_DiMuonDz, * hEvent_TauCharge,  * hEvent_3MuonVtx, *  hEvent_3MuonMass, *hEvent_Valid3MuonVtx;
      
@@ -176,7 +194,8 @@ private:
     std::vector<double>  Muon_GLnormChi2, Muon_GLhitPattern_numberOfValidMuonHits,  Muon_trackerLayersWithMeasurement,  Muon_Numberofvalidpixelhits,  Muon_outerTrack_p,  Muon_outerTrack_eta,
     Muon_outerTrack_phi,  Muon_outerTrack_normalizedChi2,  Muon_outerTrack_muonStationsWithValidHits,  Muon_innerTrack_p,  Muon_innerTrack_eta,  Muon_innerTrack_phi,  Muon_innerTrack_normalizedChi2,  Muon_QInnerOuter;
     
-  std::vector<double>   Muon_combinedQuality_updatedSta,  Muon_combinedQuality_trkKink,  Muon_combinedQuality_glbKink,  Muon_combinedQuality_trkRelChi2,  Muon_combinedQuality_staRelChi2,  Muon_combinedQuality_chi2LocalPosition,  Muon_combinedQuality_chi2LocalMomentum,  Muon_combinedQuality_localDistance,  Muon_combinedQuality_globalDeltaEtaPhi,  Muon_combinedQuality_tightMatch,  Muon_combinedQuality_glbTrackProbability,  Muon_calEnergy_em,  Muon_calEnergy_emS9,  Muon_calEnergy_emS25,  Muon_calEnergy_had,  Muon_calEnergy_hadS9,  Muon_segmentCompatibility,  Muon_caloCompatibility,  Muon_ptErrOverPt, Muon_BestTrackPt,  Muon_BestTrackPtErr;
+  std::vector<double>   Muon_combinedQuality_updatedSta,  Muon_combinedQuality_trkKink,  Muon_combinedQuality_glbKink,  Muon_combinedQuality_trkRelChi2,  Muon_combinedQuality_staRelChi2,  Muon_combinedQuality_chi2LocalPosition,  Muon_combinedQuality_chi2LocalMomentum,  Muon_combinedQuality_localDistance,  Muon_combinedQuality_globalDeltaEtaPhi,  Muon_combinedQuality_tightMatch,  Muon_combinedQuality_glbTrackProbability,  Muon_calEnergy_em,  Muon_calEnergy_emS9,  Muon_calEnergy_emS25,  Muon_calEnergy_had,  Muon_calEnergy_hadS9,  Muon_segmentCompatibility,  Muon_caloCompatibility,  Muon_ptErrOverPt, Muon_BestTrackPt,  Muon_BestTrackPtErr, Muon_BestTrackEta,  Muon_BestTrackEtaErr,  Muon_BestTrackPhi,  Muon_BestTrackPhiErr;
+
   std::vector<int>  Muon_simPdgId, Muon_simMotherPdgId, Muon_simFlavour,  Muon_simType, Muon_simBX, Muon_simTpEvent, Muon_simMatchQuality;
     std::vector<double>  Mu1_Pt,  Mu1_Eta,  Mu1_Phi,  Mu2_Pt,  Mu2_Eta,  Mu2_Phi,  Mu3_Pt,  Mu3_Eta,  Mu3_Phi, GenMatchMu1_SimPt, GenMatchMu2_SimPt, GenMatchMu3_SimPt,GenMatchMu1_SimEta, GenMatchMu2_SimEta, GenMatchMu3_SimEta, GenMatchMu1_SimPhi, GenMatchMu2_SimPhi, GenMatchMu3_SimPhi,  GenMatchMu1_Pt,  GenMatchMu2_Pt,  GenMatchMu3_Pt,  GenMatchMu1_Eta,  GenMatchMu2_Eta,  GenMatchMu3_Eta,  GenMatchMu1_Phi,  GenMatchMu2_Phi,  GenMatchMu3_Phi;
     
@@ -210,7 +229,12 @@ private:
     double PV_x,  PV_y,  PV_z,  PV_NTracks;
     
     uint  evt, run, lumi, puN;
-    std::vector<std::string> _hltpaths;
+  std::vector<string>  Trigger_l1name;
+  std::vector<int> Trigger_l1decision;
+  std::vector<int> Trigger_l1prescale;
+
+  std::vector<string>  Trigger_hltname;
+  std::vector<int> Trigger_hltdecision;
     //SyncTree
     /*  TTree*      SyncTree_;
      std::vector<float>  allmuons_pt, leadmuon_pt, leadmuon_phi, leadmuon_eta;
@@ -222,6 +246,7 @@ private:
     
     
     MiniAna2017Tree::MiniAna2017Tree(const edm::ParameterSet& iConfig){
+        edm::InputTag algInputTag_;
         isMc = iConfig.getUntrackedParameter<bool>("isMcLabel");
 	isAna = iConfig.getUntrackedParameter<bool>("isAnaLabel");
         muons_ = consumes<edm::View<pat::Muon> >  (iConfig.getParameter<edm::InputTag>("muonLabel"));
@@ -230,6 +255,10 @@ private:
         genParticles_ = consumes<edm::View<reco::GenParticle>  > (iConfig.getParameter<edm::InputTag>("genParticleLabel"));
         Cand3Mu_ = consumes<edm::View<reco::CompositeCandidate> > (iConfig.getParameter<edm::InputTag>("Cand3MuLabel"));
         puToken_ =   consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("pileupSummary"));
+	triggerToken_ = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
+	trigeventToken_ = consumes<trigger::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerSummary"));
+	algToken_ = consumes<BXVector<GlobalAlgBlk>>(iConfig.getParameter<edm::InputTag>("AlgInputTag"));
+	gtUtil_ = new l1t::L1TGlobalUtil(iConfig, consumesCollector(), *this, algInputTag_, algInputTag_);
         //  _hltInputTag(iConfig.getParameter<edm::InputTag>("hltInputTag")),
         //tauToken_(consumes(iConfig.getParameter("taus"))),
         //metToken_(consumes(iConfig.getParameter("mets")))
@@ -289,7 +318,8 @@ private:
     
     
     void MiniAna2017Tree::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup, const edm::Event& iEvent) {
-        edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
+      /*  
+      edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
         edm::InputTag trigResultsTag("TriggerResults"," ","HLT"); //make sure have correct process on MC
         iEvent.getByLabel(trigResultsTag,trigResults);
         
@@ -304,7 +334,7 @@ private:
             std::cout << "Error! HLT config extraction with process name " << trigResultsTag.process() << " failed"<<std::endl;
             // In this case, all access methods will return empty values!
         }
-        
+      */
     }
     
     
@@ -339,47 +369,79 @@ private:
         edm::Handle<edm::View<reco::Track> > trackCollection;
         iEvent.getByToken(trackToken_, trackCollection);
         
-        edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
-        edm::InputTag trigResultsTag("TriggerResults"," ","HLT"); //make sure have correct process on MC
-        iEvent.getByLabel(trigResultsTag,trigResults);
-        // const edm::TriggerNames& trigNames = iEvent.triggerNames(*trigResults);
-        
-        
-    /*
-        cout <<"Successfully obtained " << trigResultsTag<<"  "<< trigResultsTag.process()<<endl;
-        const std::vector<std::string>& pathList = hltConfig.triggerNames();
-        cout <<"TriggerPaths size=" << pathList.size()<<endl;
-        for (std::vector<std::string>::const_iterator it = pathList.begin(); it != pathList.end(); ++it) {
-            cout<<"HLT path: "<<*it<<endl;
-            //if (_hltPathsOfInterest.size()) {
-            // int nmatch = 0;
-            for (std::vector<std::string>::const_iterator kt = _hltPathsOfInterest.begin();
-             kt != _hltPathsOfInterest.end(); ++kt) {
-             nmatch += TPRegexp(*kt).Match(*it);
-             }
-            //if (!nmatch) continue;
-            //      }
-            _hltpaths.push_back(*it);
-        }
-        */
-        
-        
-        
-        edm::ESHandle<TransientTrackBuilder> theTransientTrackBuilder;
+	Handle<TriggerResults> triggerResults;
+	iEvent.getByToken(triggerToken_, triggerResults);
+
+	Handle<trigger::TriggerEvent> triggerSummary;
+	iEvent.getByToken(trigeventToken_, triggerSummary);
+
+	Handle<BXVector<GlobalAlgBlk>> alg;
+	iEvent.getByToken(algToken_,alg);
+
+	edm::ESHandle<TransientTrackBuilder> theTransientTrackBuilder;
         iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder);
         theTransientTrackBuilder_ = theTransientTrackBuilder.product();
-        
-        
+
         hEvents->Fill(1);
+
+
+	///////////////Fill Trigger Vars, L1 and HLT///////////////
+
+	gtUtil_->retrieveL1(iEvent, iSetup, algToken_);
+	const vector<pair<string, bool> > initialDecisions = gtUtil_->decisionsInitial();
+
+	if (!iEvent.isRealData())
+	  {
+	    for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) 
+	      {
+		string l1tName = (initialDecisions.at(i_l1t)).first;
+		if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos){
+		  Trigger_l1name.push_back( l1tName );
+		  Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
+		  Trigger_l1prescale.push_back( 1 );
+		}
+	      }
+	  }
+	else
+	  {
+	    ESHandle<L1TGlobalPrescalesVetos> psAndVetos;
+	    auto psRcd = iSetup.tryToGet<L1TGlobalPrescalesVetosRcd>();
+	    if(psRcd) psRcd->get(psAndVetos);
+	    int columnN= gtUtil_->prescaleColumn();
+	    for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) {
+	      string l1tName = (initialDecisions.at(i_l1t)).first;
+	      if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos){
+		//cout<<"L1Seed="<<l1tName<<" decision="<<initialDecisions.at(i_l1t).second<<" prescale="<<(psAndVetos->prescale_table_)[columnN][i_l1t]<<endl;
+		Trigger_l1name.push_back( l1tName );
+		Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
+		Trigger_l1prescale.push_back( (psAndVetos->prescale_table_)[columnN][i_l1t]);
+	      }
+	    }
+	  }
         
         
+        
+            
+	const TriggerNames &triggerNames = iEvent.triggerNames( *triggerResults );
+	for (size_t i_hlt = 0; i_hlt != triggerResults->size(); ++i_hlt){
+	    string hltName = triggerNames.triggerName(i_hlt);
+	    if(hltName.find("HLT_DoubleMu") != string::npos){
+	      //cout<<" HLTPath="<<hltName<<" isPassed="<<triggerResults->accept(i_hlt )<<endl;
+	      Trigger_hltname.push_back(hltName);
+	      Trigger_hltdecision.push_back(triggerResults->accept(i_hlt ));
+	    }
+	}
+    
+	///////////////Fill Trigger Vars, L1 and HLT///////////////
+        
+	///////////////Fill GenParticles///////////////
         if(isMc){
             uint j=0;
             uint ngenP=genParticles->size();
             std::vector<int> genPidx;
             //uint tauRaw=-999; //int DsRaw=-999;
             
-            cout<<"****************GenLevel Info Begin********************"<<endl;
+	    //            cout<<"****************GenLevel Info Begin********************"<<endl;
             for(edm::View<reco::GenParticle>::const_iterator gp=genParticles->begin(); gp!=genParticles->end(), j<ngenP; ++gp , ++j){
                 //if(fabs(gp->pdgId())==15) tauRaw = j;
                 
@@ -394,10 +456,7 @@ private:
                     }
                     for (uint i=0; i<gp->numberOfMothers();i++){
                         if(fabs(gp->mother(i)->pdgId())==15) {
-                            /*hGenMuonPt->Fill(gp->p());
-                             hGenMuonEta->Fill(gp->eta());
-                             hGenTauPt->Fill(gp->mother(i)->pt());*/
-                            //std::cout<<j<<"--genMu pt="<<gp->pt()<<" eta="<<gp->eta()<<" phi="<<gp->phi()<<" pdgID="<<gp->pdgId()<<" tau pt="<<gp->mother(i)->pt()<<" mu vtx_x="<<gp->vx()<<" mu vtx_y="<<gp->vy()<<" mu vtx_z="<<gp->vz()<<endl;
+			  //std::cout<<j<<"--genMu pt="<<gp->pt()<<" eta="<<gp->eta()<<" phi="<<gp->phi()<<" pdgID="<<gp->pdgId()<<" tau pt="<<gp->mother(i)->pt()<<" mu vtx_x="<<gp->vx()<<" mu vtx_y="<<gp->vy()<<" mu vtx_z="<<gp->vz()<<endl;
                             //cout<<tauRaw<<"--mother pdgID="<<gp->mother(i)->pdgId()<<" mother vtx_x="<<gp->mother(i)->vx()<<" vy="<<gp->mother(i)->vy()<<" vz="<<gp->mother(i)->vz()<<endl;
                             //cout<<"TauMother pdgId="<<gp->mother(i)->mother(0)->pdgId()<<" vx="<<gp->mother(i)->mother(0)->vx()<<" vy="<<gp->mother(i)->mother(0)->vy()<<" vz="<<gp->mother(i)->mother(0)->vz()<<endl;
                             genPidx.push_back(j);
@@ -406,16 +465,9 @@ private:
                 }
             }
             
-            /*
-             if(genPidx.size()==3){
-             float genDR12=dR((*genParticles)[genPidx[0]].eta(), (*genParticles)[genPidx[1]].eta(), (*genParticles)[genPidx[0]].phi(), (*genParticles)[genPidx[1]].phi());
-             float genDR23=dR((*genParticles)[genPidx[0]].eta(), (*genParticles)[genPidx[2]].eta(), (*genParticles)[genPidx[0]].phi(), (*genParticles)[genPidx[2]].phi());
-             float genDR13=dR((*genParticles)[genPidx[1]].eta(), (*genParticles)[genPidx[2]].eta(), (*genParticles)[genPidx[1]].phi(), (*genParticles)[genPidx[2]].phi());
-             //cout<<"--genDR12="<<genDR12<<" genDR23="<<genDR23<<" genDR13="<<genDR13<<endl;
-             }*/
-            cout<<"****************GenLevel Info End ********************"<<endl;
+	    //            cout<<"****************GenLevel Info End ********************"<<endl;
         }
-        
+        ///////////////Fill GenParticles///////////////
         
         //Primary Vtx
         std::vector<reco::TransientTrack> pvTracks_original;
@@ -505,7 +557,7 @@ private:
                 //    cout<<TripletIndex<<"Triplet Mass:"<<TauIt->mass()<<" pt="<<TauIt->pt()<<" vtx.x="<<TauIt->vx()<<" vtx x="<<TripletVtx.x()<<" chi2="<<TauIt->vertexChi2()<<" ndof="<<TauIt->vertexNdof()<<endl;
                 // cout<<TripletIndex<<"--Muon 1 pt="<<mu1->pt()<<" Muon2 pt="<<mu2->pt()<<" Mu3 pt="<<mu3->pt()<<" "<<endl;
                 if( isMatch1 && isMatch2 && isMatch3) {
-                    cout<<" Matched Triplets mass="<<TauIt->mass()<<endl;
+		  //cout<<" Matched Triplets mass="<<TauIt->mass()<<endl;
                     GenMatchMu1_SimPt.push_back(mu1->simPt());
                     GenMatchMu2_SimPt.push_back(mu2->simPt());
                     GenMatchMu3_SimPt.push_back(mu3->simPt());
@@ -616,11 +668,16 @@ private:
                   double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
                   double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
                   double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
-                  if (dR1 == 0 || dR2 == 0 || dR3 == 0) { cout<<"Skip muon track"<<endl; continue;}
+                  if (dR1 == 0 || dR2 == 0 || dR3 == 0) { 
+		    //cout<<"Skip muon track"<<endl; 
+		    continue;}
                   double dz = abs(track.dz(SVertexPoint));
                   double dxy = abs(track.dxy(SVertexPoint));
                   double dca_fv = sqrt(dz*dz+dxy*dxy);
-                  if(dca_fv<mindist && dca_fv>0) { cout<<"dca_fv"<<dca_fv<<endl; mindist = dca_fv;}
+                  if(dca_fv<mindist && dca_fv>0) { 
+		    //cout<<"dca_fv"<<dca_fv<<endl; 
+		    mindist = dca_fv;
+		  }
                   //for eack track having pt>1, excluded the muon tracks,
                   //for each muon in the triplet, if deltaR<0.3 and the DCA is smaller than 1 mm
                   //the pt of the track is added -> I will take the largest total pt from the three muons
@@ -873,6 +930,12 @@ private:
             Muon_ptErrOverPt.push_back( (mu->muonBestTrack()->ptError()/mu->muonBestTrack()->pt()) );
 	    Muon_BestTrackPt.push_back( mu->muonBestTrack()->pt() );
 	    Muon_BestTrackPtErr.push_back( mu->muonBestTrack()->ptError() );
+
+	    Muon_BestTrackEta.push_back( mu->muonBestTrack()->eta() );
+	    Muon_BestTrackEtaErr.push_back( mu->muonBestTrack()->etaError() );
+
+	    Muon_BestTrackPhi.push_back( mu->muonBestTrack()->phi() );
+	    Muon_BestTrackPhiErr.push_back( mu->muonBestTrack()->phiError() );
             
             const reco::MuonIsolation Iso03 = mu->isolationR03();
             const reco::MuonIsolation Iso05 = mu->isolationR05();
@@ -1096,6 +1159,14 @@ private:
         Muon_ptErrOverPt.clear();
     	Muon_BestTrackPt.clear();
 	Muon_BestTrackPtErr.clear();
+
+	Muon_BestTrackEta.clear();
+	Muon_BestTrackEtaErr.clear();
+
+	Muon_BestTrackPhi.clear();
+	Muon_BestTrackPhiErr.clear();
+
+
         Muon_emEt03.clear();
         Muon_hadEt03.clear();
         Muon_nJets03.clear();
@@ -1211,6 +1282,16 @@ private:
         FlightDistPVSV_Significance.clear();
         FlightDistPVSV_chi2.clear();
         PVCollection_Size =0;
+
+        Trigger_l1name.clear();
+        Trigger_l1decision.clear();
+        Trigger_l1prescale.clear();
+
+	Trigger_hltname.clear();
+	Trigger_hltdecision.clear();
+
+
+
     }
     
     
@@ -1220,60 +1301,20 @@ private:
     {
         
         hEvents = fs->make<TH1F>("hEvents","hEvents",10,0,10);
-        /*
-         hEvents_MuFilter = fs->make<TH1F>("hEvents_MuFilter","hEvents_MuFilter",10,0,10);
-         hEvents_DiMuonDz = fs->make<TH1F>("hEvents_DiMuonDz","hEvents_DiMuonDz",10,0,10);
-         hEvents_3Mu = fs->make<TH1F>("hEvents_3Mu","hEvents_3Mu",10,0,10);
-         hEvent_TauCharge = fs->make<TH1F>("hEvent_TauCharge", "hEvent_TauCharge",10,0,10);
-         hEvent_Valid3MuonVtx= fs->make<TH1F>("hEvent_Valid3MuonVtx", "hEvent_Valid3MuonVtx", 10, 0, 10);
-         hEvent_3MuonVtx = fs->make<TH1F>("hEvents_3MuonVtx","hEvents_3MuonVtx",10,0,10);
-         hEvent_3MuonMass = fs->make<TH1F>("hEvents_3MuonMass","hEvents_3MuonMass",10,0,10);
-         
-         
-         hGenMuonPt = fs->make<TH1F>("hGenMuonPt","hGenMuonPt",200,0,100);
-         hGenMuonEta = fs->make<TH1F>("hGenMuonEta","hGenMuonEta",60,-3,3);
-         hGenTauPt = fs->make<TH1F>("hGenTauPt","hGenTauPt",200,0,100);
-         hMuonPt = fs->make<TH1F>("hMuonPt","hMuonPt",200,0,100);
-         
-         hGlobalMuonPt = fs->make<TH1F>("hGlobalMuonPt","hMuonPt",200,0,100);
-         hSoftMuonPt = fs->make<TH1F>("hSoftMuonPt","hMuonPt",200,0,100);
-         hTrackerMuonPt = fs->make<TH1F>("hTrackerMuonPt","Tracker Muon Pt",200,0,100);
-         hLooseMuonPt = fs->make<TH1F>("hLooseMuonPt","hMuonPt",200,0,100);
-         
-         hMuonP = fs->make<TH1F>("hMuonP","hMuonPt",200,0,100);
-         hMuonEta = fs->make<TH1F>("hMuonEta","hMuonEta",60,-3,3);
-         
-         hTrackerMuonEta = fs->make<TH1F>("hTrackerMuonEta","Muon Eta",60,-3,3);
-         hSoftMuonEta = fs->make<TH1F>("hSoftMuonEta","Muon Eta",60,-3,3);
-         hGlobalMuonEta = fs->make<TH1F>("hGlobalMuonEta","Muon Eta",60,-3,3);
-         hLooseMuonEta = fs->make<TH1F>("hLooseMuonEta","Muon Eta",60,-3,3);
-         
-         hGoodMuSize = fs->make<TH1F>("hGoodMuSize","Number of selected muons per event", 20,0,20);
-         hMuonSize_GoodDiMu = fs->make<TH1F>("hMuonSize_GoodDiMu","Number of selected muons per event", 20,0,20);
-         hMuonNumberOfValidHits = fs->make<TH1F>("hMuonNumberOfValidHits","hMuonNumberOfValidHits",50,0,50);
-         hMuonDB= fs->make<TH1F>("hMuonDB","Muon Impact Parameter",100,-5,5);
-         hMuonTime = fs->make<TH1F>("hMuonTime","Time of arrival at the IP",100,-0.005,0.005);
-         hMuonTimeErr = fs->make<TH1F>("hMuonTimeErr","Error on Time of arrival at the IP",100,-0.005,0.005);
-         hMuonTimeVsP = fs->make<TH2F>("hMuonTimeVsP","muon time vs p",100,-0.005,0.005, 500, 0, 50);
-         hDiMuonDz = fs->make<TH1F>("hDiMuonDz","Distance in z between 2 muon pairs",200,0,10);
-         hDiMuonDR = fs->make<TH1F>("hDiMuonDR","Distance in Eta,Phi between 2 muon pairs",200,0,10);
-         hThreeMuonInvMass = fs->make<TH1F>("hThreeMuonInvMass","Invariant mass of the 3Muons Candidate",400,0,10);
-         hThreeMuonCharge = fs->make<TH1F>("hThreeMuonCharge", "Charge of the 3Muons Candidate", 6, -3.25, 3.25);
-         hVtxSize = fs->make<TH1F>("hVtxSize", "Number of ReFitted 3Muon Vtx",200, 0, 200);
-         
-         
-         hTau_vFit_chi2 =  fs->make<TH1F>("hTau_vFit_chi2", "hTau_vFit_chi2", 100, 0, 100);
-         h3MuonMassVtxFit = fs->make<TH1F>("h3MuonMassVtxFit", "h3MuonMassVtxFit", 100, 0, 50);
-         */
         
         tree_ = fs->make<TTree>("ntuple","LFVTau ntuple");
-        
-        
         tree_->Branch("evt", &evt);
         tree_->Branch("run", &run);
         tree_->Branch("lumi", &lumi);
         tree_->Branch("nPileUpInt", &puN);
         
+	tree_->Branch("Trigger_l1name", &Trigger_l1name);
+        tree_->Branch("Trigger_l1decision",&Trigger_l1decision);
+	tree_->Branch("Trigger_l1prescale",&Trigger_l1prescale);
+
+	tree_->Branch("Trigger_hltname",&Trigger_hltname);
+	tree_->Branch("Trigger_hltdecision",&Trigger_hltdecision);
+
         tree_->Branch("GenParticle_PdgId", &GenParticle_PdgId);
         tree_->Branch("GenParticle_Pt", &GenParticle_Pt);
         tree_->Branch("GenParticle_Eta", &GenParticle_Eta);
@@ -1364,7 +1405,11 @@ private:
         tree_->Branch("Muon_ptErrOverPt", &Muon_ptErrOverPt);
 	tree_->Branch("Muon_BestTrackPt", &Muon_BestTrackPt);
         tree_->Branch("Muon_BestTrackPtErr", &Muon_BestTrackPtErr);
-        
+        tree_->Branch("Muon_BestTrackEta", &Muon_BestTrackEta);
+	tree_->Branch("Muon_BestTrackEtaErr", &Muon_BestTrackEtaErr);
+	tree_->Branch("Muon_BestTrackPhi", &Muon_BestTrackPhi);
+	tree_->Branch("Muon_BestTrackPhiErr", &Muon_BestTrackPhiErr);
+
         tree_->Branch("Muon_emEt03", &Muon_emEt03);
         tree_->Branch("Muon_hadEt03", &Muon_hadEt03);
         tree_->Branch("Muon_nJets03", &Muon_nJets03);
