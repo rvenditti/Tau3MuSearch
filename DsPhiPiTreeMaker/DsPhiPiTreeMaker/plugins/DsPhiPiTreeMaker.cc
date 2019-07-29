@@ -23,6 +23,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -98,13 +99,24 @@
 #include "FWCore/Common/interface/TriggerResultsByName.h"
 
 #include "PhysicsTools/PatUtils/interface/TriggerHelper.h"
-#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "DataFormats/PatCandidates/interface/TriggerFilter.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "DataFormats/Candidate/interface/OverlapChecker.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
+
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "L1Trigger/L1TGlobal/interface/L1TGlobalUtil.h"
+#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1TGlobalPrescalesVetosRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TGlobalPrescalesVetos.h"
 OverlapChecker overlap;
 
 ////
@@ -114,6 +126,8 @@ public:
     ~DsPhiPiTreeMaker();
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     float dR(float eta1, float eta2, float phi1, float phi2);
+    float dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects);
+    float dRtriggerMatchTrk(reco::Track Trk, trigger::TriggerObjectCollection triggerObjects);
     void beginRun(edm::Run const &, edm::EventSetup const&, edm::Event const&);
     
     
@@ -130,6 +144,9 @@ private:
     edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > DiMuon_;
     edm::EDGetTokenT<edm::View<reco::GenParticle> > genParticles_;
     edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puToken_ ;
+    edm::EDGetTokenT<edm::TriggerResults> triggerToken_;
+    edm::EDGetTokenT<trigger::TriggerEvent> trigeventToken_;
+    edm::EDGetToken algToken_;
     bool isMc;
     bool is3Mu;
     //  edm::EDGetTokenT<edm::TriggerResults> trigResultsToken;
@@ -139,7 +156,7 @@ private:
     //  TPMERegexp* _re;
     
     edm::Service<TFileService> fs;
-    
+    l1t::L1TGlobalUtil* gtUtil_; 
     TH1F *hEvents;
     
     /*
@@ -159,8 +176,8 @@ private:
     std::vector<float>  MuonPt, MuonEta, MuonPhi, MuonChi2P, MuonChi2LocalPosition, MuonGlbTrackProbability, MuonTrkRelChi2, MuonTrkKink;
     std::vector<double> MuonEnergy,  MuonCharge;
     
-    std::vector<int> GenParticle_PdgId, GenParticle_MotherPdgId;
-    std::vector<double> GenParticle_Pt, GenParticle_Eta,    GenParticle_Phi;
+    std::vector<int> GenParticle_PdgId, GenParticle_MotherPdgId, GenParticle_isDs, GenParticle_isB, GenParticle_isBdecay;
+    std::vector<double> GenParticle_Pt, GenParticle_Eta, GenParticle_Phi;
     
     //Vtx position
     std::vector<double>  Muon_vx,  Muon_vy,  Muon_vz;
@@ -184,6 +201,8 @@ private:
     
     std::vector<double>  Mu01_Pt,  Mu01_Eta,  Mu01_Phi,  Mu02_Pt,  Mu02_Eta,  Mu02_Phi, GenMatchMu01_SimPt, GenMatchMu02_SimPt, GenMatchMu01_SimEta, GenMatchMu02_SimEta, GenMatchMu01_SimPhi, GenMatchMu02_SimPhi, GenMatchMu01_Pt, GenMatchMu02_Pt, GenMatchMu01_Eta,  GenMatchMu02_Eta, GenMatchMu01_Phi,  GenMatchMu02_Phi,  GenMatchMu03_Phi;
 
+    std::vector<float> Mu01_dRtriggerMatch, Mu02_dRtriggerMatch, Tr_dRtriggerMatch;
+
     std::vector<double>  Tr_Pt, Tr_Phi, Tr_Eta;
 
     std::vector<double>     Muon_emEt03, Muon_hadEt03, Muon_nJets03, Muon_nTracks03, Muon_sumPt03, Muon_emEt05,    Muon_hadEt05, Muon_nJets05, Muon_nTracks05, Muon_sumPt05,
@@ -191,13 +210,14 @@ private:
     //  Mu1_SimPt,  Mu1_SimEta,  Mu1_SimPhi,  Mu2_SimPt,  Mu2_SimEta,  Mu2_SimPhi, Mu3_SimPt,  Mu3_SimEta,  Mu3_SimPhi,
     
     //std::vector<int>  Mu1_TripletIndex,  Mu2_TripletIndex,  Mu3_TripletIndex;
-  std::vector<int>  Mu01_TripletIndex,  Mu02_TripletIndex, Tr_TripletIndex, selectedTripletsIndex;
-    
-  int TripletCollectionSize, TripletCollectionSize2, PVCollection_Size, MuonCollectionSize, SelectedTripletsSize;
+    std::vector<int>  Mu01_TripletIndex,  Mu02_TripletIndex, Tr_TripletIndex, selectedTripletsIndex;
+    std::vector<double>     Triplet_mindca_iso, Triplet_relativeiso;
+ 
+    int TripletCollectionSize, TripletCollectionSize2, PVCollection_Size, MuonCollectionSize, SelectedTripletsSize;
     std::vector<double>  TripletVtx_x,  TripletVtx_y,  TripletVtx_z,  TripletVtx_Chi2,  TripletVtx_NDOF,  Triplet_Mass,  Triplet_Pt,  Triplet_Eta,  Triplet_Phi, Triplet_Charge;
     std::vector<double>  TripletVtx2_x,  TripletVtx2_y,  TripletVtx2_z,  TripletVtx2_Chi2,  TripletVtx2_NDOF,  Triplet2_Mass,  Triplet2_Pt,  Triplet2_Eta,  Triplet2_Phi, Triplet2_Charge;
     
-  std::vector<double>  dxy_mu1,  dxy_mu2,  dxy_mu3,  dxyErr_mu1,  dxyErr_mu2,  dxyErr_mu3;
+    std::vector<double>  dxy_mu1,  dxy_mu2,  dxy_mu3,  dxyErr_mu1,  dxyErr_mu2,  dxyErr_mu3;
     
     std::vector<double>  RefittedPV_x, RefittedPV2_x;
     std::vector<double>  RefittedPV_y, RefittedPV2_y;
@@ -215,7 +235,12 @@ private:
     double PV_x,  PV_y,  PV_z,  PV_NTracks;
     
     uint  evt, run, lumi, puN;
-    std::vector<std::string> _hltpaths;
+    std::vector<string>  Trigger_l1name;
+    std::vector<int> Trigger_l1decision;
+    std::vector<int> Trigger_l1prescale;
+	
+    std::vector<string>  Trigger_hltname;
+    std::vector<int> Trigger_hltdecision;
     //SyncTree
     /*  TTree*      SyncTree_;
      std::vector<float>  allmuons_pt, leadmuon_pt, leadmuon_phi, leadmuon_eta;
@@ -227,6 +252,7 @@ private:
     
     
     DsPhiPiTreeMaker::DsPhiPiTreeMaker(const edm::ParameterSet& iConfig){
+        edm::InputTag algInputTag_;
         isMc = iConfig.getUntrackedParameter<bool>("isMcLabel");
         //is3Mu = iConfig.getUntrackedParameter<bool>("is3MuLabel");
         muons_ = consumes<edm::View<pat::Muon> >  (iConfig.getParameter<edm::InputTag>("muonLabel"));
@@ -237,7 +263,10 @@ private:
         Cand2Mu1Track_ = consumes<edm::View<reco::CompositeCandidate> > (iConfig.getParameter<edm::InputTag>("Cand2Mu1TrackLabel"));
 	DiMuon_ = consumes<edm::View<reco::CompositeCandidate> > (iConfig.getParameter<edm::InputTag>("DiMuonLabel"));
         puToken_ =   consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("pileupSummary"));
-        //  _hltInputTag(iConfig.getParameter<edm::InputTag>("hltInputTag")),
+	triggerToken_ = consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerResults"));
+	trigeventToken_ = consumes<trigger::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerSummary"));
+	algToken_ = consumes<BXVector<GlobalAlgBlk>>(iConfig.getParameter<edm::InputTag>("AlgInputTag"));
+	gtUtil_ = new l1t::L1TGlobalUtil(iConfig, consumesCollector(), *this, algInputTag_, algInputTag_);
         //tauToken_(consumes(iConfig.getParameter("taus"))),
         //metToken_(consumes(iConfig.getParameter("mets")))
         //tree_(0);
@@ -256,6 +285,26 @@ private:
         float deta=(eta1-eta2);
         float deltaR= TMath::Sqrt(dphi*dphi + deta*deta);
         return deltaR;
+    }
+
+    float DsPhiPiTreeMaker::dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects) {
+        float dRmin = 1.;
+        for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+            float deltaR = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), m.eta(), m.phi()));
+            //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));
+            if (deltaR < dRmin) dRmin = deltaR;
+        }
+        return dRmin;
+    }
+    
+    float DsPhiPiTreeMaker::dRtriggerMatchTrk(reco::Track Trk, trigger::TriggerObjectCollection triggerObjects) {
+        float dRmin = 1.;
+        for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+            float deltaR = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), Trk.eta(), Trk.phi()));
+            //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));
+            if (deltaR < dRmin) dRmin = deltaR;
+        }
+        return dRmin;
     }
     
     bool isGoodTrack(const reco::Track &track) {
@@ -296,10 +345,10 @@ private:
     
     
     void DsPhiPiTreeMaker::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup, const edm::Event& iEvent) {
-        edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
-        edm::InputTag trigResultsTag("TriggerResults"," ","HLT"); //make sure have correct process on MC
-        iEvent.getByLabel(trigResultsTag,trigResults);
-        
+        //edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
+        //edm::InputTag trigResultsTag("TriggerResults"," ","HLT"); //make sure have correct process on MC
+        //iEvent.getByLabel(trigResultsTag,trigResults);
+        /*
         bool changed = true;
         if (hltConfig.init(iRun, iSetup, trigResultsTag.process(), changed)) {
             // if init returns TRUE, initialisation has succeeded!
@@ -311,7 +360,7 @@ private:
             std::cout << "Error! HLT config extraction with process name " << trigResultsTag.process() << " failed"<<std::endl;
             // In this case, all access methods will return empty values!
         }
-        
+       */ 
     }
     
     
@@ -350,40 +399,64 @@ private:
         edm::Handle<edm::View<reco::Track> > trackCollection;
         iEvent.getByToken(trackToken_, trackCollection);
         
-        edm::Handle<edm::TriggerResults> trigResults; //our trigger result object
-        edm::InputTag trigResultsTag("TriggerResults"," ","HLT"); //make sure have correct process on MC
-        iEvent.getByLabel(trigResultsTag,trigResults);
-        // const edm::TriggerNames& trigNames = iEvent.triggerNames(*trigResults);
-        
-        
-    /*
-        cout <<"Successfully obtained " << trigResultsTag<<"  "<< trigResultsTag.process()<<endl;
-        const std::vector<std::string>& pathList = hltConfig.triggerNames();
-        cout <<"TriggerPaths size=" << pathList.size()<<endl;
-        for (std::vector<std::string>::const_iterator it = pathList.begin(); it != pathList.end(); ++it) {
-            cout<<"HLT path: "<<*it<<endl;
-            //if (_hltPathsOfInterest.size()) {
-            // int nmatch = 0;
-            for (std::vector<std::string>::const_iterator kt = _hltPathsOfInterest.begin();
-             kt != _hltPathsOfInterest.end(); ++kt) {
-             nmatch += TPRegexp(*kt).Match(*it);
-             }
-            //if (!nmatch) continue;
-            //      }
-            _hltpaths.push_back(*it);
-        }
-        */
-        
-        
+       	Handle<TriggerResults> triggerResults;
+	iEvent.getByToken(triggerToken_, triggerResults);
+	
+	Handle<trigger::TriggerEvent> triggerSummary;
+	iEvent.getByToken(trigeventToken_, triggerSummary);
+	
+	Handle<BXVector<GlobalAlgBlk>> alg;
+	iEvent.getByToken(algToken_,alg); 
         
         edm::ESHandle<TransientTrackBuilder> theTransientTrackBuilder;
         iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder);
         theTransientTrackBuilder_ = theTransientTrackBuilder.product();
         
-        
         hEvents->Fill(1);
-        
-        
+
+	///////////////Fill Trigger Vars, L1 and HLT///////////////
+	gtUtil_->retrieveL1(iEvent, iSetup, algToken_);
+	const vector<pair<string, bool> > initialDecisions = gtUtil_->decisionsInitial();
+	
+	if (!iEvent.isRealData())
+	   {
+	   for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) 
+	      {
+	      string l1tName = (initialDecisions.at(i_l1t)).first;
+	      if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos){
+	         Trigger_l1name.push_back( l1tName );
+		 Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
+		 Trigger_l1prescale.push_back( 1 );
+	         }
+	      }
+           }
+	else
+	   {
+	   ESHandle<L1TGlobalPrescalesVetos> psAndVetos;
+	   auto psRcd = iSetup.tryToGet<L1TGlobalPrescalesVetosRcd>();
+	   if(psRcd) psRcd->get(psAndVetos);
+	   int columnN= gtUtil_->prescaleColumn();
+	   for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) {
+	      string l1tName = (initialDecisions.at(i_l1t)).first;
+	      if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos){
+	   //    cout<<"L1Seed="<<l1tName<<" decision="<<initialDecisions.at(i_l1t).second<<" prescale="<<(psAndVetos->prescale_table_)[columnN][i_l1t]<<endl;
+	         Trigger_l1name.push_back( l1tName );
+		 Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
+		 Trigger_l1prescale.push_back( (psAndVetos->prescale_table_)[columnN][i_l1t]);
+		 }
+	      }
+	   } 
+	 const TriggerNames &triggerNames = iEvent.triggerNames( *triggerResults );
+	 for (size_t i_hlt = 0; i_hlt != triggerResults->size(); ++i_hlt){
+	    string hltName = triggerNames.triggerName(i_hlt);
+	    if(hltName.find("HLT_DoubleMu") != string::npos){
+	  //   cout<<" HLTPath="<<hltName<<" isPassed="<<triggerResults->accept(i_hlt )<<endl;
+	       Trigger_hltname.push_back(hltName);
+	       Trigger_hltdecision.push_back(triggerResults->accept(i_hlt ));
+	    }
+          }
+
+	///////////////Fill GEN particles///////////////        
         if(isMc){
             uint j=0;
             uint ngenP=genParticles->size();
@@ -392,11 +465,79 @@ private:
             for(edm::View<reco::GenParticle>::const_iterator gp=genParticles->begin(); gp!=genParticles->end(), j<ngenP; ++gp , ++j){
                 //if(fabs(gp->pdgId())==15) tauRaw = j;
                 
-                if(fabs(gp->pdgId())==13 || fabs(gp->pdgId())==15  || fabs(gp->pdgId())==11 || fabs(gp->pdgId())==211 || fabs(gp->pdgId())==321 ||  fabs(gp->pdgId())==12  || fabs(gp->pdgId())==14 || fabs(gp->pdgId())==16 || fabs(gp->pdgId())==431 || fabs(gp->pdgId())==333) {
+                int isDs = -1; //-1:not Ds //0:is not prompt Ds//1:is prompt pp->Ds//2:is D from B decays
+                int isB = -1; //-1:not B //0:is not prompt B//1:is prompt B
+                int isBdecay = -1; //-1:not B //0:isB //1: is B to Ds//2: is B to anything else
+                if ( fabs(gp->pdgId()) == 511 || fabs(gp->pdgId()) == 521 || fabs(gp->pdgId()) == 531 ) { //B0 or B+ or Bs found
+                   cout<<"B meson"<<endl;
+                   isB=0;
+                   isBdecay=0;
+                   for(uint t=0; t<gp->numberOfMothers(); t++) {
+                      cout<<"  gp->mother("<<t<<")->pdgId() = "<<gp->mother(t)->pdgId()<<endl;
+                      if( fabs(gp->mother(t)->pdgId()) == 513 || fabs(gp->mother(t)->pdgId()) == 523 || fabs(gp->mother(t)->pdgId()) == 533 || fabs(gp->mother(t)->pdgId()) == 535 ) { //B*
+                         for(uint i=0; i<gp->mother(t)->numberOfMothers(); i++) {
+                            cout<<"    gp->mother("<<t<<")->mother("<<i<<")->pdgId() = "<<gp->mother(t)->mother(i)->pdgId()<<endl;
+                            if(fabs(gp->mother(t)->mother(i)->pdgId())==5) { //b quark
+                               cout<<"    prompt"<<endl;
+                               isB=1;
+                            }
+                         }
+                      }else{
+                         if(fabs(gp->mother(t)->pdgId()) == 5){ //b quark
+                            cout<<"    prompt"<<endl;
+                            isB=1;
+                         }
+                      }
+                   }
+                   cout<<"B->"<<endl;
+                   for(uint b=0; b<gp->numberOfDaughters(); b++) {
+                      if ( fabs(gp->daughter(b)->pdgId()) == 431 || fabs(gp->daughter(b)->pdgId()) == 433 || fabs(gp->daughter(b)->pdgId()) == 435 ) {
+                         cout<<"   Ds"<<endl;
+                         isBdecay=1;
+                      }else isBdecay=2;
+                   }
+                }
+                if ( fabs(gp->pdgId()) == 431 ) { //Ds
+                   cout<<"D_s meson"<<endl;
+                   isDs=0;
+                   for(uint t=0; t<gp->numberOfMothers(); t++) {
+                      cout<<"  gp->mother("<<t<<")->pdgId() = "<<gp->mother(t)->pdgId()<<endl;
+                      if( fabs(gp->mother(t)->pdgId()) == 433 || fabs(gp->mother(t)->pdgId()) == 435 ) { //D*
+                         for(uint i=0; i<gp->mother(t)->numberOfMothers(); i++) {
+                            cout<<"    gp->mother("<<t<<")->mother("<<i<<")->pdgId() = "<<gp->mother(t)->mother(i)->pdgId()<<endl;
+                            if(fabs(gp->mother(t)->mother(i)->pdgId())==3 || fabs(gp->mother(t)->mother(i)->pdgId())==4) { //s or c quark
+                               cout<<"    prompt"<<endl;
+                               isDs=1;
+                            } else {
+                               if(fabs(gp->mother(t)->mother(i)->pdgId())==521 || fabs(gp->mother(t)->mother(i)->pdgId())==511 || fabs(gp->mother(t)->mother(i)->pdgId())==531) {
+                                  cout<<"    from B decay"<<endl;
+                                  isDs=2;
+                               }          
+                            }
+                         }
+                      }else{
+                         if(fabs(gp->mother(t)->pdgId())==3 || fabs(gp->mother(t)->pdgId())==4) { //s or c quark
+                            cout<<"    prompt"<<endl;
+                            isDs=1;
+                         }else{
+                            if(fabs(gp->mother(t)->pdgId())==521 || fabs(gp->mother(t)->pdgId())==511 || fabs(gp->mother(t)->pdgId())==531 ){
+                               cout<<"    from B decay"<<endl;
+                               isDs=2;
+                            }
+                         }
+                      }
+                   }
+                }
+
+                if(fabs(gp->pdgId())==13 || fabs(gp->pdgId())==15  || fabs(gp->pdgId())==11 || fabs(gp->pdgId())==211 || fabs(gp->pdgId())==321 ||  fabs(gp->pdgId())==12  || fabs(gp->pdgId())==14 || fabs(gp->pdgId())==16 || fabs(gp->pdgId())==431 || fabs(gp->pdgId())==333 || fabs(gp->pdgId())==511 || fabs(gp->pdgId())==521) {
                     GenParticle_PdgId.push_back(gp->pdgId());
                     GenParticle_Pt.push_back(gp->pt());
                     GenParticle_Eta.push_back(gp->eta());
                     GenParticle_Phi.push_back(gp->phi());
+                    GenParticle_isDs.push_back(isDs);
+                    GenParticle_isB.push_back(isB);
+                    GenParticle_isBdecay.push_back(isBdecay);
+
                     if(fabs(gp->pdgId())==13 && gp->numberOfMothers() && fabs(gp->mother(0)->pdgId()) ==333 ){
                         cout<<"Mu from phi pt="<<gp->pt()<<" vz="<<gp->vz()<<endl;
                     
@@ -478,10 +619,10 @@ private:
 	      //cout<<TripletIndex2<<" Reco mu2 pt="<<c2->pt()<<" eta="<<c2->eta()<<" phi="<<c2->phi()<<" DEta(mu2,c3)="<<fabs(c2->eta()-c3->eta())<<endl;
 	      //cout<<TripletIndex2<<" Reco mu3 pt="<<c3->pt()<<" eta="<<c3->eta()<<" phi="<<c3->phi()<<endl;
 		//				}
-		Mu01_Pt.push_back(mu1->pt());
-		Mu01_Eta.push_back(mu1->eta());
-		Mu01_Phi.push_back(mu1->phi());
-		Mu01_TripletIndex.push_back(trIn2);
+	      Mu01_Pt.push_back(mu1->pt());
+	      Mu01_Eta.push_back(mu1->eta());
+	      Mu01_Phi.push_back(mu1->phi());
+	      Mu01_TripletIndex.push_back(trIn2);
               
               Mu02_Pt.push_back(mu2->pt());
               Mu02_Eta.push_back(mu2->eta());
@@ -500,6 +641,28 @@ private:
 	      reco::Vertex TripletVtx = reco::Vertex(PhiIt->vertex(), PhiIt->vertexCovariance(), PhiIt->vertexChi2(), PhiIt->vertexNdof(), PhiIt->numberOfDaughters() );
               //TransientVertex TransientTripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
               //cout<<" number of muons in triplet="<<TauIt->numberOfDaughters()<<endl;
+
+              ///////////////Check Trigger Matching///////////////
+              float dR1 = 999., dR2 = 999., dR3 = 999.;
+              std::vector<trigger::TriggerObject> trgobjs = triggerSummary->getObjects();
+              trigger::TriggerObjectCollection MuonsObjects;
+              edm::InputTag MuonFilterTag = edm::InputTag("hltTau3muTkVertexFilter", "", "HLT");
+              size_t MuonFilterIndex = (*triggerSummary).filterIndex(MuonFilterTag); //find the index corresponding to the event
+              if(MuonFilterIndex < (*triggerSummary).sizeFilters()) { //check if the trigger object is present
+              //save the trigger objects corresponding to muon leg
+                  const trigger::Keys &KEYS = (*triggerSummary).filterKeys(MuonFilterIndex);
+                  for (unsigned int ipart = 0; ipart < KEYS.size(); ipart++) {
+                      trigger::TriggerObject foundObject = (trgobjs)[KEYS[ipart]];
+                      MuonsObjects.push_back(foundObject);
+                  }
+                  dR1 = DsPhiPiTreeMaker::dRtriggerMatch(*mu1, MuonsObjects);
+                  dR2 = DsPhiPiTreeMaker::dRtriggerMatch(*mu2, MuonsObjects);
+                  dR3 = DsPhiPiTreeMaker::dRtriggerMatchTrk(Track3, MuonsObjects);
+              }
+              Mu01_dRtriggerMatch.push_back(dR1);
+              Mu02_dRtriggerMatch.push_back(dR2);
+              Tr_dRtriggerMatch.push_back(dR3);
+
               if(isMc){ //if is TauPhiPi Monte Carlo
 		bool isMatch1=false; bool isMatch2=false; //bool isMatch3=false;
 		if( (mu1->simType() == reco::MatchedMuonFromLightFlavour) && (fabs(mu1->simMotherPdgId()) == 333) ){ //chiedi mu 13 e richiesta su mother 333
@@ -587,8 +750,6 @@ private:
                   pvTracks_refit2.push_back(pvTrack->second);}
               //cout<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
               
-              
-              
               RefittedPV2_NTracks.push_back(pvTracks_refit2.size()); //remember to select events with at least 2 tracks associated to the PV
               /*for(uint i=0; i<pvTracks_refit.size(); i++){
                TrackRef tr = TrackRef(pvTracks_refit, i);
@@ -596,7 +757,73 @@ private:
                //TrackRef pvTrRef = pvTr.get<TrackRef>();
                cout<<i<<"PV track ID="<<tr.id()<<endl;
                }*/
-              
+             
+              ////Defining ISO VAR related to the triplet
+              math::XYZPoint SVertexPoint = math::XYZPoint(TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
+              TLorentzVector LV1=TLorentzVector( mu1->px(), mu1->py(), mu1->pz(), mu1->energy() );
+              TLorentzVector LV2=TLorentzVector( mu2->px(), mu2->py(), mu2->pz(), mu2->energy() );
+              TLorentzVector LV3=TLorentzVector( c3->px(), c3->py(), c3->pz(), c3->energy() );
+              TLorentzVector LVDs = LV1 + LV2 + LV3;
+              //cout<<"Check Ds Info: LVDs pt "<<LVDs.Pt()<<" eta "<<LVDs.Eta()<<" phi "<<LVDs.Phi()<<endl;
+              //cout<<"Check Ds Info: PhiIt->pt() "<<PhiIt->pt()<<" eta "<<PhiIt->eta()<<" phi "<<PhiIt->phi()<<endl;
+              edm::View<reco::Track>::const_iterator trIt  = trackCollection->begin();
+              edm::View<reco::Track>::const_iterator trEnd = trackCollection->end();
+              /*
+              cout<<"Start loop on tracks for iso calc"<<endl;
+              cout<<"mu1 pt "<<mu1->pt()<<" eta "<<mu1->eta()<<" phi "<<mu1->phi()<<endl;
+              cout<<"mu1 pt "<<mu2->pt()<<" eta "<<mu2->eta()<<" phi "<<mu2->phi()<<endl;
+              cout<<"c3 pt "<<c3->pt()<<" eta "<<c3->eta()<<" phi "<<c3->phi()<<endl;
+              cout<<"=============================="<<endl;
+              cout<<"Track1 pt "<<Track1.pt()<<" eta "<<Track1.eta()<<" phi "<<Track1.phi()<<endl;
+              cout<<"Track1 pt "<<Track2.pt()<<" eta "<<Track2.eta()<<" phi "<<Track2.phi()<<endl;
+              cout<<"Track3 pt "<<Track3.pt()<<" eta "<<Track3.eta()<<" phi "<<Track3.phi()<<endl;
+              cout<<"=============================="<<endl;
+              */
+              int nTracks03_mu1=0, nTracks03_mu2=0, nTracks03_trk3=0;
+              double mindist=9999;
+              double sumPtTrack1=0, sumPtTrack2=0, sumPtTrack3=0, maxSumPtTracks=0;
+              for (; trIt != trEnd; ++trIt) {
+                 const reco::Track track = (*trIt);
+                 if(  (track.pt()>1) && (fabs(track.eta())<2.4) && (track.hitPattern().trackerLayersWithMeasurement()>5) && (track.hitPattern().pixelLayersWithMeasurement()>1)  ){
+                    double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
+                    double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
+                    double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
+                    if (dR1 == 0 || dR2 == 0 || dR3 == 0) {  
+		       //cout<<"Skip muon track"<<endl; 
+		       continue;}
+                    double dz = abs(track.dz(SVertexPoint));
+                    double dxy = abs(track.dxy(SVertexPoint));
+                    double dca_fv = sqrt(dz*dz+dxy*dxy);
+                    if(dca_fv<mindist && dca_fv>0) { 
+		       //cout<<"dca_fv"<<dca_fv<<endl; 
+		       mindist = dca_fv;
+		    }
+                    //for eack track having pt>1, excluded the muon tracks,
+                    //for each muon in the triplet, if deltaR<0.3 and the DCA is smaller than 1 mm
+                    //the pt of the track is added -> I will take the largest total pt from the three muons
+                    if (dca_fv < 0.1) {
+                       if (dR1<0.3) {
+                          sumPtTrack1+=track.pt();
+                          nTracks03_mu1++;
+                       }
+                       if (dR2<0.3) {
+                          sumPtTrack2+=track.pt();
+                          nTracks03_mu2++;
+                       }
+                       if (dR3<0.3) {
+                          sumPtTrack3+=track.pt();
+                          nTracks03_trk3++;
+                       }
+                   }
+                } 
+             }//endl loop on tracks
+
+             Triplet_mindca_iso.push_back(mindist);
+             maxSumPtTracks = std::max(sumPtTrack1, std::max(sumPtTrack2,sumPtTrack3));
+             double relativeiso = maxSumPtTracks/LVDs.Pt();
+             Triplet_relativeiso.push_back(relativeiso);
+            
+
               if(pvTracks_refit2.size() >1){
                   KalmanVertexFitter PV_fitter (true);
                   TransientVertex PVertex = PV_fitter.vertex(pvTracks_refit2); //Kinematic?
@@ -974,6 +1201,9 @@ private:
         GenParticle_Pt.clear();
         GenParticle_Eta.clear();
         GenParticle_Phi.clear();
+        GenParticle_isDs.clear();
+        GenParticle_isB.clear();
+        GenParticle_isBdecay.clear();
         GenParticle_MotherPdgId.clear();
         
         MuonCollectionSize =0;
@@ -1075,7 +1305,7 @@ private:
         Muon_hadVetoEt05.clear();
         Muon_emVetoEt05.clear();
         Muon_trackerVetoPt05.clear();
-        
+   
         Track_pt.clear();
         Track_eta.clear();
         Track_phi.clear();
@@ -1095,7 +1325,12 @@ private:
         PV_z=-99;
         PV_NTracks=-99;
         
-     
+        Trigger_l1name.clear();
+	Trigger_l1decision.clear();
+	Trigger_l1prescale.clear();
+	
+	Trigger_hltname.clear();
+	Trigger_hltdecision.clear();
         
        
         /*
@@ -1177,6 +1412,11 @@ private:
         Mu01_TripletIndex.clear();
         Mu02_TripletIndex.clear();
         Tr_TripletIndex.clear();
+
+        Mu01_dRtriggerMatch.clear();
+        Mu02_dRtriggerMatch.clear();
+        Tr_dRtriggerMatch.clear();
+
 	selectedTripletsIndex.clear();
         GenMatchMu01_SimPhi.clear();
         GenMatchMu02_SimPhi.clear();
@@ -1195,7 +1435,10 @@ private:
         
         GenMatchMu01_Phi.clear();
         GenMatchMu02_Phi.clear();
-        
+   
+        Triplet_mindca_iso.clear();
+        Triplet_relativeiso.clear();
+     
         TripletCollectionSize2 = -99;
         SelectedTripletsSize = -99;
         TripletVtx2_x.clear();
@@ -1204,7 +1447,7 @@ private:
         
         TripletVtx2_Chi2.clear();
         TripletVtx2_NDOF.clear();
-        
+		
         Triplet2_Mass.clear();
         Triplet2_Pt.clear();
         Triplet2_Eta.clear();
@@ -1250,6 +1493,9 @@ private:
         tree_->Branch("GenParticle_Pt", &GenParticle_Pt);
         tree_->Branch("GenParticle_Eta", &GenParticle_Eta);
         tree_->Branch("GenParticle_Phi", &GenParticle_Phi);
+        tree_->Branch("GenParticle_isDs", &GenParticle_isDs);
+        tree_->Branch("GenParticle_isB", &GenParticle_isB);
+        tree_->Branch("GenParticle_isBdecay", &GenParticle_isBdecay);
         tree_->Branch("GenParticle_MotherPdgId", &GenParticle_MotherPdgId);
         
         tree_->Branch("MuonCollectionSize",&MuonCollectionSize);
@@ -1375,7 +1621,16 @@ private:
         tree_->Branch("PV_y", &PV_y);
         tree_->Branch("PV_z", &PV_z);
         tree_->Branch("PV_NTracks", &PV_NTracks);
-        
+
+	tree_->Branch("Trigger_l1name", &Trigger_l1name);
+	tree_->Branch("Trigger_l1decision",&Trigger_l1decision);
+	tree_->Branch("Trigger_l1prescale",&Trigger_l1prescale);
+	
+	tree_->Branch("Trigger_hltname",&Trigger_hltname);
+	tree_->Branch("Trigger_hltdecision",&Trigger_hltdecision);       
+
+
+ 
        /* tree_->Branch("TripletCollectionSize", &TripletCollectionSize);
         tree_->Branch("Mu1_Pt",&Mu1_Pt);
         tree_->Branch("Mu1_Eta", &Mu1_Eta);
@@ -1449,16 +1704,19 @@ private:
         tree_->Branch("Mu01_Pt",&Mu01_Pt);
         tree_->Branch("Mu01_Eta", &Mu01_Eta);
         tree_->Branch("Mu01_Phi", &Mu01_Phi);
+        tree_->Branch("Mu01_dRtriggerMatch", &Mu01_dRtriggerMatch);
         tree_->Branch("Mu01_TripletIndex", &Mu01_TripletIndex);
         
         tree_->Branch("Mu02_Pt", &Mu02_Pt);
         tree_->Branch("Mu02_Eta", &Mu02_Eta);
         tree_->Branch("Mu02_Phi", &Mu02_Phi);
+        tree_->Branch("Mu02_dRtriggerMatch", &Mu02_dRtriggerMatch);
         tree_->Branch("Mu02_TripletIndex", &Mu02_TripletIndex); 
         
         tree_->Branch("Tr_Pt", &Tr_Pt);
         tree_->Branch("Tr_Eta", &Tr_Eta);
         tree_->Branch("Tr_Phi", &Tr_Phi);
+        tree_->Branch("Tr_dRtriggerMatch", &Tr_dRtriggerMatch);
         tree_->Branch("Tr_TripletIndex", &Tr_TripletIndex); 
         tree_->Branch("selectedTripletsIndex", &selectedTripletsIndex);
      
@@ -1479,7 +1737,10 @@ private:
         
         tree_->Branch("GenMatchMu01_Phi", &GenMatchMu01_Phi);
         tree_->Branch("GenMatchMu02_Phi", &GenMatchMu02_Phi);
-        
+       
+        tree_->Branch("Triplet_mindca_iso", &Triplet_mindca_iso);
+        tree_->Branch("Triplet_relativeiso", &Triplet_relativeiso);
+ 
         tree_->Branch("TripletVtx2_x", &TripletVtx2_x);
         tree_->Branch("TripletVtx2_y", &TripletVtx2_y);
         tree_->Branch("TripletVtx2_z", &TripletVtx2_z);

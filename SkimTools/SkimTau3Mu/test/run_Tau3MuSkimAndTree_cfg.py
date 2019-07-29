@@ -19,7 +19,8 @@ process.load("SkimTools.SkimTau3Mu.Tau3MuSkimAOD_cff")
 #process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v6' #data2017
 #process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_TrancheIV_v6' #mc2016
 #process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_RealisticBS_25ns_13TeV2016_v1_mc' #mc2016 gives proper mass distr
-process.GlobalTag.globaltag = '94X_mc2017_realistic_v14'
+#process.GlobalTag.globaltag = '94X_mc2017_realistic_v14'
+process.GlobalTag.globaltag = '94X_mc2017_realistic_v17'
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 

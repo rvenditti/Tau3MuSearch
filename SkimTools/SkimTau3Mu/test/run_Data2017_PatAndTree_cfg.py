@@ -40,7 +40,7 @@ process.TFileService = cms.Service("TFileService",
 
 process.TreeMakerBkg = cms.EDAnalyzer("MiniAna2017Tree",
                               isMcLabel = cms.untracked.bool(False),
-                              isAnaLabel = cms.untracked.bool(True),        
+                              isAnaLabel = cms.untracked.bool(True),
                               muonLabel=cms.InputTag("looseMuons"),
                               VertexLabel=cms.InputTag("offlinePrimaryVertices"),
                               genParticleLabel=cms.InputTag("genParticles"),
