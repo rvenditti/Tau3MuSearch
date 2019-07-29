@@ -103,6 +103,7 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Common/interface/TriggerResultsByName.h"
 
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "PhysicsTools/PatUtils/interface/TriggerHelper.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
@@ -131,6 +132,7 @@ public:
     ~MiniAna2017Tree();
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     float dR(float eta1, float eta2, float phi1, float phi2);
+    float dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects);
     void beginRun(edm::Run const &, edm::EventSetup const&, edm::Event const&);
     
     
@@ -194,11 +196,12 @@ private:
     std::vector<double>  Muon_GLnormChi2, Muon_GLhitPattern_numberOfValidMuonHits,  Muon_trackerLayersWithMeasurement,  Muon_Numberofvalidpixelhits,  Muon_outerTrack_p,  Muon_outerTrack_eta,
     Muon_outerTrack_phi,  Muon_outerTrack_normalizedChi2,  Muon_outerTrack_muonStationsWithValidHits,  Muon_innerTrack_p,  Muon_innerTrack_eta,  Muon_innerTrack_phi,  Muon_innerTrack_normalizedChi2,  Muon_QInnerOuter;
     
-  std::vector<double>   Muon_combinedQuality_updatedSta,  Muon_combinedQuality_trkKink,  Muon_combinedQuality_glbKink,  Muon_combinedQuality_trkRelChi2,  Muon_combinedQuality_staRelChi2,  Muon_combinedQuality_chi2LocalPosition,  Muon_combinedQuality_chi2LocalMomentum,  Muon_combinedQuality_localDistance,  Muon_combinedQuality_globalDeltaEtaPhi,  Muon_combinedQuality_tightMatch,  Muon_combinedQuality_glbTrackProbability,  Muon_calEnergy_em,  Muon_calEnergy_emS9,  Muon_calEnergy_emS25,  Muon_calEnergy_had,  Muon_calEnergy_hadS9,  Muon_segmentCompatibility,  Muon_caloCompatibility,  Muon_ptErrOverPt, Muon_BestTrackPt,  Muon_BestTrackPtErr, Muon_BestTrackEta,  Muon_BestTrackEtaErr,  Muon_BestTrackPhi,  Muon_BestTrackPhiErr;
+    std::vector<double>   Muon_combinedQuality_updatedSta,  Muon_combinedQuality_trkKink,  Muon_combinedQuality_glbKink,  Muon_combinedQuality_trkRelChi2,  Muon_combinedQuality_staRelChi2,  Muon_combinedQuality_chi2LocalPosition,  Muon_combinedQuality_chi2LocalMomentum,  Muon_combinedQuality_localDistance,  Muon_combinedQuality_globalDeltaEtaPhi,  Muon_combinedQuality_tightMatch,  Muon_combinedQuality_glbTrackProbability,  Muon_calEnergy_em,  Muon_calEnergy_emS9,  Muon_calEnergy_emS25,  Muon_calEnergy_had,  Muon_calEnergy_hadS9,  Muon_segmentCompatibility,  Muon_caloCompatibility,  Muon_ptErrOverPt, Muon_BestTrackPt,  Muon_BestTrackPtErr, Muon_BestTrackEta,  Muon_BestTrackEtaErr,  Muon_BestTrackPhi,  Muon_BestTrackPhiErr;
 
-  std::vector<int>  Muon_simPdgId, Muon_simMotherPdgId, Muon_simFlavour,  Muon_simType, Muon_simBX, Muon_simTpEvent, Muon_simMatchQuality;
+    std::vector<int>  Muon_simPdgId, Muon_simMotherPdgId, Muon_simFlavour,  Muon_simType, Muon_simBX, Muon_simTpEvent, Muon_simMatchQuality;
     std::vector<double>  Mu1_Pt,  Mu1_Eta,  Mu1_Phi,  Mu2_Pt,  Mu2_Eta,  Mu2_Phi,  Mu3_Pt,  Mu3_Eta,  Mu3_Phi, GenMatchMu1_SimPt, GenMatchMu2_SimPt, GenMatchMu3_SimPt,GenMatchMu1_SimEta, GenMatchMu2_SimEta, GenMatchMu3_SimEta, GenMatchMu1_SimPhi, GenMatchMu2_SimPhi, GenMatchMu3_SimPhi,  GenMatchMu1_Pt,  GenMatchMu2_Pt,  GenMatchMu3_Pt,  GenMatchMu1_Eta,  GenMatchMu2_Eta,  GenMatchMu3_Eta,  GenMatchMu1_Phi,  GenMatchMu2_Phi,  GenMatchMu3_Phi;
-    
+    std::vector<float> Mu1_dRtriggerMatch, Mu2_dRtriggerMatch, Mu3_dRtriggerMatch;
+ 
     std::vector<double>     Muon_emEt03, Muon_hadEt03, Muon_nJets03, Muon_nTracks03, Muon_sumPt03, Muon_emEt05,    Muon_hadEt05, Muon_nJets05, Muon_nTracks05, Muon_sumPt05,
     Muon_hadVetoEt03,Muon_emVetoEt03,    Muon_trackerVetoPt03,    Muon_hadVetoEt05,    Muon_emVetoEt05,    Muon_trackerVetoPt05;
     //dd  Mu1_SimPt,  Mu1_SimEta,  Mu1_SimPhi,  Mu2_SimPt,  Mu2_SimEta,  Mu2_SimPhi, Mu3_SimPt,  Mu3_SimEta,  Mu3_SimPhi,
@@ -211,7 +214,7 @@ private:
     int TripletCollectionSize, PVCollection_Size, MuonCollectionSize;
     std::vector<double>  TripletVtx_x,  TripletVtx_y,  TripletVtx_z,  TripletVtx_Chi2,  TripletVtx_NDOF,  Triplet_Mass,  Triplet_Pt,  Triplet_Eta,  Triplet_Phi, Triplet_Charge;
     
-  std::vector<double> dxy_mu1,dxy_mu2,dxy_mu3,dxyErr_mu1,dxyErr_mu2,  dxyErr_mu3; 
+    std::vector<double> dxy_mu1, dxy_mu2, dxy_mu3, dxyErr_mu1, dxyErr_mu2, dxyErr_mu3; 
     
     std::vector<double>  RefittedPV_x;
     std::vector<double>  RefittedPV_y;
@@ -279,6 +282,17 @@ private:
         float deltaR= TMath::Sqrt(dphi*dphi + deta*deta);
         return deltaR;
     }
+
+    float MiniAna2017Tree::dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects) {
+        float dRmin = 1.;                                                                          
+        for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+            float deltaR = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), m.eta(), m.phi()));
+            //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));
+            if (deltaR < dRmin) dRmin = deltaR;                                                    
+        }                                                                                          
+        return dRmin;                                                                              
+    }
+
     
     bool isGoodTrack(const reco::Track &track) {
         if(track.pt()>1){
@@ -415,11 +429,9 @@ private:
 		Trigger_l1name.push_back( l1tName );
 		Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
 		Trigger_l1prescale.push_back( (psAndVetos->prescale_table_)[columnN][i_l1t]);
-	      }
-	    }
-	  }
-        
-        
+                }
+            }
+        }
         
             
 	const TriggerNames &triggerNames = iEvent.triggerNames( *triggerResults );
@@ -432,8 +444,7 @@ private:
 	    }
 	}
     
-	///////////////Fill Trigger Vars, L1 and HLT///////////////
-        
+ 
 	///////////////Fill GenParticles///////////////
         if(isMc){
             uint j=0;
@@ -529,6 +540,29 @@ private:
             reco::Vertex TripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
             //TransientVertex TransientTripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
             //cout<<" number of muons in triplet="<<TauIt->numberOfDaughters()<<endl;
+
+
+	    ///////////////Check Trigger Matching///////////////
+            float dR1 = 999., dR2 = 999., dR3 = 999.;
+            std::vector<trigger::TriggerObject> trgobjs = triggerSummary->getObjects();
+            trigger::TriggerObjectCollection MuonsObjects;
+            edm::InputTag MuonFilterTag = edm::InputTag("hltTau3muTkVertexFilter", "", "HLT");
+            size_t MuonFilterIndex = (*triggerSummary).filterIndex(MuonFilterTag); //find the index corresponding to the event
+            if(MuonFilterIndex < (*triggerSummary).sizeFilters()) { //check if the trigger object is present
+            //save the trigger objetcs corresponding to muon leg
+                const trigger::Keys &KEYS = (*triggerSummary).filterKeys(MuonFilterIndex);
+                for (unsigned int ipart = 0; ipart < KEYS.size(); ipart++) {
+                    trigger::TriggerObject foundObject = (trgobjs)[KEYS[ipart]];
+                    MuonsObjects.push_back(foundObject);
+                }
+                dR1 = MiniAna2017Tree::dRtriggerMatch(*mu1, MuonsObjects);
+                dR2 = MiniAna2017Tree::dRtriggerMatch(*mu2, MuonsObjects);
+                dR3 = MiniAna2017Tree::dRtriggerMatch(*mu3, MuonsObjects);
+            }
+            Mu1_dRtriggerMatch.push_back(dR1);
+            Mu2_dRtriggerMatch.push_back(dR2);
+            Mu3_dRtriggerMatch.push_back(dR3);
+
             if(isMc){
                 bool isMatch1=false; bool isMatch2=false; bool isMatch3=false;
                 if( (mu1->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu1->simMotherPdgId()) == 15) ){
@@ -1197,16 +1231,19 @@ private:
         Mu1_Eta.clear();
         Mu1_Phi.clear();
         Mu1_NTracks03iso.clear();
+        Mu1_dRtriggerMatch.clear();
         
         Mu2_Pt.clear();
         Mu2_Eta.clear();
         Mu2_Phi.clear();
         Mu2_NTracks03iso.clear();
+        Mu2_dRtriggerMatch.clear();
         
         Mu3_Pt.clear();
         Mu3_Eta.clear();
         Mu3_Phi.clear();
         Mu3_NTracks03iso.clear();
+        Mu3_dRtriggerMatch.clear();
         
         Mu1_TripletIndex.clear();
         Mu2_TripletIndex.clear();
@@ -1439,18 +1476,21 @@ private:
         tree_->Branch("Mu1_Eta", &Mu1_Eta);
         tree_->Branch("Mu1_Phi", &Mu1_Phi);
         tree_->Branch("Mu1_NTracks03iso", &Mu1_NTracks03iso); 
+        tree_->Branch("Mu1_dRtriggerMatch", &Mu1_dRtriggerMatch); 
         tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex);
  
         tree_->Branch("Mu2_Pt", &Mu2_Pt);
         tree_->Branch("Mu2_Eta", &Mu2_Eta);
         tree_->Branch("Mu2_Phi", &Mu2_Phi);
         tree_->Branch("Mu2_NTracks03iso", &Mu2_NTracks03iso); 
+        tree_->Branch("Mu2_dRtriggerMatch", &Mu2_dRtriggerMatch); 
         tree_->Branch("Mu2_TripletIndex", &Mu2_TripletIndex); 
         
         tree_->Branch("Mu3_Pt", &Mu3_Pt);
         tree_->Branch("Mu3_Eta",&Mu3_Eta);
         tree_->Branch("Mu3_Phi", &Mu3_Phi);
         tree_->Branch("Mu3_NTracks03iso", &Mu3_NTracks03iso); 
+        tree_->Branch("Mu3_dRtriggerMatch", &Mu3_dRtriggerMatch); 
         tree_->Branch("Mu3_TripletIndex", &Mu3_TripletIndex); 
 
 	tree_->Branch("dxy_mu1", &dxy_mu1);

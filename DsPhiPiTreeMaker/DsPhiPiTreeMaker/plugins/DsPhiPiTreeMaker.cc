@@ -126,6 +126,8 @@ public:
     ~DsPhiPiTreeMaker();
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     float dR(float eta1, float eta2, float phi1, float phi2);
+    float dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects);
+    float dRtriggerMatchTrk(reco::Track Trk, trigger::TriggerObjectCollection triggerObjects);
     void beginRun(edm::Run const &, edm::EventSetup const&, edm::Event const&);
     
     
@@ -198,6 +200,8 @@ private:
     std::vector<double>  Mu1_Pt,  Mu1_Eta,  Mu1_Phi,  Mu2_Pt,  Mu2_Eta,  Mu2_Phi,  Mu3_Pt,  Mu3_Eta,  Mu3_Phi, GenMatchMu1_SimPt, GenMatchMu2_SimPt, GenMatchMu3_SimPt,GenMatchMu1_SimEta, GenMatchMu2_SimEta, GenMatchMu3_SimEta, GenMatchMu1_SimPhi, GenMatchMu2_SimPhi, GenMatchMu3_SimPhi,  GenMatchMu1_Pt,  GenMatchMu2_Pt,  GenMatchMu3_Pt,  GenMatchMu1_Eta,  GenMatchMu2_Eta,  GenMatchMu3_Eta,  GenMatchMu1_Phi,  GenMatchMu2_Phi,  GenMatchMu3_Phi;
     
     std::vector<double>  Mu01_Pt,  Mu01_Eta,  Mu01_Phi,  Mu02_Pt,  Mu02_Eta,  Mu02_Phi, GenMatchMu01_SimPt, GenMatchMu02_SimPt, GenMatchMu01_SimEta, GenMatchMu02_SimEta, GenMatchMu01_SimPhi, GenMatchMu02_SimPhi, GenMatchMu01_Pt, GenMatchMu02_Pt, GenMatchMu01_Eta,  GenMatchMu02_Eta, GenMatchMu01_Phi,  GenMatchMu02_Phi,  GenMatchMu03_Phi;
+
+    std::vector<float> Mu01_dRtriggerMatch, Mu02_dRtriggerMatch, Tr_dRtriggerMatch;
 
     std::vector<double>  Tr_Pt, Tr_Phi, Tr_Eta;
 
@@ -281,6 +285,26 @@ private:
         float deta=(eta1-eta2);
         float deltaR= TMath::Sqrt(dphi*dphi + deta*deta);
         return deltaR;
+    }
+
+    float DsPhiPiTreeMaker::dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects) {
+        float dRmin = 1.;
+        for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+            float deltaR = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), m.eta(), m.phi()));
+            //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));
+            if (deltaR < dRmin) dRmin = deltaR;
+        }
+        return dRmin;
+    }
+    
+    float DsPhiPiTreeMaker::dRtriggerMatchTrk(reco::Track Trk, trigger::TriggerObjectCollection triggerObjects) {
+        float dRmin = 1.;
+        for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+            float deltaR = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), Trk.eta(), Trk.phi()));
+            //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));
+            if (deltaR < dRmin) dRmin = deltaR;
+        }
+        return dRmin;
     }
     
     bool isGoodTrack(const reco::Track &track) {
@@ -617,6 +641,28 @@ private:
 	      reco::Vertex TripletVtx = reco::Vertex(PhiIt->vertex(), PhiIt->vertexCovariance(), PhiIt->vertexChi2(), PhiIt->vertexNdof(), PhiIt->numberOfDaughters() );
               //TransientVertex TransientTripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
               //cout<<" number of muons in triplet="<<TauIt->numberOfDaughters()<<endl;
+
+              ///////////////Check Trigger Matching///////////////
+              float dR1 = 999., dR2 = 999., dR3 = 999.;
+              std::vector<trigger::TriggerObject> trgobjs = triggerSummary->getObjects();
+              trigger::TriggerObjectCollection MuonsObjects;
+              edm::InputTag MuonFilterTag = edm::InputTag("hltTau3muTkVertexFilter", "", "HLT");
+              size_t MuonFilterIndex = (*triggerSummary).filterIndex(MuonFilterTag); //find the index corresponding to the event
+              if(MuonFilterIndex < (*triggerSummary).sizeFilters()) { //check if the trigger object is present
+              //save the trigger objects corresponding to muon leg
+                  const trigger::Keys &KEYS = (*triggerSummary).filterKeys(MuonFilterIndex);
+                  for (unsigned int ipart = 0; ipart < KEYS.size(); ipart++) {
+                      trigger::TriggerObject foundObject = (trgobjs)[KEYS[ipart]];
+                      MuonsObjects.push_back(foundObject);
+                  }
+                  dR1 = DsPhiPiTreeMaker::dRtriggerMatch(*mu1, MuonsObjects);
+                  dR2 = DsPhiPiTreeMaker::dRtriggerMatch(*mu2, MuonsObjects);
+                  dR3 = DsPhiPiTreeMaker::dRtriggerMatchTrk(Track3, MuonsObjects);
+              }
+              Mu01_dRtriggerMatch.push_back(dR1);
+              Mu02_dRtriggerMatch.push_back(dR2);
+              Tr_dRtriggerMatch.push_back(dR3);
+
               if(isMc){ //if is TauPhiPi Monte Carlo
 		bool isMatch1=false; bool isMatch2=false; //bool isMatch3=false;
 		if( (mu1->simType() == reco::MatchedMuonFromLightFlavour) && (fabs(mu1->simMotherPdgId()) == 333) ){ //chiedi mu 13 e richiesta su mother 333
@@ -1366,6 +1412,11 @@ private:
         Mu01_TripletIndex.clear();
         Mu02_TripletIndex.clear();
         Tr_TripletIndex.clear();
+
+        Mu01_dRtriggerMatch.clear();
+        Mu02_dRtriggerMatch.clear();
+        Tr_dRtriggerMatch.clear();
+
 	selectedTripletsIndex.clear();
         GenMatchMu01_SimPhi.clear();
         GenMatchMu02_SimPhi.clear();
@@ -1653,16 +1704,19 @@ private:
         tree_->Branch("Mu01_Pt",&Mu01_Pt);
         tree_->Branch("Mu01_Eta", &Mu01_Eta);
         tree_->Branch("Mu01_Phi", &Mu01_Phi);
+        tree_->Branch("Mu01_dRtriggerMatch", &Mu01_dRtriggerMatch);
         tree_->Branch("Mu01_TripletIndex", &Mu01_TripletIndex);
         
         tree_->Branch("Mu02_Pt", &Mu02_Pt);
         tree_->Branch("Mu02_Eta", &Mu02_Eta);
         tree_->Branch("Mu02_Phi", &Mu02_Phi);
+        tree_->Branch("Mu02_dRtriggerMatch", &Mu02_dRtriggerMatch);
         tree_->Branch("Mu02_TripletIndex", &Mu02_TripletIndex); 
         
         tree_->Branch("Tr_Pt", &Tr_Pt);
         tree_->Branch("Tr_Eta", &Tr_Eta);
         tree_->Branch("Tr_Phi", &Tr_Phi);
+        tree_->Branch("Tr_dRtriggerMatch", &Tr_dRtriggerMatch);
         tree_->Branch("Tr_TripletIndex", &Tr_TripletIndex); 
         tree_->Branch("selectedTripletsIndex", &selectedTripletsIndex);
      
