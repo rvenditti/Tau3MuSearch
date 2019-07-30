@@ -24,7 +24,7 @@
 // * cut[4] -> Invariant dimuon mass in (1-1.04) GeV
 // * cut[5] -> Longitudianl IP of the track w.r.t. the beam spot < 20 cm
 // * cut[6] -> Transverse IP of the track w.r.t. the beam spot < 0.3 cm
-// * cut[7] -> null
+// * cut[7] ->
 
 void ntupleClass_Control::LoopControl(){
     if (fChain == 0) return;
@@ -42,7 +42,7 @@ void ntupleClass_Control::LoopControl(){
     Fill_particleName(pId);
     Fill_CutName(listCut);
     // Creation of the output file
-    TString fileout = "../AnalysedTree/Control/AnalysedTree_2glb_MC_DsPhiPi.root";
+    TString fileout = "../AnalysedTree/Control_new/AnalysedTree_2glb_MC_DsPhiPi.root";
     TFile *fout = new TFile(fileout, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
@@ -148,6 +148,7 @@ void ntupleClass_Control::LoopControl(){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                         // CUT 7 : Null at the moment
+//                                        if(Triplet2_Mass->at(j) > 1.93){
                                         if(1 == 1){
                                             Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
                                         }
@@ -219,16 +220,91 @@ void ntupleClass_Control::LoopControl(){
 // #########################################  END DsPhiPi ANALYSIS CUTFLOW
 
 
-// #########################################  DsPhiPi Data ANALYSIS CUTFLOW
 
-// Cuts: (over triplets)
-// * cut[1] -> Both mu have to be different from the track
-// * cut[2] -> Chi2 triplet vertex (in 0 - 15)
-// * cut[3] -> 2 mu w/ opposite charge
-// * cut[4] -> Invariant dimuon mass in (1-1.04) GeV
-// * cut[5] -> Longitudianl IP of the track w.r.t. the beam spot < 20 cm
-// * cut[6] -> Transverse IP of the track w.r.t. the beam spot < 0.3 cm
-// * cut[7] -> Additional requets on invariant mass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     if (fChain == 0) return;
@@ -246,8 +322,8 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     Fill_particleName(pId);
     Fill_CutName(listCut);
     // Creation of the output file
-    TString filename = "../AnalysedTree/Control/AnalysedTree_2glb_DsPhiPi_Data"; filename += datasetName;
-    filename += "_Bkg.root";
+    TString filename = "../AnalysedTree/Control_new/sgn_new/AnalysedTree_2glb_DsPhiPi_Data"; filename += datasetName;
+    filename += "_sgn.root";
     TFile *fout = new TFile(filename, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
@@ -347,8 +423,9 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                     if (Track_dxy->at(mu[2]) < 0.3){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-                                        // CUT 7 : additional requests on the inv mass
-                                        if(Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01){
+                                        // CUT 7 : Null at the moment
+                                        //if(Triplet2_Mass->at(j) >= 1.7 && Triplet2_Mass->at(j) <= 1.8){
+                                        if(Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01 ){
                                             Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
                                         }
                                     }

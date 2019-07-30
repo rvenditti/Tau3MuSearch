@@ -41,6 +41,11 @@ public :
    UInt_t          run;
    UInt_t          lumi;
    UInt_t          nPileUpInt;
+   vector<string>  *Trigger_l1name;
+   vector<int>     *Trigger_l1decision;
+   vector<int>     *Trigger_l1prescale;
+   vector<string>  *Trigger_hltname;
+   vector<int>     *Trigger_hltdecision;
    vector<int>     *GenParticle_PdgId;
    vector<double>  *GenParticle_Pt;
    vector<double>  *GenParticle_Eta;
@@ -110,6 +115,10 @@ public :
    vector<double>  *Muon_ptErrOverPt;
    vector<double>  *Muon_BestTrackPt;
    vector<double>  *Muon_BestTrackPtErr;
+   vector<double>  *Muon_BestTrackEta;
+   vector<double>  *Muon_BestTrackEtaErr;
+   vector<double>  *Muon_BestTrackPhi;
+   vector<double>  *Muon_BestTrackPhiErr;
    vector<double>  *Muon_emEt03;
    vector<double>  *Muon_hadEt03;
    vector<double>  *Muon_nJets03;
@@ -198,6 +207,11 @@ public :
    TBranch        *b_run;   //!
    TBranch        *b_lumi;   //!
    TBranch        *b_nPileUpInt;   //!
+   TBranch        *b_Trigger_l1name;   //!
+   TBranch        *b_Trigger_l1decision;   //!
+   TBranch        *b_Trigger_l1prescale;   //!
+   TBranch        *b_Trigger_hltname;   //!
+   TBranch        *b_Trigger_hltdecision;   //!
    TBranch        *b_GenParticle_PdgId;   //!
    TBranch        *b_GenParticle_Pt;   //!
    TBranch        *b_GenParticle_Eta;   //!
@@ -416,6 +430,7 @@ public :
     virtual Float_t  QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4);
     virtual Double_t ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]);
     virtual void     StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl);
+    virtual void     TriggerMatching(Int_t ind, TH1D *hTripTriggerMatched);
         // Functions for the final tree
     virtual Double_t TreeFin_Angle(Int_t ind);
     virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
@@ -466,6 +481,11 @@ void ntupleClass_MC::Init(TTree *tree)
    // (once per file to be processed).
 
    // Set object pointer
+   Trigger_l1name = 0;
+   Trigger_l1decision = 0;
+   Trigger_l1prescale = 0;
+   Trigger_hltname = 0;
+   Trigger_hltdecision = 0;
    GenParticle_PdgId = 0;
    GenParticle_Pt = 0;
    GenParticle_Eta = 0;
@@ -620,6 +640,11 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("run", &run, &b_run);
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("nPileUpInt", &nPileUpInt, &b_nPileUpInt);
+   fChain->SetBranchAddress("Trigger_l1name", &Trigger_l1name, &b_Trigger_l1name);
+   fChain->SetBranchAddress("Trigger_l1decision", &Trigger_l1decision, &b_Trigger_l1decision);
+   fChain->SetBranchAddress("Trigger_l1prescale", &Trigger_l1prescale, &b_Trigger_l1prescale);
+   fChain->SetBranchAddress("Trigger_hltname", &Trigger_hltname, &b_Trigger_hltname);
+   fChain->SetBranchAddress("Trigger_hltdecision", &Trigger_hltdecision, &b_Trigger_hltdecision);
    fChain->SetBranchAddress("GenParticle_PdgId", &GenParticle_PdgId, &b_GenParticle_PdgId);
    fChain->SetBranchAddress("GenParticle_Pt", &GenParticle_Pt, &b_GenParticle_Pt);
    fChain->SetBranchAddress("GenParticle_Eta", &GenParticle_Eta, &b_GenParticle_Eta);

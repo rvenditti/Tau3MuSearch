@@ -994,6 +994,42 @@ void ntupleClass_MC::StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D
     hPt_tripl->Fill(Triplet_Pt->at(ind), pileupFactor);
 }
 
+void ntupleClass_MC::TriggerMatching(Int_t ind, TH1D *hTripTriggerMatched){
+    // If the required trigger conditions (both on HLT and L1) are matched,
+    //  the function fills a histo w/ the triplet mass
+    TString hltName, l1Name;
+    int nMatches = 0, hlt_ind = 0, l1_ind = 0;
+    // HLT Trigger matching w/ "HLT_DoubleMu3_Trk_Tau3mu_v*"
+    for(int h=0; h<Trigger_hltname->size(); h++) {
+        hltName = Trigger_hltname->at(h);
+        if(strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0) {
+            nMatches++;
+            hlt_ind = h;
+        }
+    }
+    if (nMatches > 1) cout << "There is more than 1 matching in HLT trigger !" << endl;
+    if (nMatches == 0) cout << "There is NO matching in HLT trigger !" << endl;
+    // L1 Trigger matching w/ "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4"
+    nMatches = 0;
+    for(int h=0; h<Trigger_l1name->size(); h++) {
+        l1Name = Trigger_l1name->at(h);
+        if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0) {
+            nMatches++;
+            l1_ind = h;
+        }
+    }
+    if (nMatches > 1) cout << "There is more than 1 matching in l1 trigger !" << endl;
+    if (nMatches == 0) cout << "There is NO matching in l1 trigger !" << endl;
+    
+    if(Trigger_hltdecision->at(hlt_ind) == 1 && Trigger_l1decision->at(l1_ind) == 1)
+        hTripTriggerMatched->Fill(Triplet_Mass->at(ind));
+    else
+    {
+        cout <<  Trigger_hltname->at(hlt_ind) << " decision " << Trigger_hltdecision->at(hlt_ind) << endl;
+        cout <<  Trigger_l1name->at(l1_ind) << " decision " << Trigger_l1decision->at(l1_ind) << endl << endl;
+    }
+}
+
 Double_t ntupleClass_MC::TreeFin_Angle(Int_t ind){
     // Computes the angle between the momentum vector of the 3mu triplet (b) and the vector from the primary vertex (a)
     double a_x = TripletVtx_x->at(ind) - RefittedPV_x->at(ind);

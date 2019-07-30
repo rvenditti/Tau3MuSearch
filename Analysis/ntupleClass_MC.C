@@ -69,7 +69,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     
     gStyle->SetOptStat(1111);
     // Creation of output file & final tree
-    TString foutName = "../AnalysedTree/AnalysedTree_cat_MC_";
+    TString foutName = "../AnalysedTree/AnalysedTree_cat_3loose_MC_";
     if(strcmp(type, "MC_sgn") == 0)
         foutName += "sgn_";
     if (strcmp(datasetName, "Ds") == 0)
@@ -154,9 +154,11 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     
     //Loop over the events
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
-        if(jentry == 791)   continue;
+        cout << "Event n. " << jentry << endl;
+	if(jentry == 791)   continue;
         if(jentry == 40287)   continue;
-        ntripl = 0, trInd = 0; int cutevt2[NCUTS] = {0};
+        if(jentry == 147384)	continue;
+	ntripl = 0, trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
         fChain->GetEntry(ientry);
         //Check number of tracks in the primary vertex
@@ -184,14 +186,14 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                     FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                     // CUT 2 :
                     // Check that mu1 is glb & pt>ptmax & |eta|<Etamax
-                    if((Muon_isGlobal->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax){
+                    if((Muon_isLoose->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax){
                         DeltaZ1 = Muon_vz->at(mu[0]);
                         // Check that mu2 is glb & pt>ptmax & |eta|<Etamax
-                        if((Muon_isGlobal->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax){
+                        if((Muon_isLoose->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax){
                             DeltaZ2 = Muon_vz->at(mu[1]);
                             // Check that mu3 is tracker & pt>0.5 & |eta|<Etamax
-//                            if((Muon_isTrackerMuon->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                             if((Muon_isLoose->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
+                            //if((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                                 DeltaZ3 = Muon_vz->at(mu[2]);
                                 Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                 FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);

@@ -6,6 +6,24 @@
 #include <iostream>
 #include <string.h>
 
+// ###### INSTRUCTIONS (input options)
+// (after having compiled the code [.L Analysis.cpp])
+//
+// * type = "MC" -> for the 'standard analysis' (triplet mass quite large)
+// * type = "MC_sgn" -> for the analysis for MVA  (triplet mass narrower)
+// *** Ds->Tau->3Mu : Analysis("MC", "Ds")
+// *** B0->Tau->3Mu : Analysis("MC", "B0")
+// *** Bp->Tau->3Mu : Analysis("MC", "Bp")
+// *** Ds->Phi->Pi  : Analysis("MC", "Ds_Phi")
+// *** Minimum bias : Analysis("MC", "MiniBias")
+//
+// * type = "data" -> for the 'standard analysis' (triplet mass quite large)
+// * type = "data_bkg" -> for the analysis for MVA (triplet mass complementary w.r.t. tau mass)
+// *** 2017 B : Analysis("data", "2017B")
+// *** 2017 C : Analysis("data", "2017C")
+// *** 2017 D : Analysis("data", "2017D")
+// *** 2017 F : Analysis("data", "2017F")
+
 using namespace std;
 
 int main(int narg, char** arg){
@@ -97,10 +115,9 @@ int main(int narg, char** arg){
     if (strcmp(type, "data") == 0 || strcmp(type, "data_bkg") == 0){
         cout << "This is data" << endl;
         cout << "Data " << datasetName << endl << endl;
-        TString treeName = "../Tree/TreeData_Run";  treeName += datasetName; treeName += ".root";
-        TString treeMakerName = "../Tree/TreeData_Run";  treeMakerName += datasetName;
-        if (strcmp(datasetName, "2017B") == 0 || strcmp(datasetName, "2017B_0a") == 0 || strcmp(datasetName, "2017B_0b") == 0 || strcmp(datasetName, "2017B_0c") == 0 || strcmp(datasetName, "2017B_1a") == 0 || strcmp(datasetName, "2017B_1b") == 0 || strcmp(datasetName, "2017C") == 0 || strcmp(datasetName, "2017C_0a") == 0 || strcmp(datasetName, "2017C_0b") == 0 || strcmp(datasetName, "2017C_0c") == 0 || strcmp(datasetName, "2017C_0d") == 0 || strcmp(datasetName, "2017C_0e") == 0 || strcmp(datasetName, "2017C_1a") == 0 || strcmp(datasetName, "2017C_1b") == 0 || strcmp(datasetName, "2017C_1c") == 0 || strcmp(datasetName, "2017C_1d") == 0 || strcmp(datasetName, "2017C_1e") == 0 || strcmp(datasetName, "2017C_2a") == 0 || strcmp(datasetName, "2017C_2b") == 0 || strcmp(datasetName, "2017C_2c") == 0 || strcmp(datasetName, "2017C_2d") == 0 || strcmp(datasetName, "2017C_2e") == 0 || strcmp(datasetName, "2017C_3a") == 0 || strcmp(datasetName, "2017C_3b") == 0 || strcmp(datasetName, "2017C_3c") == 0 || strcmp(datasetName, "2017C_3d") == 0 || strcmp(datasetName, "2017C_3e") == 0 || strcmp(datasetName, "2017C_4a") == 0 || strcmp(datasetName, "2017C_4b") == 0 || strcmp(datasetName, "2017C_4c") == 0 || strcmp(datasetName, "2017C_4d") == 0) treeMakerName += ".root:/TreeMaker";
-        else treeMakerName += ".root:/TreeMakerBkg";
+        TString treeName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsTau3Mu/TreeData_Run";  treeName += datasetName; treeName += ".root";
+        TString treeMakerName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsTau3Mu/TreeData_Run";  treeMakerName += datasetName;
+        treeMakerName += ".root:/TreeMakerBkg";
         
         TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(treeName);
         if (!f || !f->IsOpen()) {

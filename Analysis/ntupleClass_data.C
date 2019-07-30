@@ -34,7 +34,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     cutevt[0] = nentries;
     Fill_CutName(listCut);
     // Creation of the output file & final tree
-    TString filename = "../AnalysedTree/AnalysedTree_cat_Data"; filename += datasetName;
+    TString filename = "../AnalysedTree/AnalysedTree_cat_3loose_Data"; filename += datasetName;
     if(strcmp(type, "data_bkg") == 0) filename += "_Bkg";
     filename += ".root";
     TFile *fout = new TFile(filename, "RECREATE");
@@ -62,11 +62,13 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     TDirectory *dirAfterCuts = fout->mkdir("AfterCuts");
     dirAfterCuts->cd();
     TH1I *hNtripl; TH1F *hChi2Track, *hmassQuad, *hmassQuad_Zero;
-    TH1D *hPileUp_AC, *hNPrVert_AC, *hMassTriRes, *hMassTriResBarrel, *hMassTriResEndcap, *hmassdi, *hPtRes_AC, *hPtRes_AC_mu[NMU], *hPtResBarrel_AC, *hPtResBarrel_AC_mu[NMU], *hPtResEndcap_AC, *hPtResEndcap_AC_mu[NMU], *hNMatchedStat, *hFlightDist, *hFlightDist_Signif, *hPtErrOverPt, *hPt_tripl_good, *hPt_tripl_fake, *hDeltaX, *hDeltaY, *hDeltaZ, *hDeltaX_fake, *hDeltaY_fake, *hDeltaZ_fake, *hTripMassA, *hTripMassB, *hTripMassC, *hEtaA, *hEtaB, *hEtaC; TH2D *hFlightDistvsP;
+    TH1D *hPileUp_AC, *hNPrVert_AC, *hTripTriggerMatched, *hMassTriRes, *hMassTriResBarrel, *hMassTriResEndcap, *hmassdi, *hPtRes_AC, *hPtRes_AC_mu[NMU], *hPtResBarrel_AC, *hPtResBarrel_AC_mu[NMU], *hPtResEndcap_AC, *hPtResEndcap_AC_mu[NMU], *hNMatchedStat, *hFlightDist, *hFlightDist_Signif, *hPtErrOverPt, *hPt_tripl_good, *hPt_tripl_fake, *hDeltaX, *hDeltaY, *hDeltaZ, *hDeltaX_fake, *hDeltaY_fake, *hDeltaZ_fake, *hTripMassA, *hTripMassB, *hTripMassC, *hEtaA, *hEtaB, *hEtaC; TH2D *hFlightDistvsP;
     hPileUp_AC = new TH1D("hNPileUp", "hNPileUp", 80, -0.5, 79.5);
     hPileUp_AC->Sumw2();
     hNPrVert_AC = new TH1D("hNPrimaryVertices", "hNPrimaryVertices", 100, -0.5, 99.5);
     hNPrVert_AC->Sumw2();
+    hTripTriggerMatched = new TH1D("hTriplMassTrigMatched", "hTriplMassTrigMatched", 42, 1.60, 2.02); // binning 10 MeV
+    hTripTriggerMatched->Sumw2();
     hTripMassA = new TH1D("hTripMassA", "hTripMassA", 42, 1.60, 2.02); // binning 10 MeV
     hTripMassA->Sumw2();
     hTripMassB = new TH1D("hTripMassB", "hTripMassB", 42, 1.60, 2.02); // binning 10 MeV
@@ -111,22 +113,6 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     
     //Loop over the events
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
-        cout << "Event n. " << jentry << endl;
-        if (jentry == 1000000) cout << "We are at 1M" << endl;
-        if (jentry == 2000000) cout << "We are at 2M" << endl;
-        if (jentry == 3000000) cout << "We are at 3M" << endl;
-        if (jentry == 4000000) cout << "We are at 4M" << endl;
-        if (jentry == 5000000) cout << "We are at 5M" << endl;
-        if (jentry == 6000000) cout << "We are at 6M" << endl;
-        if (jentry == 7000000) cout << "We are at 7M" << endl;
-        if (jentry == 8000000) cout << "We are at 8M" << endl;
-        if (jentry == 9000000) cout << "We are at 9M" << endl;
-        if (jentry == 10000000) cout << "We are at 10M" << endl;
-        if (jentry == 11000000) cout << "We are at 11M" << endl;
-        if (jentry == 12000000) cout << "We are at 12M" << endl;
-        if (jentry == 13000000) cout << "We are at 13M" << endl;
-        if (jentry == 14000000) cout << "We are at 14M" << endl;
-        if (jentry == 15000000) cout << "We are at 15M" << endl;
         ntripl = 0, trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
         fChain->GetEntry(ientry);
@@ -149,14 +135,14 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                     FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                     // CUT 2 :
                     // Check that mu1 is glb & pt>ptmax & |eta|<Etamax
-                    if((Muon_isGlobal->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax){
+                    if((Muon_isLoose->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax){
                         DeltaZ1 = Muon_vz->at(mu[0]);
                         // Check that mu2 is glb & pt>ptmax & |eta|<Etamax
-                        if((Muon_isGlobal->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax){
+                        if((Muon_isLoose->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax){
                             DeltaZ2 = Muon_vz->at(mu[1]);
                             // Check that mu3 is tracker & pt>0.5 & |eta|<Etamax
-//                            if((Muon_isTrackerMuon->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                             if((Muon_isLoose->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
+                            //if((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptminTrack) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                                 DeltaZ3 = Muon_vz->at(mu[2]);
                                 Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                 FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
@@ -232,8 +218,9 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero);
             hPileUp_AC->Fill(nPileUpInt);
             hNPrVert_AC->Fill(PVCollection_Size);
+            // Trigger matching
+            TriggerMatching(ind, hTripTriggerMatched);
         }
-        
         if (ientry < 0) break;
     }//end loop on events
     cut[0] = ntripltot;
@@ -242,10 +229,10 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     cout << "N. EVENTS -> " << nentries << endl << endl;
     cout << "N. TRIPLETS -> " << ntripltot << endl << endl;
     //Histo of cuts Efficiency
-    TCanvas *canvEvt = new TCanvas("CutEfficiency_Nevents", "CutEfficiency_Nevents", 0, 0, 1200, 1000);
-    Draw_CutEffCanvas(canvEvt, hCutEffEvt, cutevt, listCut);
-    TCanvas *canv = new TCanvas("CutEfficiency_Ntriplets", "CutEfficiency_Ntriplets", 0, 0, 1200, 1000);
-    Draw_CutEffCanvas(canv, hCutEff, cut, listCut);
+//    TCanvas *canvEvt = new TCanvas("CutEfficiency_Nevents", "CutEfficiency_Nevents", 0, 0, 1200, 1000);
+//    Draw_CutEffCanvas(canvEvt, hCutEffEvt, cutevt, listCut);
+//    TCanvas *canv = new TCanvas("CutEfficiency_Ntriplets", "CutEfficiency_Ntriplets", 0, 0, 1200, 1000);
+//    Draw_CutEffCanvas(canv, hCutEff, cut, listCut);
     //Write and close the file
     fout->Write();
     fout->Close();
