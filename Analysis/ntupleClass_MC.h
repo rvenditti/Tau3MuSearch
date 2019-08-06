@@ -145,16 +145,19 @@ public :
    vector<double>  *Mu1_Eta;
    vector<double>  *Mu1_Phi;
    vector<int>     *Mu1_NTracks03iso;
+   vector<float>   *Mu1_dRtriggerMatch;
    vector<int>     *Mu1_TripletIndex;
    vector<double>  *Mu2_Pt;
    vector<double>  *Mu2_Eta;
    vector<double>  *Mu2_Phi;
    vector<int>     *Mu2_NTracks03iso;
+   vector<float>   *Mu2_dRtriggerMatch;
    vector<int>     *Mu2_TripletIndex;
    vector<double>  *Mu3_Pt;
    vector<double>  *Mu3_Eta;
    vector<double>  *Mu3_Phi;
    vector<int>     *Mu3_NTracks03iso;
+   vector<float>   *Mu3_dRtriggerMatch;
    vector<int>     *Mu3_TripletIndex;
    vector<double>  *dxy_mu1;
    vector<double>  *dxy_mu2;
@@ -307,16 +310,19 @@ public :
    TBranch        *b_Mu1_Eta;   //!
    TBranch        *b_Mu1_Phi;   //!
    TBranch        *b_Mu1_NTracks03iso;   //!
+   TBranch        *b_Mu1_dRtriggerMatch;   //!
    TBranch        *b_Mu1_TripletIndex;   //!
    TBranch        *b_Mu2_Pt;   //!
    TBranch        *b_Mu2_Eta;   //!
    TBranch        *b_Mu2_Phi;   //!
    TBranch        *b_Mu2_NTracks03iso;   //!
+   TBranch        *b_Mu2_dRtriggerMatch;   //!
    TBranch        *b_Mu2_TripletIndex;   //!
    TBranch        *b_Mu3_Pt;   //!
    TBranch        *b_Mu3_Eta;   //!
    TBranch        *b_Mu3_Phi;   //!
    TBranch        *b_Mu3_NTracks03iso;   //!
+   TBranch        *b_Mu3_dRtriggerMatch;   //!
    TBranch        *b_Mu3_TripletIndex;   //!
    TBranch        *b_dxy_mu1;   //!
    TBranch        *b_dxy_mu2;   //!
@@ -430,7 +436,7 @@ public :
     virtual Float_t  QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4);
     virtual Double_t ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]);
     virtual void     StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl);
-    virtual void     TriggerMatching(Int_t ind, TH1D *hTripTriggerMatched);
+    virtual void     TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched);
         // Functions for the final tree
     virtual Double_t TreeFin_Angle(Int_t ind);
     virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
@@ -574,16 +580,19 @@ void ntupleClass_MC::Init(TTree *tree)
    Mu1_Eta = 0;
    Mu1_Phi = 0;
    Mu1_NTracks03iso = 0;
+   Mu1_dRtriggerMatch = 0;
    Mu1_TripletIndex = 0;
    Mu2_Pt = 0;
    Mu2_Eta = 0;
    Mu2_Phi = 0;
    Mu2_NTracks03iso = 0;
+   Mu2_dRtriggerMatch = 0;
    Mu2_TripletIndex = 0;
    Mu3_Pt = 0;
    Mu3_Eta = 0;
    Mu3_Phi = 0;
    Mu3_NTracks03iso = 0;
+   Mu3_dRtriggerMatch = 0;
    Mu3_TripletIndex = 0;
    dxy_mu1 = 0;
    dxy_mu2 = 0;
@@ -740,16 +749,19 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Mu1_Eta", &Mu1_Eta, &b_Mu1_Eta);
    fChain->SetBranchAddress("Mu1_Phi", &Mu1_Phi, &b_Mu1_Phi);
    fChain->SetBranchAddress("Mu1_NTracks03iso", &Mu1_NTracks03iso, &b_Mu1_NTracks03iso);
+   fChain->SetBranchAddress("Mu1_dRtriggerMatch", &Mu1_dRtriggerMatch, &b_Mu1_dRtriggerMatch);
    fChain->SetBranchAddress("Mu1_TripletIndex", &Mu1_TripletIndex, &b_Mu1_TripletIndex);
    fChain->SetBranchAddress("Mu2_Pt", &Mu2_Pt, &b_Mu2_Pt);
    fChain->SetBranchAddress("Mu2_Eta", &Mu2_Eta, &b_Mu2_Eta);
    fChain->SetBranchAddress("Mu2_Phi", &Mu2_Phi, &b_Mu2_Phi);
    fChain->SetBranchAddress("Mu2_NTracks03iso", &Mu2_NTracks03iso, &b_Mu2_NTracks03iso);
+   fChain->SetBranchAddress("Mu2_dRtriggerMatch", &Mu2_dRtriggerMatch, &b_Mu2_dRtriggerMatch);
    fChain->SetBranchAddress("Mu2_TripletIndex", &Mu2_TripletIndex, &b_Mu2_TripletIndex);
    fChain->SetBranchAddress("Mu3_Pt", &Mu3_Pt, &b_Mu3_Pt);
    fChain->SetBranchAddress("Mu3_Eta", &Mu3_Eta, &b_Mu3_Eta);
    fChain->SetBranchAddress("Mu3_Phi", &Mu3_Phi, &b_Mu3_Phi);
    fChain->SetBranchAddress("Mu3_NTracks03iso", &Mu3_NTracks03iso, &b_Mu3_NTracks03iso);
+   fChain->SetBranchAddress("Mu3_dRtriggerMatch", &Mu3_dRtriggerMatch, &b_Mu3_dRtriggerMatch);
    fChain->SetBranchAddress("Mu3_TripletIndex", &Mu3_TripletIndex, &b_Mu3_TripletIndex);
    fChain->SetBranchAddress("dxy_mu1", &dxy_mu1, &b_dxy_mu1);
    fChain->SetBranchAddress("dxy_mu2", &dxy_mu2, &b_dxy_mu2);

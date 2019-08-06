@@ -36,20 +36,15 @@ int main(int narg, char** arg){
     cout << "datasetName : " << datasetName << endl << endl;
     
     // Check input arguments
-    if(strcmp(type, "MC") != 0 && strcmp(type, "MC_sgn") != 0 && strcmp(type, "MC_control") != 0 && strcmp(type, "data") != 0 && strcmp(type, "data_bkg") != 0 && strcmp(type, "data_control") != 0){
-        cout << "The first argument is wrong! Please choose between 'MC', 'MC_sgn', 'MC_control', 'data', 'data_bkg'and 'data_control'" << endl;
+    if(strcmp(type, "MC") != 0 && strcmp(type, "MC_sgn") != 0 && strcmp(type, "MC_control") != 0 && strcmp(type, "data") != 0 && strcmp(type, "data_bkg") != 0 && strcmp(type, "data_control_sgn") != 0 && strcmp(type, "data_control_bkg") != 0){
+        cout << "The first argument is wrong! Please choose between 'MC', 'MC_sgn', 'MC_control', 'data','data_bkg', 'data_control_sgn' and 'data_control_bkg'" << endl;
         return -1;
     }
     if((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0 ) && strcmp(datasetName, "Ds") != 0 && strcmp(datasetName, "B0") != 0 && strcmp(datasetName, "Bp") != 0 && strcmp(datasetName, "MiniBias") != 0){
         cout << "The second argument is wrong! Please choose between 'Ds', 'B0', 'Bp' and 'MiniBias' " << endl;
         return -1;
     }
-    /*
-    if((strcmp(type, "data") == 0 || strcmp(type, "data_bkg") == 0 || strcmp(type, "data_control") == 0) && strcmp(datasetName, "2017B") != 0 && strcmp(datasetName, "2017B_0a") != 0 && strcmp(datasetName, "2017B_0b") != 0 && strcmp(datasetName, "2017B_0c") != 0 && strcmp(datasetName, "2017B_1") != 0 && strcmp(datasetName, "2017C") != 0 && strcmp(datasetName, "2017D") != 0 && strcmp(datasetName, "2017D_0") != 0 && strcmp(datasetName, "2017D_1") != 0  && strcmp(datasetName, "2017F") != 0 && strcmp(datasetName, "2017F_0a") != 0 && strcmp(datasetName, "2017F_0b") != 0 && strcmp(datasetName, "2017F_0c") != 0 && strcmp(datasetName, "2017F_0d") != 0 && strcmp(datasetName, "2017F_0e") != 0 && strcmp(datasetName, "2017F_1a") != 0 && strcmp(datasetName, "2017F_1b") != 0 && strcmp(datasetName, "2017F_1c") != 0 && strcmp(datasetName, "2017F_1d") != 0 && strcmp(datasetName, "2017F_1e") != 0 && strcmp(datasetName, "2017F_2") != 0 ){
-        cout << "The second argument is wrong! Please choose between '2017B', '2017B_0a', '2017B_0b', '2017B_0c', '2017B_1', '2017C', '2017D', '2017F_0a', '2017F_0b', '2017F_0c', '2017F_0d', '2017F_0e', '2017F_1a', '2017F_1b', '2017F_1c', '2017F_1d', '2017F_1e', '2017F_2' and '2017F'" << endl;
-        return -1;
-    }
-    */
+
     // ################ MC
     if ((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0) && (strcmp(datasetName, "Ds") == 0 || strcmp(datasetName, "B0") == 0 || strcmp(datasetName, "Bp") == 0 || strcmp(datasetName, "MiniBias") == 0)){
         cout << "This is a MC" << endl;
@@ -132,11 +127,11 @@ int main(int narg, char** arg){
     
     // ##################### Data Control
     
-    if (strcmp(type, "data_control") == 0){
+    if (strcmp(type, "data_control_sgn") == 0 || strcmp(type, "data_control_bkg") == 0){
         cout << "Control channel analysis on data" << endl;
         cout << "Data " << datasetName << endl << endl;
-        TString treeName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsPhiPiData/Tree_DsPhiPi_Data_Run"; treeName += datasetName; treeName += "_new.root";
-        TString treeMakerName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsPhiPiData/Tree_DsPhiPi_Data_Run"; treeMakerName += datasetName; treeMakerName += "_new.root:/Tree3Mu";
+        TString treeName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsPhiPiData/Tree_DsPhiPi_Data_Run"; treeName += datasetName; treeName += ".root";
+        TString treeMakerName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsPhiPiData/Tree_DsPhiPi_Data_Run"; treeMakerName += datasetName; treeMakerName += ".root:/Tree3Mu";
         
         TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(treeName);
         if (!f || !f->IsOpen()) {

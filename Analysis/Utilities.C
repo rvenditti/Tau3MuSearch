@@ -1,6 +1,6 @@
 
 #define ntupleClass_MC_cxx
-#define NCUTS 8
+#define NCUTS 9
 #define NPARTICLES 560
 #define NMU 3
 #define mumass 0.1056583715 // Muon mass in GeV
@@ -48,10 +48,11 @@ void ntupleClass_MC::Draw_CutEffCanvas(TCanvas *canv, TH1I *hist, Int_t cut[NCUT
         hist->Fill(k+1, cut[k]);
         hist->GetXaxis()->SetBinLabel(k+1, listCut[k]);
     }
-    canv->SetLogy();
+//    canv->SetLogy();
     hist->DrawCopy("HIST TEXT0");
-    canv->Write();
-    canv->Close();
+    hist->Write();
+//    canv->Write();
+//    canv->Close();
 }
 
 void ntupleClass_MC::Draw_PdgIdCanvas(TCanvas *canv, TH1I *hist, Int_t Idsummary[NPARTICLES], TString pIdList[NPARTICLES]){
@@ -144,6 +145,7 @@ void ntupleClass_MC::Fill_CutName(TString listCut[NCUTS]){
     listCut[5] = "DeltaZ";
     listCut[6] = "VETO #Phi mass";
     listCut[7] = "VETO #omega mass";
+    listCut[8] = "Trigger Matching";
 }
 
 void ntupleClass_MC::Fill_DimuonMass(Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t dimu[NMU]){
@@ -994,7 +996,7 @@ void ntupleClass_MC::StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D
     hPt_tripl->Fill(Triplet_Pt->at(ind), pileupFactor);
 }
 
-void ntupleClass_MC::TriggerMatching(Int_t ind, TH1D *hTripTriggerMatched){
+void ntupleClass_MC::TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched){
     // If the required trigger conditions (both on HLT and L1) are matched,
     //  the function fills a histo w/ the triplet mass
     TString hltName, l1Name;

@@ -15,6 +15,7 @@
 // * cut[5] -> The 3 possible pairs of mu of the triplet have proper |DeltaZ| (<0.5)
 // * cut[6] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
 // * cut[7] -> Cut on the dimuon mass w.r.t. Omega(782) per pairs of mu of the triplet w/ opposite sign
+// * cut[8] -> Trigger Matching
 
 void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     
@@ -165,7 +166,11 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                                                 FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                 //CUT 7: VETO on Omega(782) mass
                                                 if(isPairNotAOmega(dimu, sigmaOmega) == true){
-                                                    Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
+                                                    Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
+                                                    //CUT 8: Trigger Matching
+                                                    if(1==1){
+                                                       Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
+                                                    }
                                                 }
                                             }
                                         }
@@ -218,8 +223,8 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero);
             hPileUp_AC->Fill(nPileUpInt);
             hNPrVert_AC->Fill(PVCollection_Size);
-            // Trigger matching
-            TriggerMatching(ind, hTripTriggerMatched);
+            // Trigger requirements
+            TriggerRequirements(ind, hTripTriggerMatched);
         }
         if (ientry < 0) break;
     }//end loop on events

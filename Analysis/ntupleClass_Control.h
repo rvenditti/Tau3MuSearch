@@ -35,6 +35,9 @@ public :
     vector<double>  *GenParticle_Pt;
     vector<double>  *GenParticle_Eta;
     vector<double>  *GenParticle_Phi;
+    vector<int>     *GenParticle_isDs;
+    vector<int>     *GenParticle_isB;
+    vector<int>     *GenParticle_isBdecay;
     vector<int>     *GenParticle_MotherPdgId;
     Int_t           MuonCollectionSize;
     vector<float>   *MuonPt;
@@ -67,6 +70,7 @@ public :
     vector<double>  *Muon_numberOfMatchedStations;
     vector<double>  *Muon_numberOfMatches;
     vector<double>  *Muon_timeAtIpInOut;
+    vector<double>  *Muon_timeAtIpInOutErr;
     vector<double>  *Muon_GLnormChi2;
     vector<double>  *Muon_GLhitPattern_numberOfValidMuonHits;
     vector<double>  *Muon_trackerLayersWithMeasurement;
@@ -134,19 +138,27 @@ public :
     Double_t        PV_y;
     Double_t        PV_z;
     Double_t        PV_NTracks;
+    vector<string>  *Trigger_l1name;
+    vector<int>     *Trigger_l1decision;
+    vector<int>     *Trigger_l1prescale;
+    vector<string>  *Trigger_hltname;
+    vector<int>     *Trigger_hltdecision;
     Int_t           TripletCollectionSize2;
     Int_t           SelectedTripletsSize;
     vector<double>  *Mu01_Pt;
     vector<double>  *Mu01_Eta;
     vector<double>  *Mu01_Phi;
+    vector<float>   *Mu01_dRtriggerMatch;
     vector<int>     *Mu01_TripletIndex;
     vector<double>  *Mu02_Pt;
     vector<double>  *Mu02_Eta;
     vector<double>  *Mu02_Phi;
+    vector<float>   *Mu02_dRtriggerMatch;
     vector<int>     *Mu02_TripletIndex;
     vector<double>  *Tr_Pt;
     vector<double>  *Tr_Eta;
     vector<double>  *Tr_Phi;
+    vector<float>   *Tr_dRtriggerMatch;
     vector<int>     *Tr_TripletIndex;
     vector<int>     *selectedTripletsIndex;
     vector<double>  *GenMatchMu01_SimPt;
@@ -161,6 +173,8 @@ public :
     vector<double>  *GenMatchMu02_Eta;
     vector<double>  *GenMatchMu01_Phi;
     vector<double>  *GenMatchMu02_Phi;
+    vector<double>  *Triplet_mindca_iso;
+    vector<double>  *Triplet_relativeiso;
     vector<double>  *TripletVtx2_x;
     vector<double>  *TripletVtx2_y;
     vector<double>  *TripletVtx2_z;
@@ -180,6 +194,12 @@ public :
     vector<double>  *FlightDistPVSV2_Err;
     vector<double>  *FlightDistPVSV2_Significance;
     vector<double>  *FlightDistPVSV2_chi2;
+    vector<double>  *dxy_mu1;
+    vector<double>  *dxy_mu2;
+    vector<double>  *dxy_mu3;
+    vector<double>  *dxyErr_mu1;
+    vector<double>  *dxyErr_mu2;
+    vector<double>  *dxyErr_mu3;
     
     // List of branches
     TBranch        *b_evt;   //!
@@ -190,6 +210,9 @@ public :
     TBranch        *b_GenParticle_Pt;   //!
     TBranch        *b_GenParticle_Eta;   //!
     TBranch        *b_GenParticle_Phi;   //!
+    TBranch        *b_GenParticle_isDs;   //!
+    TBranch        *b_GenParticle_isB;   //!
+    TBranch        *b_GenParticle_isBdecay;   //!
     TBranch        *b_GenParticle_MotherPdgId;   //!
     TBranch        *b_MuonCollectionSize;   //!
     TBranch        *b_MuonPt;   //!
@@ -222,6 +245,7 @@ public :
     TBranch        *b_Muon_numberOfMatchedStations;   //!
     TBranch        *b_Muon_numberOfMatches;   //!
     TBranch        *b_Muon_timeAtIpInOut;   //!
+    TBranch        *b_Muon_timeAtIpInOutErr;   //!
     TBranch        *b_Muon_GLnormChi2;   //!
     TBranch        *b_Muon_GLhitPattern_numberOfValidMuonHits;   //!
     TBranch        *b_Muon_trackerLayersWithMeasurement;   //!
@@ -289,19 +313,27 @@ public :
     TBranch        *b_PV_y;   //!
     TBranch        *b_PV_z;   //!
     TBranch        *b_PV_NTracks;   //!
+    TBranch        *b_Trigger_l1name;   //!
+    TBranch        *b_Trigger_l1decision;   //!
+    TBranch        *b_Trigger_l1prescale;   //!
+    TBranch        *b_Trigger_hltname;   //!
+    TBranch        *b_Trigger_hltdecision;   //!
     TBranch        *b_TripletCollectionSize2;   //!
     TBranch        *b_SelectedTripletsSize;   //!
     TBranch        *b_Mu01_Pt;   //!
     TBranch        *b_Mu01_Eta;   //!
     TBranch        *b_Mu01_Phi;   //!
+    TBranch        *b_Mu01_dRtriggerMatch;   //!
     TBranch        *b_Mu01_TripletIndex;   //!
     TBranch        *b_Mu02_Pt;   //!
     TBranch        *b_Mu02_Eta;   //!
     TBranch        *b_Mu02_Phi;   //!
+    TBranch        *b_Mu02_dRtriggerMatch;   //!
     TBranch        *b_Mu02_TripletIndex;   //!
     TBranch        *b_Tr_Pt;   //!
     TBranch        *b_Tr_Eta;   //!
     TBranch        *b_Tr_Phi;   //!
+    TBranch        *b_Tr_dRtriggerMatch;   //!
     TBranch        *b_Tr_TripletIndex;   //!
     TBranch        *b_selectedTripletsIndex;   //!
     TBranch        *b_GenMatchMu01_SimPt;   //!
@@ -316,6 +348,8 @@ public :
     TBranch        *b_GenMatchMu02_Eta;   //!
     TBranch        *b_GenMatchMu01_Phi;   //!
     TBranch        *b_GenMatchMu02_Phi;   //!
+    TBranch        *b_Triplet_mindca_iso;   //!
+    TBranch        *b_Triplet_relativeiso;   //!
     TBranch        *b_TripletVtx2_x;   //!
     TBranch        *b_TripletVtx2_y;   //!
     TBranch        *b_TripletVtx2_z;   //!
@@ -335,6 +369,12 @@ public :
     TBranch        *b_FlightDistPVSV2_Err;   //!
     TBranch        *b_FlightDistPVSV2_Significance;   //!
     TBranch        *b_FlightDistPVSV2_chi2;   //!
+    TBranch        *b_dxy_mu1;   //!
+    TBranch        *b_dxy_mu2;   //!
+    TBranch        *b_dxy_mu3;   //!
+    TBranch        *b_dxyErr_mu1;   //!
+    TBranch        *b_dxyErr_mu2;   //!
+    TBranch        *b_dxyErr_mu3;   //!
  
    ntupleClass_Control(TTree *tree);
     virtual ~ntupleClass_Control();
@@ -399,6 +439,7 @@ public :
     virtual Float_t  QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4);
     virtual void     StudyOnTriplet(TString type, Int_t ind, Int_t mu[NTOT], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl);
     virtual Double_t TrackFinder(Double_t pt, Double_t eta, Double_t phi);
+    virtual void     TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched);
     // Functions for the final tree
     virtual Double_t TreeFin_Angle(Int_t ind);
     virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel);
@@ -453,6 +494,9 @@ void ntupleClass_Control::Init(TTree *tree)
     GenParticle_Pt = 0;
     GenParticle_Eta = 0;
     GenParticle_Phi = 0;
+    GenParticle_isDs = 0;
+    GenParticle_isB = 0;
+    GenParticle_isBdecay = 0;
     GenParticle_MotherPdgId = 0;
     MuonPt = 0;
     MuonEnergy = 0;
@@ -484,6 +528,7 @@ void ntupleClass_Control::Init(TTree *tree)
     Muon_numberOfMatchedStations = 0;
     Muon_numberOfMatches = 0;
     Muon_timeAtIpInOut = 0;
+    Muon_timeAtIpInOutErr = 0;
     Muon_GLnormChi2 = 0;
     Muon_GLhitPattern_numberOfValidMuonHits = 0;
     Muon_trackerLayersWithMeasurement = 0;
@@ -546,17 +591,25 @@ void ntupleClass_Control::Init(TTree *tree)
     Track_vx = 0;
     Track_vy = 0;
     Track_vz = 0;
+    Trigger_l1name = 0;
+    Trigger_l1decision = 0;
+    Trigger_l1prescale = 0;
+    Trigger_hltname = 0;
+    Trigger_hltdecision = 0;
     Mu01_Pt = 0;
     Mu01_Eta = 0;
     Mu01_Phi = 0;
+    Mu01_dRtriggerMatch = 0;
     Mu01_TripletIndex = 0;
     Mu02_Pt = 0;
     Mu02_Eta = 0;
     Mu02_Phi = 0;
+    Mu02_dRtriggerMatch = 0;
     Mu02_TripletIndex = 0;
     Tr_Pt = 0;
     Tr_Eta = 0;
     Tr_Phi = 0;
+    Tr_dRtriggerMatch = 0;
     Tr_TripletIndex = 0;
     selectedTripletsIndex = 0;
     GenMatchMu01_SimPt = 0;
@@ -571,6 +624,8 @@ void ntupleClass_Control::Init(TTree *tree)
     GenMatchMu02_Eta = 0;
     GenMatchMu01_Phi = 0;
     GenMatchMu02_Phi = 0;
+    Triplet_mindca_iso = 0;
+    Triplet_relativeiso = 0;
     TripletVtx2_x = 0;
     TripletVtx2_y = 0;
     TripletVtx2_z = 0;
@@ -590,6 +645,12 @@ void ntupleClass_Control::Init(TTree *tree)
     FlightDistPVSV2_Err = 0;
     FlightDistPVSV2_Significance = 0;
     FlightDistPVSV2_chi2 = 0;
+    dxy_mu1 = 0;
+    dxy_mu2 = 0;
+    dxy_mu3 = 0;
+    dxyErr_mu1 = 0;
+    dxyErr_mu2 = 0;
+    dxyErr_mu3 = 0;
     // Set branch addresses and branch pointers
     if (!tree) return;
     fChain = tree;
@@ -604,6 +665,9 @@ void ntupleClass_Control::Init(TTree *tree)
     fChain->SetBranchAddress("GenParticle_Pt", &GenParticle_Pt, &b_GenParticle_Pt);
     fChain->SetBranchAddress("GenParticle_Eta", &GenParticle_Eta, &b_GenParticle_Eta);
     fChain->SetBranchAddress("GenParticle_Phi", &GenParticle_Phi, &b_GenParticle_Phi);
+    fChain->SetBranchAddress("GenParticle_isDs", &GenParticle_isDs, &b_GenParticle_isDs);
+    fChain->SetBranchAddress("GenParticle_isB", &GenParticle_isB, &b_GenParticle_isB);
+    fChain->SetBranchAddress("GenParticle_isBdecay", &GenParticle_isBdecay, &b_GenParticle_isBdecay);
     fChain->SetBranchAddress("GenParticle_MotherPdgId", &GenParticle_MotherPdgId, &b_GenParticle_MotherPdgId);
     fChain->SetBranchAddress("MuonCollectionSize", &MuonCollectionSize, &b_MuonCollectionSize);
     fChain->SetBranchAddress("MuonPt", &MuonPt, &b_MuonPt);
@@ -636,6 +700,7 @@ void ntupleClass_Control::Init(TTree *tree)
     fChain->SetBranchAddress("Muon_numberOfMatchedStations", &Muon_numberOfMatchedStations, &b_Muon_numberOfMatchedStations);
     fChain->SetBranchAddress("Muon_numberOfMatches", &Muon_numberOfMatches, &b_Muon_numberOfMatches);
     fChain->SetBranchAddress("Muon_timeAtIpInOut", &Muon_timeAtIpInOut, &b_Muon_timeAtIpInOut);
+    fChain->SetBranchAddress("Muon_timeAtIpInOutErr", &Muon_timeAtIpInOutErr, &b_Muon_timeAtIpInOutErr);
     fChain->SetBranchAddress("Muon_GLnormChi2", &Muon_GLnormChi2, &b_Muon_GLnormChi2);
     fChain->SetBranchAddress("Muon_GLhitPattern_numberOfValidMuonHits", &Muon_GLhitPattern_numberOfValidMuonHits, &b_Muon_GLhitPattern_numberOfValidMuonHits);
     fChain->SetBranchAddress("Muon_trackerLayersWithMeasurement", &Muon_trackerLayersWithMeasurement, &b_Muon_trackerLayersWithMeasurement);
@@ -703,19 +768,27 @@ void ntupleClass_Control::Init(TTree *tree)
     fChain->SetBranchAddress("PV_y", &PV_y, &b_PV_y);
     fChain->SetBranchAddress("PV_z", &PV_z, &b_PV_z);
     fChain->SetBranchAddress("PV_NTracks", &PV_NTracks, &b_PV_NTracks);
+    fChain->SetBranchAddress("Trigger_l1name", &Trigger_l1name, &b_Trigger_l1name);
+    fChain->SetBranchAddress("Trigger_l1decision", &Trigger_l1decision, &b_Trigger_l1decision);
+    fChain->SetBranchAddress("Trigger_l1prescale", &Trigger_l1prescale, &b_Trigger_l1prescale);
+    fChain->SetBranchAddress("Trigger_hltname", &Trigger_hltname, &b_Trigger_hltname);
+    fChain->SetBranchAddress("Trigger_hltdecision", &Trigger_hltdecision, &b_Trigger_hltdecision);
     fChain->SetBranchAddress("TripletCollectionSize2", &TripletCollectionSize2, &b_TripletCollectionSize2);
     fChain->SetBranchAddress("SelectedTripletsSize", &SelectedTripletsSize, &b_SelectedTripletsSize);
     fChain->SetBranchAddress("Mu01_Pt", &Mu01_Pt, &b_Mu01_Pt);
     fChain->SetBranchAddress("Mu01_Eta", &Mu01_Eta, &b_Mu01_Eta);
     fChain->SetBranchAddress("Mu01_Phi", &Mu01_Phi, &b_Mu01_Phi);
+    fChain->SetBranchAddress("Mu01_dRtriggerMatch", &Mu01_dRtriggerMatch, &b_Mu01_dRtriggerMatch);
     fChain->SetBranchAddress("Mu01_TripletIndex", &Mu01_TripletIndex, &b_Mu01_TripletIndex);
     fChain->SetBranchAddress("Mu02_Pt", &Mu02_Pt, &b_Mu02_Pt);
     fChain->SetBranchAddress("Mu02_Eta", &Mu02_Eta, &b_Mu02_Eta);
     fChain->SetBranchAddress("Mu02_Phi", &Mu02_Phi, &b_Mu02_Phi);
+    fChain->SetBranchAddress("Mu02_dRtriggerMatch", &Mu02_dRtriggerMatch, &b_Mu02_dRtriggerMatch);
     fChain->SetBranchAddress("Mu02_TripletIndex", &Mu02_TripletIndex, &b_Mu02_TripletIndex);
     fChain->SetBranchAddress("Tr_Pt", &Tr_Pt, &b_Tr_Pt);
     fChain->SetBranchAddress("Tr_Eta", &Tr_Eta, &b_Tr_Eta);
     fChain->SetBranchAddress("Tr_Phi", &Tr_Phi, &b_Tr_Phi);
+    fChain->SetBranchAddress("Tr_dRtriggerMatch", &Tr_dRtriggerMatch, &b_Tr_dRtriggerMatch);
     fChain->SetBranchAddress("Tr_TripletIndex", &Tr_TripletIndex, &b_Tr_TripletIndex);
     fChain->SetBranchAddress("selectedTripletsIndex", &selectedTripletsIndex, &b_selectedTripletsIndex);
     fChain->SetBranchAddress("GenMatchMu01_SimPt", &GenMatchMu01_SimPt, &b_GenMatchMu01_SimPt);
@@ -730,6 +803,8 @@ void ntupleClass_Control::Init(TTree *tree)
     fChain->SetBranchAddress("GenMatchMu02_Eta", &GenMatchMu02_Eta, &b_GenMatchMu02_Eta);
     fChain->SetBranchAddress("GenMatchMu01_Phi", &GenMatchMu01_Phi, &b_GenMatchMu01_Phi);
     fChain->SetBranchAddress("GenMatchMu02_Phi", &GenMatchMu02_Phi, &b_GenMatchMu02_Phi);
+    fChain->SetBranchAddress("Triplet_mindca_iso", &Triplet_mindca_iso, &b_Triplet_mindca_iso);
+    fChain->SetBranchAddress("Triplet_relativeiso", &Triplet_relativeiso, &b_Triplet_relativeiso);
     fChain->SetBranchAddress("TripletVtx2_x", &TripletVtx2_x, &b_TripletVtx2_x);
     fChain->SetBranchAddress("TripletVtx2_y", &TripletVtx2_y, &b_TripletVtx2_y);
     fChain->SetBranchAddress("TripletVtx2_z", &TripletVtx2_z, &b_TripletVtx2_z);
@@ -749,6 +824,12 @@ void ntupleClass_Control::Init(TTree *tree)
     fChain->SetBranchAddress("FlightDistPVSV2_Err", &FlightDistPVSV2_Err, &b_FlightDistPVSV2_Err);
     fChain->SetBranchAddress("FlightDistPVSV2_Significance", &FlightDistPVSV2_Significance, &b_FlightDistPVSV2_Significance);
     fChain->SetBranchAddress("FlightDistPVSV2_chi2", &FlightDistPVSV2_chi2, &b_FlightDistPVSV2_chi2);
+    fChain->SetBranchAddress("dxy_mu1", &dxy_mu1, &b_dxy_mu1);
+    fChain->SetBranchAddress("dxy_mu2", &dxy_mu2, &b_dxy_mu2);
+    fChain->SetBranchAddress("dxy_mu3", &dxy_mu3, &b_dxy_mu3);
+    fChain->SetBranchAddress("dxyErr_mu1", &dxyErr_mu1, &b_dxyErr_mu1);
+    fChain->SetBranchAddress("dxyErr_mu2", &dxyErr_mu2, &b_dxyErr_mu2);
+    fChain->SetBranchAddress("dxyErr_mu3", &dxyErr_mu3, &b_dxyErr_mu3);
     Notify();
 }
 

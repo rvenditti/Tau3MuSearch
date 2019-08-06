@@ -1,6 +1,6 @@
 
 #define ntupleClass_Control_cxx
-#define NCUTS 8
+#define NCUTS 9
 #define NPARTICLES 560
 #define NMU_C 2
 #define NTOT 3
@@ -41,10 +41,11 @@ void ntupleClass_Control::Draw_CutEffCanvas(TCanvas *canv, TH1I *hist, Int_t cut
         hist->Fill(k+1, cut[k]);
         hist->GetXaxis()->SetBinLabel(k+1, listCut[k]);
     }
-    canv->SetLogy();
+//    canv->SetLogy();
     hist->DrawCopy("HIST TEXT0");
-    canv->Write();
-    canv->Close();
+    hist->Write();
+//    canv->Write();
+//    canv->Close();
 }
 
 void ntupleClass_Control::Draw_PdgIdCanvas(TCanvas *canv, TH1I *hist, Int_t Idsummary[NPARTICLES], TString pIdList[NPARTICLES]){
@@ -137,7 +138,8 @@ void ntupleClass_Control::Fill_CutName(TString listCut[NCUTS]){
     listCut[4] = "Dimuon mass";
     listCut[5] = "Long.IPTrack";
     listCut[6] = "Trans.IPTrack";
-    listCut[7] = "null";
+    listCut[7] = "TriplMass conditions";
+    listCut[8] = "TriggerMatching";
 }
 
 void ntupleClass_Control::Fill_DimuonMass(Int_t mu_Ind[NTOT], Int_t mu[NTOT], Double_t dimu[NTOT]){
@@ -1006,6 +1008,42 @@ Double_t ntupleClass_Control::TrackFinder(Double_t pt, Double_t eta, Double_t ph
     return m;
 }
 
+void ntupleClass_Control::TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched){
+    // If the required trigger conditions (both on HLT and L1) are matched,
+    //  the function fills a histo w/ the triplet mass
+    TString hltName, l1Name;
+    int nMatches = 0, hlt_ind = 0, l1_ind = 0;
+    // HLT Trigger matching w/ "HLT_DoubleMu3_Trk_Tau3mu_v*"
+    for(int h=0; h<Trigger_hltname->size(); h++) {
+        hltName = Trigger_hltname->at(h);
+        if(strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0) {
+            nMatches++;
+            hlt_ind = h;
+        }
+    }
+    if (nMatches > 1) cout << "There is more than 1 matching in HLT trigger !" << endl;
+    if (nMatches == 0) cout << "There is NO matching in HLT trigger !" << endl;
+    // L1 Trigger matching w/ "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4"
+    nMatches = 0;
+    for(int h=0; h<Trigger_l1name->size(); h++) {
+        l1Name = Trigger_l1name->at(h);
+        if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0) {
+            nMatches++;
+            l1_ind = h;
+        }
+    }
+    if (nMatches > 1) cout << "There is more than 1 matching in l1 trigger !" << endl;
+    if (nMatches == 0) cout << "There is NO matching in l1 trigger !" << endl;
+    
+    if(Trigger_hltdecision->at(hlt_ind) == 1 && Trigger_l1decision->at(l1_ind) == 1)
+    hTripTriggerMatched->Fill(Triplet2_Mass->at(ind));
+    else
+    {
+        cout <<  Trigger_hltname->at(hlt_ind) << " decision " << Trigger_hltdecision->at(hlt_ind) << endl;
+        cout <<  Trigger_l1name->at(l1_ind) << " decision " << Trigger_l1decision->at(l1_ind) << endl << endl;
+    }
+}
+
 Double_t ntupleClass_Control::TreeFin_Angle(Int_t ind){
     // Computes the angle between the momentum vector of the 3mu triplet (b) and the vector from the primary vertex (a)
     double a_x = TripletVtx2_x->at(ind) - RefittedPV2_x->at(ind);
@@ -1043,6 +1081,8 @@ void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU]
     fv_nC = TripletVtx2_Chi2->at(ind)/3;
     fv_dphi3D = TreeFin_Angle(ind);
     fv_d3Dsig = FlightDistPVSV2_Significance->at(ind);
+    mindca_iso = Triplet_mindca_iso->at(ind);
+    trkRel = Triplet_relativeiso->at(ind);
     tree->Fill();
 }
 

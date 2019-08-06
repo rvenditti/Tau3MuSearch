@@ -1,5 +1,5 @@
 #define ntupleClass_MC_cxx
-#define NCUTS 8
+#define NCUTS 9
 #define NPARTICLES 560
 #define NMU 3
 #define mumass 0.1056583715
@@ -28,6 +28,7 @@ int Idsummary2D_Gen[NPARTICLES][NPARTICLES] = {0};
 // * cut[5] -> The 3 possible pairs of mu of the triplet have proper |DeltaZ| (<0.5)
 // * cut[6] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
 // * cut[7] -> Cut on the dimuon mass w.r.t. Omega(782) per pairs of mu of the triplet w/ opposite sign
+// * cut[8] -> Trigger Matching
 
 
 void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
@@ -105,11 +106,13 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     TDirectory *dirAfterCuts = fout->mkdir("AfterCuts");
     dirAfterCuts->cd();
     TH1I *hNtripl; TH1F *hChi2Track, *hmassQuad, *hmassQuad_Zero;
-    TH1D *hPileUp_AC, *hNPrVert_AC, *hMassTriRes, *hMassTriResBarrel, *hMassTriResEndcap, *hmassdi, *hPtRes_AC, *hPtRes_AC_mu[NMU], *hPtResBarrel_AC, *hPtResBarrel_AC_mu[NMU], *hPtResEndcap_AC, *hPtResEndcap_AC_mu[NMU], *hNMatchedStat, *hFlightDist, *hFlightDist_Signif, *hPtErrOverPt, *hPt_tripl_good, *hPt_tripl_fake, *hDeltaX, *hDeltaY, *hDeltaZ, *hDeltaX_fake, *hDeltaY_fake, *hDeltaZ_fake, *hTripMassA, *hTripMassB, *hTripMassC, *hEtaA, *hEtaB, *hEtaC; TH2D *hFlightDistvsP;
+    TH1D *hPileUp_AC, *hNPrVert_AC, *hTripTriggerMatched, *hMassTriRes, *hMassTriResBarrel, *hMassTriResEndcap, *hmassdi, *hPtRes_AC, *hPtRes_AC_mu[NMU], *hPtResBarrel_AC, *hPtResBarrel_AC_mu[NMU], *hPtResEndcap_AC, *hPtResEndcap_AC_mu[NMU], *hNMatchedStat, *hFlightDist, *hFlightDist_Signif, *hPtErrOverPt, *hPt_tripl_good, *hPt_tripl_fake, *hDeltaX, *hDeltaY, *hDeltaZ, *hDeltaX_fake, *hDeltaY_fake, *hDeltaZ_fake, *hTripMassA, *hTripMassB, *hTripMassC, *hEtaA, *hEtaB, *hEtaC; TH2D *hFlightDistvsP;
     hPileUp_AC = new TH1D("hNPileUp", "hNPileUp", 80, -0.5, 79.5);
     hPileUp_AC->Sumw2();
     hNPrVert_AC = new TH1D("hNPrimaryVertices", "hNPrimaryVertices", 100, -0.5, 99.5);
     hNPrVert_AC->Sumw2();
+    hTripTriggerMatched = new TH1D("hTriplMassTrigMatched", "hTriplMassTrigMatched", 42, 1.60, 2.02); // binning 10 MeV
+    hTripTriggerMatched->Sumw2();
     hTripMassA = new TH1D("hTripMassA", "hTripMassA", 42, 1.60, 2.02); // binning 10 MeV
     hTripMassA->Sumw2();
     hTripMassB = new TH1D("hTripMassB", "hTripMassB", 42, 1.60, 2.02); // binning 10 MeV
@@ -216,7 +219,11 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                                                 FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                 //CUT 7: VETO on Omega(782) mass
                                                 if(isPairNotAOmega(dimu, sigmaOmega) == true){
-                                                    Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
+                                                    Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
+                                                    // CUT 8: Trigger Matching
+                                                    if(1==1){
+                                                       Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
+                                                    }
                                                 }
                                             }
                                         }
@@ -274,6 +281,8 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                 FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero);
                 hPileUp_AC->Fill(nPileUpInt);
                 hNPrVert_AC->Fill(PVCollection_Size, pileupFactor);
+                // Trigger requirements
+                TriggerRequirements(ind, hTripTriggerMatched);
             }
             if(muGen[0] == -999 && muGen[1] == -999 && muGen[2] == -999) {
                 NbadTripl++;
