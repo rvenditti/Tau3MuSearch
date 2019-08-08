@@ -36,8 +36,8 @@ int main(int narg, char** arg){
     cout << "datasetName : " << datasetName << endl << endl;
     
     // Check input arguments
-    if(strcmp(type, "MC") != 0 && strcmp(type, "MC_sgn") != 0 && strcmp(type, "MC_control") != 0 && strcmp(type, "data") != 0 && strcmp(type, "data_bkg") != 0 && strcmp(type, "data_control_sgn") != 0 && strcmp(type, "data_control_bkg") != 0){
-        cout << "The first argument is wrong! Please choose between 'MC', 'MC_sgn', 'MC_control', 'data','data_bkg', 'data_control_sgn' and 'data_control_bkg'" << endl;
+    if(strcmp(type, "MC") != 0 && strcmp(type, "MC_sgn") != 0 && strcmp(type, "MC_control") != 0 && strcmp(type, "data") != 0 && strcmp(type, "data_bkg") != 0 && strcmp(type, "data_control_sgn") != 0 && strcmp(type, "data_control_bkg") != 0 && strcmp(type, "data_control") != 0){
+        cout << "The first argument is wrong! Please choose between 'MC', 'MC_sgn', 'MC_control', 'data','data_bkg', 'data_control', 'data_control_sgn' and 'data_control_bkg'" << endl;
         return -1;
     }
     if((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0 ) && strcmp(datasetName, "Ds") != 0 && strcmp(datasetName, "B0") != 0 && strcmp(datasetName, "Bp") != 0 && strcmp(datasetName, "MiniBias") != 0){
@@ -127,7 +127,7 @@ int main(int narg, char** arg){
     
     // ##################### Data Control
     
-    if (strcmp(type, "data_control_sgn") == 0 || strcmp(type, "data_control_bkg") == 0){
+    if (strcmp(type, "data_control") == 0 || strcmp(type, "data_control_sgn") == 0 || strcmp(type, "data_control_bkg") == 0){
         cout << "Control channel analysis on data" << endl;
         cout << "Data " << datasetName << endl << endl;
         TString treeName = "/lustre/cms/store/user/rosma/DoubleMuonLowMass/TreeDsPhiPiData/Tree_DsPhiPi_Data_Run"; treeName += datasetName; treeName += ".root";

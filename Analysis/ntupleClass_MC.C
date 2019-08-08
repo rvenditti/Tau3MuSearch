@@ -70,18 +70,8 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     
     gStyle->SetOptStat(1111);
     // Creation of output file & final tree
-    TString foutName = "../AnalysedTree/AnalysedTree_cat_3loose_MC_";
-    if(strcmp(type, "MC_sgn") == 0)
-        foutName += "sgn_";
-    if (strcmp(datasetName, "Ds") == 0)
-        foutName += "DsTau3mu.root";
-    if (strcmp(datasetName, "B0") == 0)
-        foutName += "B0Tau3mu.root";
-    if (strcmp(datasetName, "Bp") == 0)
-        foutName += "BpTau3mu.root";
-    if (strcmp(datasetName, "MiniBias") == 0)
-        foutName += "MiniBias.root";
-    TFile *fout = new TFile(foutName, "RECREATE");
+    TString root_fileName = fileName;
+    TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *treeA = new TTree("FinalTreeA_sgn","FinalTreeA_sgn");
     TTree *treeB = new TTree("FinalTreeB_sgn","FinalTreeB_sgn");

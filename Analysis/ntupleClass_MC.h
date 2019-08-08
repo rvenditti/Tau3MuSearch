@@ -33,6 +33,7 @@ class ntupleClass_MC {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
+   TString    fileName; //output filename set in Analysis.cpp
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -370,7 +371,7 @@ public :
    TBranch        *b_FlightDistPVSV_Significance;   //!
    TBranch        *b_FlightDistPVSV_chi2;   //!
 
-    ntupleClass_MC(TTree *tree);
+    ntupleClass_MC(TTree *tree, TString fname);
     virtual ~ntupleClass_MC();
     virtual Int_t    Cut(Long64_t entry);
     virtual Int_t    GetEntry(Long64_t entry);
@@ -446,9 +447,10 @@ public :
 #endif
 
 #ifdef ntupleClass_MC_cxx
-ntupleClass_MC::ntupleClass_MC(TTree *tree) : fChain(0)
+ntupleClass_MC::ntupleClass_MC(TTree *tree, TString fname) : fChain(0)
 {
    Init(tree);
+   fileName=fname;
 }
 
 ntupleClass_MC::~ntupleClass_MC()
