@@ -23,6 +23,7 @@ class ntupleClass_Control {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
+   TString    fileName;//output filename given in Analysis.cpp
 
     // Fixed size dimensions of array or collections stored in the TTree if any.
     
@@ -376,7 +377,7 @@ public :
     TBranch        *b_dxyErr_mu2;   //!
     TBranch        *b_dxyErr_mu3;   //!
  
-   ntupleClass_Control(TTree *tree);
+   ntupleClass_Control(TTree *tree, TString fname);
     virtual ~ntupleClass_Control();
     virtual Int_t    Cut(Long64_t entry);
     virtual Int_t    GetEntry(Long64_t entry);
@@ -449,9 +450,10 @@ public :
 #endif
 
 #ifdef ntupleClass_Control_cxx
-ntupleClass_Control::ntupleClass_Control(TTree *tree) : fChain(0)
+ntupleClass_Control::ntupleClass_Control(TTree *tree, TString fname) : fChain(0)
 {
    Init(tree);
+   fileName=fname;
 }
 
 ntupleClass_Control::~ntupleClass_Control()

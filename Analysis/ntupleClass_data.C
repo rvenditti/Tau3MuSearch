@@ -35,10 +35,8 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     cutevt[0] = nentries;
     Fill_CutName(listCut);
     // Creation of the output file & final tree
-    TString filename = "../AnalysedTree/AnalysedTree_cat_3loose_Data"; filename += datasetName;
-    if(strcmp(type, "data_bkg") == 0) filename += "_Bkg";
-    filename += ".root";
-    TFile *fout = new TFile(filename, "RECREATE");
+    TString root_fileName = fileName;
+    TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *treeA = new TTree("FinalTreeA_Bkg","FinalTreeA_Bkg");
     TTree *treeB = new TTree("FinalTreeB_Bkg","FinalTreeB_Bkg");

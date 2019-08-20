@@ -43,8 +43,8 @@ void ntupleClass_Control::LoopControl(){
     Fill_particleName(pId);
     Fill_CutName(listCut);
     // Creation of the output file
-    TString fileout = "../AnalysedTree/Control_new/AnalysedTree_2loose_MC_DsPhiPi.root";
-    TFile *fout = new TFile(fileout, "RECREATE");
+    TString root_fileName = fileName;
+    TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
     TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
@@ -100,7 +100,7 @@ void ntupleClass_Control::LoopControl(){
     // Creation of total histograms
     TH1I *hCutEff = new TH1I("CutEff_Ntriplets", "CutEff_Ntriplets", NCUTS , 0.5, (NCUTS+0.5));
     TH1I *hCutEffEvt = new TH1I("CutEff_NEvents", "CutEff_NEvents", NCUTS , 0.5, (NCUTS+0.5));
-    
+   
     //Loop over the events
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         ntripl = 0; trInd = 0; int cutevt2[NCUTS] = {0};
@@ -326,10 +326,8 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     Fill_particleName(pId);
     Fill_CutName(listCut);
     // Creation of the output file
-    TString filename = "../AnalysedTree/Control_new/AllNew/AnalysedTree_2loose_DsPhiPi_Data"; filename += datasetName;
-    if(strcmp(type, "data_control_sgn") == 0) filename += "_sgn.root";
-    if(strcmp(type, "data_control_bkg") == 0) filename += "_bkg.root";
-    TFile *fout = new TFile(filename, "RECREATE");
+    TString root_fileName = fileName;
+    TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
     TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
@@ -431,7 +429,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                         // CUT 7 : Additional conditions on triplet mass
-                                        if((strcmp(type, "data_control_sgn") == 0 && Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01) || (strcmp(type, "data_control_bkg") == 0 && Triplet2_Mass->at(j) >= 1.7 && Triplet2_Mass->at(j) <= 1.8)){
+                                        if((strcmp(type, "data_control_sgn") == 0 && Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01) || (strcmp(type, "data_control_bkg") == 0 && Triplet2_Mass->at(j) >= 1.7 && Triplet2_Mass->at(j) <= 1.8) || strcmp(type, "data_control") == 0 ){
                                             Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                             // CUT 8 : Trigger matching
                                             if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03){
