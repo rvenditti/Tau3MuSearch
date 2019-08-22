@@ -431,6 +431,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                         // CUT 7 : Additional conditions on triplet mass
                                         if((strcmp(type, "data_control_sgn") == 0 && Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01) || (strcmp(type, "data_control_bkg") == 0 && Triplet2_Mass->at(j) >= 1.7 && Triplet2_Mass->at(j) <= 1.8) || strcmp(type, "data_control") == 0 ){
                                             Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
+                                            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                             // CUT 8 : Trigger matching
                                             if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03){
                                                Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;

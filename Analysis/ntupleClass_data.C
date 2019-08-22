@@ -165,8 +165,9 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                                                 //CUT 7: VETO on Omega(782) mass
                                                 if(isPairNotAOmega(dimu, sigmaOmega) == true){
                                                     Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
+                                                    FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                     //CUT 8: Trigger Matching
-                                                    if(1==1){
+                                                    if(Mu1_dRtriggerMatch->at(j)<0.03 && Mu2_dRtriggerMatch->at(j)<0.03 && Mu3_dRtriggerMatch->at(j)<0.03){
                                                        Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
                                                     }
                                                 }

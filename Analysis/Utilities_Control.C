@@ -138,7 +138,7 @@ void ntupleClass_Control::Fill_CutName(TString listCut[NCUTS]){
     listCut[4] = "Dimuon mass";
     listCut[5] = "Long.IPTrack";
     listCut[6] = "Trans.IPTrack";
-    listCut[7] = "TriplMass conditions";
+    listCut[7] = "Add Inv Mass conditions";
     listCut[8] = "TriggerMatching";
 }
 
