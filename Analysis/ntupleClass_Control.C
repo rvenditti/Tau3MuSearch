@@ -1,5 +1,5 @@
 #define ntupleClass_Control_cxx
-#define NCUTS 9
+#define NCUTS 11
 #define NPARTICLES 560
 #define NMU_C 2
 #define NTOT 3
@@ -24,8 +24,10 @@
 // * cut[4] -> Invariant dimuon mass in (1-1.04) GeV
 // * cut[5] -> Longitudianl IP of the track w.r.t. the beam spot < 20 cm
 // * cut[6] -> Transverse IP of the track w.r.t. the beam spot < 0.3 cm
-// * cut[7] -> Additional conditions on the triplet mass
-// * cut[8] -> TriggerMatching
+// * cut[7] -> TriggerMatching
+// * cut[8] -> cut on invariant mass: sgn
+// * cut[9] -> cut on invariant mass: bkg
+// * cut[10] -> no cut on invariant mass
 
 void ntupleClass_Control::LoopControl(){
     if (fChain == 0) return;
@@ -146,13 +148,10 @@ void ntupleClass_Control::LoopControl(){
                                     if (Track_dxy->at(mu[2]) < 0.3){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-                                        // CUT 7 : Null at the moment
-                                        if(1 == 1){
-                                            Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
-                                            // CUT 8 : Trigger matching
-                                            if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03){
-                                                Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
-                                            }
+                                        // CUT 7 : Trigger matching
+                                        if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03){
+                                            Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
+                                            FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                         }
                                     }
                                 }
@@ -167,6 +166,7 @@ void ntupleClass_Control::LoopControl(){
             if(cutevt2[k] > 0) cutevt[k]++;
         }
         // Histo N. triplets passed for each event
+        cout<<"ntripl = "<<ntripl<<endl;
         hNtripl->Fill(ntripl);
         if(ntripl > 0) {
             cutevt[NCUTS-1]++; cut[NCUTS-1]++;
@@ -175,6 +175,17 @@ void ntupleClass_Control::LoopControl(){
             MatchIndex("ID", ind, mu_Ind, mu);
             TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
             Fill_DimuonMass(mu_Ind, mu, dimu);
+
+
+            if(Triplet2_Mass->at(ind) >= 1.93 && Triplet2_Mass->at(ind) <= 2.01) {
+               //plot sgn
+               FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-3, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                }
+            else if(Triplet2_Mass->at(ind) >= 1.7 && Triplet2_Mass->at(ind) <= 1.8){
+               //plot bkg
+               FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-2, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+               }
+            //plot totale
             FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             // Resolution & final histograms
             MatchIndex("Gen", ind, mu_Ind, muGen);
@@ -222,88 +233,6 @@ void ntupleClass_Control::LoopControl(){
 }
 
 // #########################################  END DsPhiPi ANALYSIS CUTFLOW
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -428,14 +357,10 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                     if (Track_dxy->at(mu[2]) < 0.3){
                                         Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                         FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-                                        // CUT 7 : Additional conditions on triplet mass
-                                        if((strcmp(type, "data_control_sgn") == 0 && Triplet2_Mass->at(j) >= 1.93 && Triplet2_Mass->at(j) <= 2.01) || (strcmp(type, "data_control_bkg") == 0 && Triplet2_Mass->at(j) >= 1.7 && Triplet2_Mass->at(j) <= 1.8) || strcmp(type, "data_control") == 0 ){
-                                            Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
+                                        // CUT 7 : Trigger matching
+                                        if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03 ){
+                                            Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
                                             FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-                                            // CUT 8 : Trigger matching
-                                            if(Mu01_dRtriggerMatch->at(j)<0.03 && Mu02_dRtriggerMatch->at(j)<0.03 && Tr_dRtriggerMatch->at(j)<0.03){
-                                               Ncut++; ntripl++; triplIndex[trInd] = j; trInd++;
-                                            }
                                         }
                                     }
                                 }
@@ -451,6 +376,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
         }
         // Histo N. triplets passed for each event
         hNtripl->Fill(ntripl);
+        cout<<"ntripl = "<<ntripl<<endl;
         if(ntripl > 0) {
             cutevt[NCUTS-1]++; cut[NCUTS-1]++;
             ind = BestTripletFinder(triplIndex, ntripl);
@@ -458,6 +384,19 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
             MatchIndex("ID", ind, mu_Ind, mu);
             TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
             Fill_DimuonMass(mu_Ind, mu, dimu);
+
+            if(Triplet2_Mass->at(ind) >= 1.93 && Triplet2_Mass->at(ind) <= 2.01) {
+               //plot sgn
+               cout<<"Sgn region, NCUTS-3 = "<<NCUTS-3<<endl;
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            }
+            else if(Triplet2_Mass->at(ind) >= 1.7 && Triplet2_Mass->at(ind) <= 1.8){
+               //plot bkg
+               cout<<"Bkg region, NCUTS-2 = "<<NCUTS-2<<endl;
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            }
+            //plot totale
+            cout<<"Total region, NCUTS-1 = "<<NCUTS-1<<endl;
             FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero, hChi2VertexNorm, hSegmComp, hDeltaR, hTrIPSign);
             hPileUp_AC->Fill(nPileUpInt);

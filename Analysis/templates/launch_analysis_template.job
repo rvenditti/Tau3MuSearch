@@ -34,6 +34,8 @@ export STORE=/lustre/cms/store/user/fsimone/
 cd /lustrehome/fsimone/TreeMakerRosma/CMSSW_9_4_4/src
 #cmsenv
 eval `scramv1 runtime -sh`
+#set env. variables if needed
+#export HOME=/cvmfs/cms.cern.ch/slc7_amd64_gcc630/lcg/root/6.10.08/etc/
 cd Analysis
 
 #compile

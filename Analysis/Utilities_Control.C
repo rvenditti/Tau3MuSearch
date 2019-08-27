@@ -1,6 +1,6 @@
 
 #define ntupleClass_Control_cxx
-#define NCUTS 9
+#define NCUTS 11
 #define NPARTICLES 560
 #define NMU_C 2
 #define NTOT 3
@@ -138,8 +138,10 @@ void ntupleClass_Control::Fill_CutName(TString listCut[NCUTS]){
     listCut[4] = "Dimuon mass";
     listCut[5] = "Long.IPTrack";
     listCut[6] = "Trans.IPTrack";
-    listCut[7] = "Add Inv Mass conditions";
-    listCut[8] = "TriggerMatching";
+    listCut[7] = "TriggerMatching";
+    listCut[8] = "TripletMass_no_cut";
+    listCut[9] = "TripletMass_sgn";
+    listCut[10] = "TripletMass_bkg";
 }
 
 void ntupleClass_Control::Fill_DimuonMass(Int_t mu_Ind[NTOT], Int_t mu[NTOT], Double_t dimu[NTOT]){
