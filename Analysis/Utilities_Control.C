@@ -94,7 +94,7 @@ void ntupleClass_Control::Draw_PdgIdCanvas_2D(TCanvas *canv, TH2I *hist, Int_t I
             l++;
         }
     }
-    //gStyle->SetPalette(kBlackBody);
+    gStyle->SetPalette(kBlackBody);
     hist->SetMarkerSize(0.7);
     hist->GetXaxis()->SetTitleOffset(0.8);
     hist->GetYaxis()->SetTitleOffset(0.8);
