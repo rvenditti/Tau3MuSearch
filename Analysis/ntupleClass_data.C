@@ -16,6 +16,11 @@
 // * cut[6] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
 // * cut[7] -> Cut on the dimuon mass w.r.t. Omega(782) per pairs of mu of the triplet w/ opposite sign
 // * cut[8] -> Trigger Matching
+// * cut[9] -> cut on invariant mass: sgn
+// * cut[10] -> cut on invariant mass: bkg
+// * cut[11] -> no cut on invariant mass
+
+
 
 void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     
@@ -212,6 +217,15 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             }
             
             Fill_DimuonMass(mu_Ind, mu, dimu);
+            if(Triplet2_Mass->at(ind) >= 1.73 && Triplet2_Mass->at(ind) <= 1.82) {
+               //plot sgn
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            }
+            else if( (Triplet2_Mass->at(ind) >= 1.65 && Triplet2_Mass->at(ind) <= 1.73) || (Triplet2_Mass->at(ind) >= 1.82 && Triplet2_Mass->at(ind) <= 1.90) ){
+               //plot bkg
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            }
+            //plot totale
             FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             //
             for(int k=0; k<NMU; k++){

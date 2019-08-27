@@ -1,5 +1,5 @@
 #define ntupleClass_MC_cxx
-#define NCUTS 9
+#define NCUTS 12
 #define NPARTICLES 560
 #define NMU 3
 #define mumass 0.1056583715
@@ -242,6 +242,15 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
             if(muGen[0] != -999 && muGen[1] != -999 && muGen[2] != -999) {
                 NgoodTripl++;
                 Fill_DimuonMass(mu_Ind, mu, dimu);
+
+                if(Triplet2_Mass->at(ind) >= 1.73 && Triplet2_Mass->at(ind) <= 1.82) {
+                  //plot sgn
+                  FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-3, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                  }
+                else if( (Triplet2_Mass->at(ind) >= 1.65 && Triplet2_Mass->at(ind) <= 1.73) || (Triplet2_Mass->at(ind) >= 1.82 && Triplet2_Mass->at(ind) <= 1.90) ){
+                  //plot bkg
+                   FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-2, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                }
                 FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                 FillHistoResoPt_AC(muGen, hPtRes_AC, hPtRes_AC_mu, hPtResBarrel_AC, hPtResBarrel_AC_mu, hPtResEndcap_AC, hPtResEndcap_AC_mu);
                 StudyOnTriplet("good", ind, mu, hDeltaX, hDeltaY, hDeltaZ, hPt_tripl_good);

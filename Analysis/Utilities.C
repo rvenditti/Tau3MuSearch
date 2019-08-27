@@ -1,6 +1,6 @@
 
 #define ntupleClass_MC_cxx
-#define NCUTS 9
+#define NCUTS 12
 #define NPARTICLES 560
 #define NMU 3
 #define mumass 0.1056583715 // Muon mass in GeV
@@ -146,6 +146,9 @@ void ntupleClass_MC::Fill_CutName(TString listCut[NCUTS]){
     listCut[6] = "VETO #Phi mass";
     listCut[7] = "VETO #omega mass";
     listCut[8] = "Trigger Matching";
+    listCut[9] = "TripletMass_no_cut";
+    listCut[10] = "TripletMass_sgn";
+    listCut[11] = "TripletMass_bkg";
 }
 
 void ntupleClass_MC::Fill_DimuonMass(Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t dimu[NMU]){
