@@ -217,11 +217,11 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             }
             
             Fill_DimuonMass(mu_Ind, mu, dimu);
-            if(Triplet2_Mass->at(ind) >= 1.73 && Triplet2_Mass->at(ind) <= 1.82) {
+            if(Triplet_Mass->at(ind) >= 1.73 && Triplet_Mass->at(ind) <= 1.82) {
                //plot sgn
                FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
-            else if( (Triplet2_Mass->at(ind) >= 1.65 && Triplet2_Mass->at(ind) <= 1.73) || (Triplet2_Mass->at(ind) >= 1.82 && Triplet2_Mass->at(ind) <= 1.90) ){
+            else if( (Triplet_Mass->at(ind) >= 1.65 && Triplet_Mass->at(ind) <= 1.73) || (Triplet_Mass->at(ind) >= 1.82 && Triplet_Mass->at(ind) <= 1.90) ){
                //plot bkg
                FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
