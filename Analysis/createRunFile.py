@@ -53,13 +53,14 @@ if args.anatype == 'control':
    if args.dataset == 'data' and args.run == '2017B':
       path = ''
    if args.dataset == 'data' and args.run == '2017C':
-      path = ''
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017C_31July_TM/190807_214658'
    if args.dataset == 'data' and args.run == '2017D':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017D_31July_TM/190802_092450'
    if args.dataset == 'data' and args.run == '2017E':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017E_31July_TM/190805_091837'
    if args.dataset == 'data' and args.run == '2017F':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_31July_TM/190731_083038'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_31July_TM/190731_083038'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_19Aug_newSplit/'
 if args.dataset == 'MC' and args.MCprocess == 'DsTau3Mu':
    path = ''
 if args.dataset == 'MC' and args.MCprocess == 'B0Tau3Mu':
@@ -84,10 +85,12 @@ final_script.write("cd "+startTime+"\n")
 
 #loop to generate one .cpp+executable+batch system conf file for each group of "n" files
 n_chunk = len(fileList)//args.n
+print('Number of files is {0:2d}'.format(len(fileList)))
+print('Number of jobs is {0:2d}'.format(n_chunk+1))
 for file_index in range(n_chunk+1):
       chunk = '' 
       for idx, l in enumerate(fileList):
-         if idx < (args.n*(1 + file_index) -1) and idx > args.n*file_index:
+         if idx < args.n*(file_index+1) and idx >= args.n*file_index:
              l = l.rstrip()
              l = '        chain->AddFile("{}");\n'.format(l)
              chunk = chunk + l
