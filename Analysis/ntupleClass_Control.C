@@ -166,7 +166,6 @@ void ntupleClass_Control::LoopControl(){
             if(cutevt2[k] > 0) cutevt[k]++;
         }
         // Histo N. triplets passed for each event
-        cout<<"ntripl = "<<ntripl<<endl;
         hNtripl->Fill(ntripl);
         if(ntripl > 0) {
             cutevt[NCUTS-1]++; cut[NCUTS-1]++;
@@ -376,7 +375,6 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
         }
         // Histo N. triplets passed for each event
         hNtripl->Fill(ntripl);
-        cout<<"ntripl = "<<ntripl<<endl;
         if(ntripl > 0) {
             cutevt[NCUTS-1]++; cut[NCUTS-1]++;
             ind = BestTripletFinder(triplIndex, ntripl);
@@ -387,16 +385,13 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
 
             if(Triplet2_Mass->at(ind) >= 1.93 && Triplet2_Mass->at(ind) <= 2.01) {
                //plot sgn
-               cout<<"Sgn region, NCUTS-3 = "<<NCUTS-3<<endl;
                FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
             else if(Triplet2_Mass->at(ind) >= 1.7 && Triplet2_Mass->at(ind) <= 1.8){
                //plot bkg
-               cout<<"Bkg region, NCUTS-2 = "<<NCUTS-2<<endl;
                FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
             //plot totale
-            cout<<"Total region, NCUTS-1 = "<<NCUTS-1<<endl;
             FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero, hChi2VertexNorm, hSegmComp, hDeltaR, hTrIPSign);
             hPileUp_AC->Fill(nPileUpInt);
