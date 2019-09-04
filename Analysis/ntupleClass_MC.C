@@ -153,7 +153,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
         if(jentry == 147384)	continue;
 	ntripl = 0, trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
-        fChain->GetEntry(ientry);
+        fChain->GetTree()->GetEntry(ientry);
         //Check number of tracks in the primary vertex
         if(PV_NTracks > NMU){
             hPileUp_BC->Fill(nPileUpInt);

@@ -16,9 +16,9 @@
 // * cut[6] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
 // * cut[7] -> Cut on the dimuon mass w.r.t. Omega(782) per pairs of mu of the triplet w/ opposite sign
 // * cut[8] -> Trigger Matching
-// * cut[9] -> cut on invariant mass: sgn
-// * cut[10] -> cut on invariant mass: bkg
-// * cut[11] -> no cut on invariant mass
+// * cut[9] -> Filling HistoStepByStep if invariant mass is in SB and HLT fired and L1Double fired
+// * cut[10] -> Filling HistoStepByStep if invariant mass is in SB and HLT fired and L1Double fired
+// * cut[11] -> Filling HistoStepByStep if HLT and L1Double OR L1Triple fired, no cut on invariant mass
 
 
 
@@ -119,7 +119,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         ntripl = 0, trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
-        fChain->GetEntry(ientry);
+        fChain->GetTree()->GetEntry(ientry);
         hPileUp_BC->Fill(nPileUpInt);
         hNPrVert_BC->Fill(PVCollection_Size);
         //Loop over the TRIPLETS
@@ -151,7 +151,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                                 Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                 FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                 //CUT 3: check condition on trimuon mass
-                                if((strcmp(type, "data") == 0 && Triplet_Mass->at(j) > massmin && Triplet_Mass->at(j) < massmax) || ((strcmp(type, "data_bkg") == 0) && ((Triplet_Mass->at(j) >= 1.65 && Triplet_Mass->at(j) < 1.73) || (Triplet_Mass->at(j) > 1.82 && Triplet_Mass->at(j) <= 1.9)))){
+                                if(Triplet_Mass->at(j) > massmin && Triplet_Mass->at(j) < massmax){
                                     Ncut++; cut[Ncut]++; cutevt2[Ncut]++;
                                     FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                     //CUT 4: Loop on PAIRS of muons of the triplet & check DeltaR
@@ -197,7 +197,36 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             ind = BestTripletFinder(triplIndex, ntripl);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
-            if(strcmp(type, "data_bkg") == 0){
+
+            //Check HLT and L1 decision
+            bool hlt_fired = 0;
+            bool l1double_fired = 0;
+            bool l1triple_fired = 0;
+            cout<<"evt "<<evt<<endl;
+            for(int h=0; h<Trigger_hltname->size(); h++) {
+               TString hltName = Trigger_hltname->at(h);
+               if(strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0 && Trigger_hltdecision->at(h) == 1) {
+                  hlt_fired = 1;
+               }
+            }
+            cout<<" ========= debug ========= "<<endl;
+            for(int k=0; k<Trigger_l1name->size(); k++) {
+               TString l1Name = Trigger_l1name->at(k);
+               cout<<l1Name<<endl;
+               //HLT + L1_DoubleMu
+               if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0 && Trigger_l1decision->at(k) == 1) l1double_fired = 1;
+               //HLT + L1_TripleMu
+               if( ( strcmp(l1Name, "L1_TripleMu_5_3_0_DoubleMu_5_3_OS_Mass_Max17") == 0 || strcmp(l1Name, "L1_TripleMu_5SQ_3SQ_0_DoubleMu_5_3_SQ_OS_Mass_Max9") == 0 ) && Trigger_l1decision->at(k) == 1)  l1triple_fired = 1;
+            }
+
+            bool isTrigger_forAna = 0;
+            if( hlt_fired == 1 && ( l1double_fired == 1 || l1triple_fired == 1 ) ) isTrigger_forAna = 1;
+
+            bool isSB_tripletMass = 0;
+            if( (Triplet_Mass->at(ind) >= 1.65 && Triplet_Mass->at(ind) <= 1.73) || (Triplet_Mass->at(ind) >= 1.82 && Triplet_Mass->at(ind) <= 1.90) ) isSB_tripletMass = 1;
+            
+           //if(strcmp(type, "data_bkg") == 0){
+            if(strcmp(type, "data_bkg") == 0 && isTrigger_forAna && isSB_tripletMass){
                 double tripReso = ResoTriplMass(mu_Ind, mu);
                 if(tripReso < catA){
                     hTripMassA->Fill(Triplet_Mass->at(ind));
@@ -217,26 +246,27 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             }
             
             Fill_DimuonMass(mu_Ind, mu, dimu);
-            if(Triplet_Mass->at(ind) >= 1.73 && Triplet_Mass->at(ind) <= 1.82) {
-               //plot sgn
-               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+
+            if( isSB_tripletMass && hlt_fired == 1 && l1double_fired == 1  ){
+               //plot bkg for yield l1DoubleMu
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
-            else if( (Triplet_Mass->at(ind) >= 1.65 && Triplet_Mass->at(ind) <= 1.73) || (Triplet_Mass->at(ind) >= 1.82 && Triplet_Mass->at(ind) <= 1.90) ){
-               //plot bkg
-               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2,hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            if( isSB_tripletMass && hlt_fired == 1 && l1triple_fired == 1  ){
+               //plot bkg for yield l1TripleMu
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
-            //plot totale
-            FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
-            //
-            for(int k=0; k<NMU; k++){
-                hIsolation_03->Fill(Muon_emEt03->at(mu[k]));
-                hIsolation_05->Fill(Muon_emEt05->at(mu[k]));
+            if ( isTrigger_forAna ) {
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+               for(int k=0; k<NMU; k++){
+                   hIsolation_03->Fill(Muon_emEt03->at(mu[k]));
+                   hIsolation_05->Fill(Muon_emEt05->at(mu[k]));
+               }
+               FillHistoResoTriplMass(mu_Ind, mu, hMassTriRes, hMassTriResBarrel, hMassTriResEndcap);
+               FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero);
+               hPileUp_AC->Fill(nPileUpInt);
+               hNPrVert_AC->Fill(PVCollection_Size);
             }
-            FillHistoResoTriplMass(mu_Ind, mu, hMassTriRes, hMassTriResBarrel, hMassTriResEndcap);
-            FillHistoAC(ind, mu, hChi2Track, hNMatchedStat, hFlightDist, hFlightDist_Signif, hFlightDistvsP, hPtErrOverPt, hmassdi, dimu, hmassQuad, hmassQuad_Zero);
-            hPileUp_AC->Fill(nPileUpInt);
-            hNPrVert_AC->Fill(PVCollection_Size);
-            // Trigger requirements
+            // Filling histogram with triplet mass if hlt is fired AND (l1_DoubleMu || l1_TripleMu) is fireds
             TriggerRequirements(ind, hTripTriggerMatched);
         }
         if (ientry < 0) break;
