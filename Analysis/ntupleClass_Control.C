@@ -107,7 +107,7 @@ void ntupleClass_Control::LoopControl(){
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         ntripl = 0; trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
-        fChain->GetEntry(ientry);
+        fChain->GetTree()->GetEntry(ientry);
         hPileUp_BC->Fill(nPileUpInt);
         hNPrVert_BC->Fill(PVCollection_Size);
 
@@ -316,7 +316,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         ntripl = 0; trInd = 0; int cutevt2[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
-        fChain->GetEntry(ientry);
+        fChain->GetTree()->GetEntry(ientry);
         hPileUp_BC->Fill(nPileUpInt);
         hNPrVert_BC->Fill(PVCollection_Size);
         //Loop over the TRIPLETS

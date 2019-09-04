@@ -1018,7 +1018,7 @@ void ntupleClass_MC::TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched){
     nMatches = 0;
     for(int h=0; h<Trigger_l1name->size(); h++) {
         l1Name = Trigger_l1name->at(h);
-        if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0 || strcmp(l1Name, "L1_TripleMu_5_3_0_DoubleMu_5_3_OS_Mass_Max1p7") == 0) {
+        if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0 || strcmp(l1Name, "L1_TripleMu_5SQ_3SQ_0_DoubleMu_5_3_SQ_OS_Mass_Max9") == 0 || strcmp(l1Name, "L1_TripleMu_5_3_0_DoubleMu_5_3_OS_Mass_Max17") == 0) {
             nMatches++;
             l1_ind = h;
         }
