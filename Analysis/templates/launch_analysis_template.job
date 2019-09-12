@@ -3,43 +3,26 @@
 export CVSROOT=:pserver:anonymous@cmscvs.cern.ch:/cvs_server/repositories/CMSSW
 export CVSROOT=":ext:fsimone@lxplus.cern.ch:/afs/cern.ch/work/c/cmsbuild/public/cvs/CMSSW"
 export CVS_RSH=ssh
-# setenv CVSROOT ":ext:fsimone@lxplus.cern.ch:/afs/cern.ch/work/c/cmsbuild/public/cvs/CMSSW"
-# setenv CVS_RSH ssh
-#export SCRAM_ARCH=slc6_amd64_gcc630
-#source /opt/exp_soft/cms/cmsset_default.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-
 
 source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env_3_2.sh
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/exp_soft/crab/pbs_python-3.5.0/lib
-#source /opt/exp_soft/crab/CRAB_2_10_5_patch1/crab.sh
-source /cvmfs/cms.cern.ch/crab3/crab.sh
 
-#source /afs/cern.ch/cms/ccs/wm/scripts/Crab/crab.sh
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
 export STORE=/lustre/cms/store/user/fsimone/
-### Cernlib
-#export CERN=/afs/in2p3.fr/cernlib/i386_linux24/pro/lib
-#export CERN=/opt/exp_soft/CERN/2006/slc4_ia32_gcc4/lib/
-#export CERN=/opt/exp_soft/CERN/x86_64/2006b/x86_64-slc5-gcc41-opt/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/exp_soft/CERN/x86_64/2006b/x86_64-slc5-gcc41-opt/lib
 
- alias ls='ls --color'
-#source  /opt/exp_soft/root/root_v5.26.00b/bin/thisroot.sh
-#source  /opt/exp_soft/root/root_v5.34.00/bin/thisroot.sh
-#source  /opt/exp_soft/root/root_v5.34.07/bin/thisroot.sh
-#source /afs/cern.ch/sw/lcg/external/gcc/4.7/x86_64-slc5/setup.sh
-#source /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.21/x86_64-slc5-gcc47-opt/root/bin/thisroot.sh
-
-cd /lustrehome/fsimone/TreeMakerRosma/CMSSW_9_4_4/src
-#cmsenv
+cd /lustrehome/fsimone/TreeMakerRosma/CMSSW_9_4_4/src/
 eval `scramv1 runtime -sh`
 #set env. variables if needed
-#export HOME=/cvmfs/cms.cern.ch/slc7_amd64_gcc630/lcg/root/6.10.08/etc/
-cd Analysis
+export HOME=/cvmfs/cms.cern.ch/slc7_amd64_gcc630/lcg/root/6.10.08/etc/
+cd /lustrehome/fsimone/Analysis
+#export ROOTSYS=/lustrehome/fsimone/root/
+#source $ROOTSYS/bin/thisroot.sh 
+#export HOME=$ROOTSYS/etc/
+#cd /lustrehome/fsimone/Analysis
 
 #compile
-#g++ -I $ROOTSYS/include -I $ROOTSYS/include Analysis_chunk*.cpp `root-config --glibs` `root-config --libs` `root-config --cflags`  -L $ROOTSYS/lib -o executable*
+#g++ -I $ROOTSYS/include Analysis_chunk*.cpp `root-config --glibs` `root-config --libs` `root-config --cflags`  -L $ROOTSYS/lib -o executable*
 sleep 1
 
 #execute

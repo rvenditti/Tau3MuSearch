@@ -14,7 +14,7 @@ parser.add_argument("anatype", type=str, choices=['tau3mu', 'control'], help="Sp
 parser.add_argument("--run", type=str, default='', choices=['2017B', '2017C', '2017D', '2017E', '2017F'], help="run in data")
 parser.add_argument("--n", type=int, default=255, help="number of .root files per job")
 parser.add_argument("--massregion", type=str, default='', choices=['sgn', 'bkg'], help="Specify invariant mass range")
-parser.add_argument("--MCprocess", type=str, default='', choices=['DsTau3Mu', 'B0Tau3Mu', 'BpTau3Mu', 'DsPhiPi', 'MinBias'], help="process in Monte Carlo")
+parser.add_argument("--MCprocess", type=str, default='', choices=['Ds', 'B0', 'Bp', 'DsPhiPi', 'MiniBias'], help="process in Monte Carlo")
 args = parser.parse_args()
 
 #prepare output filename  and option string
@@ -40,33 +40,32 @@ else:
 
 if args.anatype == 'tau3mu':
    if args.dataset == 'data' and args.run == '2017B':
-      path = ''
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017B_AOD_v3/190807_095259'
    if args.dataset == 'data' and args.run == '2017C':
-      path = ''
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017C_AOD_v3/190807_214813'
    if args.dataset == 'data' and args.run == '2017D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017D_AOD_v3/190802_092640'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017D_AOD_v3_newSplit'
    if args.dataset == 'data' and args.run == '2017E':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017E_AOD_v3/190805_092853'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017E_AOD_v3_newSplit'
    if args.dataset == 'data' and args.run == '2017F':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v3/190731_084012'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v3_newSplit'
 if args.anatype == 'control':
    if args.dataset == 'data' and args.run == '2017B':
-      path = ''
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017B_31July_TM/190807_091820'
    if args.dataset == 'data' and args.run == '2017C':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017C_31July_TM/190807_214658'
    if args.dataset == 'data' and args.run == '2017D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017D_31July_TM/190802_092450'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017D_31July_TM_newSplit/190829_123749'
    if args.dataset == 'data' and args.run == '2017E':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017E_31July_TM/190805_091837'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017E_31July_TM_newSplit/190902_083458'
    if args.dataset == 'data' and args.run == '2017F':
-      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_31July_TM/190731_083038'
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_19Aug_newSplit/'
-if args.dataset == 'MC' and args.MCprocess == 'DsTau3Mu':
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_19Aug_newSplit/190819_222432'
+if args.dataset == 'MC' and args.MCprocess == 'Ds':
    path = ''
-if args.dataset == 'MC' and args.MCprocess == 'B0Tau3Mu':
-   path = ''
-if args.dataset == 'MC' and args.MCprocess == 'BpTau3Mu':
-   path = ''
+if args.dataset == 'MC' and args.MCprocess == 'B0':
+   path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v3_newSplit/190905_085548'
+if args.dataset == 'MC' and args.MCprocess == 'Bp':
+   path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v3_newSplit/'
 if args.dataset == 'MC' and args.MCprocess == 'DsPhiPi':
    path = '/lustre/cms/store/user/fsimone/histoSkim_twoMuonTrack_MCDsPhiPi'
 
@@ -119,7 +118,7 @@ for file_index in range(n_chunk+1):
           for lb2 in buf2:
               if lb2 == "#compile\n":
                   launch_outfile.write("cd "+startTime+"\n")
-                  launch_outfile.write("g++ -I $ROOTSYS/include -I $ROOTSYS/include ../"+cpp_filename+" `root-config --glibs` `root-config --libs` `root-config --cflags`  -L $ROOTSYS/lib -o executable"+str(file_index)+"\n")
+                  launch_outfile.write("g++ -I $ROOTSYS/include ../"+cpp_filename+" `root-config --glibs` `root-config --libs` `root-config --cflags` -lTMVA -L $ROOTSYS/lib -o executable"+str(file_index)+"\n")
               elif lb2 == "#execute\n":
                   launch_outfile.write('./executable'+str(file_index)+option_string+'\n')
               else: launch_outfile.write(lb2)
