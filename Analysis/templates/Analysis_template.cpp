@@ -52,8 +52,8 @@ int main(int narg, char** arg){
         if (strcmp(datasetName, "Ds") == 0){
             cout << "MC Dataset : Ds -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-            //AddFile_MCDsTau3Mu_tau3mu
-            TString fileout = "AddOutput_MCDsTau3Mu_tau3mu.root";
+        //AddFile_MCDs_tau3mu
+            TString fileout = "AddOutput_MCDs_tau3mu.root";
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
@@ -62,8 +62,8 @@ int main(int narg, char** arg){
         if (strcmp(datasetName, "B0") == 0){
             cout << "MC Dataset : B0 -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-            //AddFile_MCB0Tau3Mu_tau3mu
-            TString fileout = "AddOutput_MCB0Tau3Mu_tau3mu.root";
+        //AddFile_MCB0_tau3mu
+            TString fileout = "AddOutput_MCB0_tau3mu.root";
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
@@ -72,8 +72,8 @@ int main(int narg, char** arg){
         if (strcmp(datasetName, "Bp") == 0){
             cout << "MC Dataset : Bp -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-            //AddFile_MCBpTau3Mu_tau3mu
-            TString fileout = "AddOutput_MCBpTau3Mu_tau3mu.root";
+        //AddFile_MCBp_tau3mu
+            TString fileout = "AddOutput_MCBp_tau3mu.root";
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
@@ -82,8 +82,8 @@ int main(int narg, char** arg){
         if(strcmp(datasetName, "MiniBias") == 0){
             cout << "Minimum Bias Dataset " << endl << endl;
             TChain* chain = new TChain("TreeMakerBkg/ntuple");
-            //AddFile_MCMinBias_tau3mu
-            TString fileout = "AddOutput_MCMinBias_tau3mu.root";
+        //AddFile_MCMiniBias_tau3mu
+            TString fileout = "AddOutput_MCMiniBias_tau3mu.root";
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
