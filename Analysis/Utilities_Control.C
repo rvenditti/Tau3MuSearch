@@ -1066,7 +1066,7 @@ Double_t ntupleClass_Control::TreeFin_Angle(Int_t ind){
 void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
     // Fills the tree branches
     Pmu3 = MuonP(Mu02_Pt->at(mu_Ind[1]), Mu02_Eta->at(mu_Ind[1]), Mu02_Phi->at(mu_Ind[1]));
-    cLP = 0; tKink = 0; segmComp = 1; double temp[NMU_C] = {0};
+    cLP = -999; tKink = -999; segmComp = 999; double temp[NMU_C] = {0};
 //    temp[0] = abs(dxy_mu1->at(mu_Ind[0])/ dxyErr_mu1->at(mu_Ind[0]));
 //    temp[1] = abs(dxy_mu2->at(mu_Ind[1])/ dxyErr_mu2->at(mu_Ind[1]));
     d0sig = temp[0];
@@ -1076,8 +1076,8 @@ void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU]
         //  * segmComp MIN
         //  * d0sig MIN
         if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) > cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
-        if (MuonTrkKink->at(mu[k]) > tKink) tKink = MuonTrkKink->at(mu[k]);
-        if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
+        if (MuonTrkKink->at(mu[k]) > tKink)                          tKink = MuonTrkKink->at(mu[k]);
+        if (Muon_segmentCompatibility->at(mu[k]) < segmComp)         segmComp = Muon_segmentCompatibility->at(mu[k]);
         if (temp[k] < d0sig) d0sig = temp[k];
     }
     fv_nC = TripletVtx2_Chi2->at(ind)/3;

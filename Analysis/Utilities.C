@@ -1056,7 +1056,7 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
     // Fills the tree branches
     // 2016 variables
     Pmu3 = MuonP(Mu3_Pt->at(mu_Ind[2]), Mu3_Eta->at(mu_Ind[2]), Mu3_Phi->at(mu_Ind[2]));
-    cLP = 1000; tKink = 0; segmComp = 1; double temp1[NMU] = {0}, temp[NMU] = {0};
+    cLP = -999; tKink = -999; segmComp = 999; double temp1[NMU] = {0}, temp[NMU] = {0};
     temp1[0] = dxy_mu1->at(mu_Ind[0]);
     temp1[1] = dxy_mu2->at(mu_Ind[1]);
     temp1[2] = dxy_mu3->at(mu_Ind[2]);
@@ -1073,7 +1073,7 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
         //  * kink MAX
         //  * segmComp MIN
         //  * d0sig MIN
-        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) < cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
+        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) > cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
         if (Muon_combinedQuality_trkKink->at(mu[k]) > tKink) tKink = Muon_combinedQuality_trkKink->at(mu[k]);
         if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
         if (temp1[k] < d0) d0 = temp1[k];
