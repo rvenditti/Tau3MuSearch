@@ -1,6 +1,5 @@
-
 #define ntupleClass_Control_cxx
-#define NCUTS 11
+#define NCUTS 17
 #define NPARTICLES 560
 #define NMU_C 2
 #define NTOT 3
@@ -105,7 +104,7 @@ void ntupleClass_Control::Draw_PdgIdCanvas_2D(TCanvas *canv, TH2I *hist, Int_t I
 
 void ntupleClass_Control::Draw_PdgIdCanvas_StepByStep(TCanvas *PdgIdCanvas_cut[NCUTS], TH1I *hPdgId_cut[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], TCanvas *PdgIdMotherCanvas_cut[NCUTS], TH1I *hMotherPdgId_cut[NCUTS], Int_t IdsummaryMother[NCUTS][NPARTICLES], TCanvas *PdgIdCanvas2D_cut[NCUTS], TH2I *hPdgId2D_cut[NCUTS], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES], TString pId[NPARTICLES]){
     // This function draws the Pdg histograms
-    for (int i=0; i<NCUTS; i++){
+    for (int i=3; i<NCUTS; i++){
         TString canvName = "PdgId_Daughter_cut"; canvName += i;
         TString canvNameMother = "PdgId_Mother_cut"; canvNameMother += i;
         TString canvName2D = "PdgId2D_cut"; canvName2D += i;
@@ -131,20 +130,26 @@ void ntupleClass_Control::Draw_PdgIdCanvasGen(TCanvas *PdgIdCanvas_Gen, TH1I *hP
 
 void ntupleClass_Control::Fill_CutName(TString listCut[NCUTS]){
     // Init a vector of strings w/ the names of the cuts
-    listCut[0] = "BeforeCuts";
-    listCut[1] = "Mu!=Track";
-    listCut[2] = "#chi^{2} triplet";
-    listCut[3] = "2osMu";
-    listCut[4] = "Dimuon mass";
-    listCut[5] = "Long.IPTrack";
-    listCut[6] = "Trans.IPTrack";
-    listCut[7] = "TriggerMatching";
-    listCut[8] = "TripletMass_no_cut";
-    listCut[9] = "TripletMass_sgn";
-    listCut[10] = "TripletMass_bkg";
+    listCut[0] = "BeforeCuts"; //cut 0
+    listCut[1] = "L1_fired";
+    listCut[2] = "HLT_fired";
+    listCut[3] = "BeforeTripletSelection";
+    listCut[4] = "Mu!=Track & isGlobal";
+    listCut[5] = "#chi^{2} triplet";
+    listCut[6] = "2osMu";
+    listCut[7] = "Dimuon mass";
+    listCut[8] = "Long.IPTrack";
+    listCut[9] = "Trans.IPTrack";
+    listCut[10] = "Null";
+    listCut[11] = "Mu1_TriggerMatching";
+    listCut[12] = "Mu2_TriggerMatching";
+    listCut[13] = "Trk_TriggerMatching";
+    listCut[14] = "TripletMass_sgn";
+    listCut[15] = "TripletMass_bkg";
+    listCut[16] = "TripletMass_no_cut";
 }
 
-void ntupleClass_Control::Fill_DimuonMass(Int_t mu_Ind[NTOT], Int_t mu[NTOT], Double_t dimu[NTOT]){
+void ntupleClass_Control::Compute_DimuonMass(Int_t mu_Ind[NTOT], Int_t mu[NTOT], Double_t dimu[NTOT]){
     // Fills the vector w/ the 3 possible dimuon masses of the muons of the triplet
     double pt[NTOT] = {0}, eta[NTOT] = {0}, phi[NTOT] = {0};
     Fill_MuonAndTrackVariables(mu_Ind, pt, eta, phi);
@@ -195,13 +200,16 @@ void ntupleClass_Control::Fill_ParticleIdSummary(Int_t mu[NTOT], Int_t Idsummary
     }
 }
 
-void ntupleClass_Control::FillHistoAC(Int_t ind, Int_t mu[NTOT], TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NTOT], TH1F *hmassQuad, TH1F *hmassQuad_Zero, TH1D *hChi2VertexNorm, TH1D *hSegmComp, TH1D *hDeltaR, TH1D *hTrIPSign){
+void ntupleClass_Control::FillHistoAC(Int_t ind, Int_t mu[NTOT], TH1F *hMinSegmComp, TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NTOT], TH1F *hmassQuad, TH1F *hmassQuad_Zero, TH1D *hChi2VertexNorm, TH1D *hSegmComp, TH1D *hDeltaR, TH1D *hTrIPSign){
     // Fills the histograms after cuts
+    Double_t segmComp = 999;
     for(int k=0; k<NMU_C; k++){
         hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu[k]));
         hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu[k]));
         hPtErrOverPt->Fill(Muon_ptErrOverPt->at(mu[k]));
+        if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
     }
+    hMinSegmComp->Fill(segmComp);
     hFlightDist->Fill(FlightDistPVSV2->at(ind));
     hFlightDist_Signif->Fill(FlightDistPVSV2_Significance->at(ind));
     double TripletP = MuonP(Triplet2_Pt->at(ind), Triplet2_Eta->at(ind), Triplet2_Phi->at(ind));
@@ -371,66 +379,69 @@ void ntupleClass_Control::FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_
     hist_mass->Fill(Triplet2_Mass->at(ind));
 }
 
-void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU_C], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU_C], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU_C], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake, TH1D *&hChi2VertexNorm, TH1D *&hSegmComp, TH1D *&hDeltaR, TH1D *&hTrIPSign){
+void ntupleClass_Control::InitHistoAC(TString massregion, TH1I *&hNtripl, TH1F *&hMinSegmComp, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU_C], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU_C], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU_C], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake, TH1D *&hChi2VertexNorm, TH1D *&hSegmComp, TH1D *&hDeltaR, TH1D *&hTrIPSign){
     // Init histograms for variables After Cuts
-    hNtripl = new TH1I("Ntripl", "Ntripl", 5, -0.5, 4.5);
+    hNtripl = new TH1I("Ntripl"+massregion, "Ntripl", 5, -0.5, 4.5);
     hNtripl->GetXaxis()->SetTitle("N. triplets survived per event");
     hNtripl->GetYaxis()->SetTitle("N. entries");
-    hChi2Track = new TH1F("Chi2Track", "Chi2Track", 27, -0.3, 5.1); //binning 0.2
+    hMinSegmComp = new TH1F("hMinSegmComp"+massregion, "hMinSegmComp", 55, -0.1, 1);
+    hMinSegmComp->GetXaxis()->SetTitle("Segment Compatibility");
+    hMinSegmComp->GetYaxis()->SetTitle("N. entries");
+    hChi2Track = new TH1F("Chi2Track"+massregion, "Chi2Track", 27, -0.3, 5.1); //binning 0.2
     hChi2Track->GetXaxis()->SetTitle("#chi^{2} Muon Inner track");
     hChi2Track->GetYaxis()->SetTitle("N. muons");
     hChi2Track->Sumw2();
-    hMassTriRes = new TH1D("TriplMassRes", "TriplMassRes", 600, -0.1, 0.1); //binning 0.00033
+    hMassTriRes = new TH1D("TriplMassRes"+massregion, "TriplMassRes", 600, -0.1, 0.1); //binning 0.00033
     hMassTriRes->GetXaxis()->SetTitle("TripletMass Resolution");
     hMassTriRes->GetYaxis()->SetTitle("N. triplets");
     //    hMassTriRes->Sumw2();
-    hMassTriResBarrel = new TH1D("TriplMassRes_Barrel", "TriplMassRes_Barrel", 600, -0.1, 0.1); //binning 0.00033
+    hMassTriResBarrel = new TH1D("TriplMassRes_Barrel"+massregion, "TriplMassRes_Barrel", 600, -0.1, 0.1); //binning 0.00033
     hMassTriResBarrel->GetXaxis()->SetTitle("TripletMass Resolution Barrel");
     hMassTriResBarrel->GetYaxis()->SetTitle("N. triplets");
     //    hMassTriResBarrel->Sumw2();
-    hMassTriResEndcap = new TH1D("TriplMassRes_Endcap", "TriplMassRes_Endcap", 600, -0.1, 0.1); //binning 0.00033
+    hMassTriResEndcap = new TH1D("TriplMassRes_Endcap"+massregion, "TriplMassRes_Endcap", 600, -0.1, 0.1); //binning 0.00033
     hMassTriResEndcap->GetXaxis()->SetTitle("TripletMass Resolution Endcap");
     hMassTriResEndcap->GetYaxis()->SetTitle("N. triplets");
     //    hMassTriResEndcap->Sumw2();
-    hmassdi = new TH1D("DimuonMass", "DimuonMass", 60, -0.05, 2.95); //binning 50 MeV
+    hmassdi = new TH1D("DimuonMass"+massregion, "DimuonMass", 60, -0.05, 2.95); //binning 50 MeV
     hmassdi->GetXaxis()->SetTitle("Mass(#mu^{+}#mu^{-}) (GeV/c^{2})");
     hmassdi->GetXaxis()->SetTitle("N. entries");
     hmassdi->Sumw2();
-    hmassQuad = new TH1F("QuadMuonMass", "QuadMuonMass", 400, -0.05, 79.95); // binning 200 MeV
+    hmassQuad = new TH1F("QuadMuonMass"+massregion, "QuadMuonMass", 400, -0.05, 79.95); // binning 200 MeV
     hmassQuad->GetXaxis()->SetTitle("Mass(4#mu) (GeV/c^{2})");
     hmassQuad->GetYaxis()->SetTitle("N. entries");
     hmassQuad->Sumw2();
-    hmassQuad_Zero = new TH1F("QuadMuonMass_Zero", "QuadMuonMass_Zero", 400, -0.05, 79.95); // binning 200 MeV
+    hmassQuad_Zero = new TH1F("QuadMuonMass_Zero"+massregion, "QuadMuonMass_Zero", 400, -0.05, 79.95); // binning 200 MeV
     hmassQuad_Zero->GetXaxis()->SetTitle("Mass(4#mu) (GeV/c^{2})");
     hmassQuad_Zero->GetYaxis()->SetTitle("N. entries");
     hmassQuad_Zero->Sumw2();
-    hNMatchedStat = new TH1D("NofMatchedStations", "NofMatchedStations", 6, -0.5, 5.5);
+    hNMatchedStat = new TH1D("NofMatchedStations"+massregion, "NofMatchedStations", 6, -0.5, 5.5);
     hNMatchedStat->GetXaxis()->SetTitle("N. of matched muon stations");
     hNMatchedStat->GetYaxis()->SetTitle("N. muons");
     hNMatchedStat->Sumw2();
-    hFlightDist = new TH1D("FlightDist", "FlightDist", 20, 0., 2.); // binning 0.1 cm
+    hFlightDist = new TH1D("FlightDist"+massregion, "FlightDist", 20, 0., 2.); // binning 0.1 cm
     hFlightDist->GetXaxis()->SetTitle("Decay length (cm)");
     hFlightDist->GetYaxis()->SetTitle("N. triplets");
     hFlightDist->Sumw2();
-    hFlightDist_Signif = new TH1D("FlightDist_Signif", "FlightDist_Signif", 20, 0., 50.); // binning 2.5
+    hFlightDist_Signif = new TH1D("FlightDist_Signif"+massregion, "FlightDist_Signif", 20, 0., 50.); // binning 2.5
     hFlightDist_Signif->GetXaxis()->SetTitle("Decay length significance");
     hFlightDist_Signif->GetYaxis()->SetTitle("N. triplets");
     hFlightDist_Signif->Sumw2();
-    hFlightDistvsP = new TH2D("FlightDistvsP", "FlightDistvsP", 20, 0., 0.3, 20, 0., 45.);
+    hFlightDistvsP = new TH2D("FlightDistvsP"+massregion, "FlightDistvsP", 20, 0., 0.3, 20, 0., 45.);
     hFlightDistvsP->GetXaxis()->SetTitle("Decay length (cm)");
     hFlightDistvsP->GetYaxis()->SetTitle("p triplet (GeV/c)");
-    hPtErrOverPt = new TH1D("PtErrOverPt", "PtErrOverPt", 120, 0, 1.2);
+    hPtErrOverPt = new TH1D("PtErrOverPt"+massregion, "PtErrOverPt", 120, 0, 1.2);
     hPtErrOverPt->GetXaxis()->SetTitle("p_{T} err/ p_{T}");
     hPtErrOverPt->GetYaxis()->SetTitle("N. muons");
-    hPtRes = new TH1D("MuonPtRes", "MuonPtRes", 160, -2., 2.); // binning 0.025
+    hPtRes = new TH1D("MuonPtRes"+massregion, "MuonPtRes", 160, -2., 2.); // binning 0.025
     hPtRes->GetXaxis()->SetTitle("Muon p_{T} resolution");
     hPtRes->GetYaxis()->SetTitle("N. muons");
     hPtRes->Sumw2();
-    hPtResBarrel = new TH1D("MuonPtResBarrel", "MuonPtResBarrel", 160, -2., 2.); // binning 0.025
+    hPtResBarrel = new TH1D("MuonPtResBarrel"+massregion, "MuonPtResBarrel", 160, -2., 2.); // binning 0.025
     hPtResBarrel->GetXaxis()->SetTitle("Muon p_{T} resolution Barrel");
     hPtResBarrel->GetYaxis()->SetTitle("N. muons");
     hPtResBarrel->Sumw2();
-    hPtResEndcap = new TH1D("MuonPtResEndcap", "MuonPtResEndcap", 160, -2., 2.); // binning 0.025
+    hPtResEndcap = new TH1D("MuonPtResEndcap"+massregion, "MuonPtResEndcap", 160, -2., 2.); // binning 0.025
     hPtResEndcap->GetXaxis()->SetTitle("Muon p_{T} resolution Endcap");
     hPtResEndcap->GetYaxis()->SetTitle("N. muons");
     hPtResEndcap->Sumw2();
@@ -438,9 +449,9 @@ void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&
         TString hptResMuName = "MuonPtRes_mu"; hptResMuName += k+1;
         TString hptResBarrelMuName = "MuonPtResBarrel_mu"; hptResBarrelMuName += k+1;
         TString hptResEndcapMuName = "MuonPtResEndcap_mu"; hptResEndcapMuName += k+1;
-        hPtRes_mu[k] = new TH1D(hptResMuName, hptResMuName, 160, -2., 2.); // binning 0.025
-        hPtResBarrel_mu[k] = new TH1D(hptResBarrelMuName, hptResBarrelMuName, 160, -2., 2.); // binning 0.025
-        hPtResEndcap_mu[k] = new TH1D(hptResEndcapMuName, hptResEndcapMuName, 160, -2., 2.); // binning 0.025
+        hPtRes_mu[k] = new TH1D(hptResMuName+massregion, hptResMuName, 160, -2., 2.); // binning 0.025
+        hPtResBarrel_mu[k] = new TH1D(hptResBarrelMuName+massregion, hptResBarrelMuName, 160, -2., 2.); // binning 0.025
+        hPtResEndcap_mu[k] = new TH1D(hptResEndcapMuName+massregion, hptResEndcapMuName, 160, -2., 2.); // binning 0.025
         hptResMuName = "Mu"; hptResMuName += k+1; hptResMuName += " p_{T} resolution";
         hPtRes_mu[k]->GetXaxis()->SetTitle(hptResMuName);
         hPtRes_mu[k]->GetYaxis()->SetTitle("N. muons");
@@ -455,31 +466,31 @@ void ntupleClass_Control::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&
         hPtResEndcap_mu[k]->Sumw2();
     }
     // Other control plots
-    hChi2VertexNorm = new TH1D("SV_Chi2_norm", "SV_Chi2_norm", 20, 0., 5.); // binning 0.25
+    hChi2VertexNorm = new TH1D("SV_Chi2_norm"+massregion, "SV_Chi2_norm", 20, 0., 5.); // binning 0.25
     hChi2VertexNorm->GetXaxis()->SetTitle("SV #chi^{2} norm");
     hChi2VertexNorm->GetYaxis()->SetTitle("N. triplets");
     hChi2VertexNorm->Sumw2();
-    hSegmComp = new TH1D("SegmComp_mu2", "SegmComp_mu2", 20, 0., 1.); // binning 0.05
+    hSegmComp = new TH1D("SegmComp_mu2"+massregion, "SegmComp_mu2", 20, 0., 1.); // binning 0.05
     hSegmComp->GetXaxis()->SetTitle("Segment Compatibility (#mu 2)");
     hSegmComp->GetYaxis()->SetTitle("N. muons");
     hSegmComp->Sumw2();
-    hDeltaR = new TH1D("DeltaR", "DeltaR", 20, 0., 0.4); // binning 0.02
+    hDeltaR = new TH1D("DeltaR"+massregion, "DeltaR", 20, 0., 0.4); // binning 0.02
     hDeltaR->GetXaxis()->SetTitle("#Delta R muons");
     hDeltaR->GetYaxis()->SetTitle("N. muons");
     hDeltaR->Sumw2();
-    hTrIPSign = new TH1D("TrIPSign_track", "TrIPSign_track", 20, 0., 30); // binning 1.5
+    hTrIPSign = new TH1D("TrIPSign_track"+massregion, "TrIPSign_track", 20, 0., 30); // binning 1.5
     hTrIPSign->GetXaxis()->SetTitle("Transverse IP significance track");
     hTrIPSign->GetYaxis()->SetTitle("N. muons");
     hTrIPSign->Sumw2();
     // For study on fake triplets
-    hPt_tripl_good = new TH1D("Pt_tripl_good", "Pt_tripl_good", 160, -0.05, 39.95); // binning 250 MeV
-    hPt_tripl_fake = new TH1D("Pt_tripl_fake", "Pt_tripl_fake", 160, -0.05, 39.95); // binning 250 MeV
-    hDeltaX = new TH1D("DeltaX", "DeltaX", 500, 0., 0.5); // binning 0.01 mm
-    hDeltaY = new TH1D("DeltaY", "DeltaY", 500, 0., 0.5); // binning 0.01 mm
-    hDeltaZ = new TH1D("DeltaZ", "DeltaZ", 1000, 0., 1.); // binning 0.01 mm
-    hDeltaX_fake = new TH1D("DeltaX_fake", "DeltaX_fake", 500, 0., 0.5); // binning 0.01 mm
-    hDeltaY_fake = new TH1D("DeltaY_fake", "DeltaY_fake", 500, 0., 0.5); // binning 0.01 mm
-    hDeltaZ_fake = new TH1D("DeltaZ_fake", "DeltaZ_fake", 1000, 0., 1.); // binning 0.01 mm
+    hPt_tripl_good = new TH1D("Pt_tripl_good"+massregion, "Pt_tripl_good", 160, -0.05, 39.95); // binning 250 MeV
+    hPt_tripl_fake = new TH1D("Pt_tripl_fake"+massregion, "Pt_tripl_fake", 160, -0.05, 39.95); // binning 250 MeV
+    hDeltaX = new TH1D("DeltaX"+massregion, "DeltaX", 500, 0., 0.5); // binning 0.01 mm
+    hDeltaY = new TH1D("DeltaY"+massregion, "DeltaY", 500, 0., 0.5); // binning 0.01 mm
+    hDeltaZ = new TH1D("DeltaZ"+massregion, "DeltaZ", 1000, 0., 1.); // binning 0.01 mm
+    hDeltaX_fake = new TH1D("DeltaX_fake"+massregion, "DeltaX_fake", 500, 0., 0.5); // binning 0.01 mm
+    hDeltaY_fake = new TH1D("DeltaY_fake"+massregion, "DeltaY_fake", 500, 0., 0.5); // binning 0.01 mm
+    hDeltaZ_fake = new TH1D("DeltaZ_fake"+massregion, "DeltaZ_fake", 1000, 0., 1.); // binning 0.01 mm
     //
 }
 
@@ -1100,4 +1111,12 @@ void ntupleClass_Control::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &c
     tree->Branch("d0sig", &d0sig);
     tree->Branch("mindca_iso", &mindca_iso);
     tree->Branch("trkRel", &trkRel);
+}
+
+void ntupleClass_Control::InitYieldTree(TTree *&tree, Int_t &run, Int_t &evt, Int_t &lumi, Int_t &isDs, Double_t &DsMass){
+    tree->Branch("run", &run);
+    tree->Branch("evt", &evt);
+    tree->Branch("lumi", &lumi);
+    tree->Branch("isDs", &isDs);
+    tree->Branch("DsMass", &DsMass);
 }

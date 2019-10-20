@@ -1,17 +1,20 @@
 
 #define ntupleClass_MC_cxx
-#define NCUTS 12
+#define NCUTS 17
 #define NPARTICLES 560
 #define NMU 3
 #define mumass 0.1056583715 // Muon mass in GeV
 #define PhiMass 1.019461 // Phi mass in GeV
+#define sigmaPhiMass 0.011 //sigma of Phi mass in GeV 
 #define OmegaMass 0.78265 // Omega mass in GeV
+#define sigmaOmegaMass 0.0085 //sigma of Omega mass in GeV
 #define ptmin 2.0
 
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <iostream>
+#include <TMVA/Reader.h>
 
 double pileup_weight[100] = {0};
 double pileupFactor = 0;
@@ -29,19 +32,42 @@ Int_t ntupleClass_MC::BestTripletFinder(Int_t triplIndex[1000], Int_t n){
     return index;
 }
 
-Double_t ntupleClass_MC::DimuonMass(Double_t charge1, Double_t charge2, Double_t pt1, Double_t pt2, Double_t eta1, Double_t eta2, Double_t phi1, Double_t phi2){
+Double_t ntupleClass_MC::DimuonMass(Int_t mu_index1, Int_t mu_index2){
+    // Given the characteristics of 2 muons, if their charge is opposite the function returns their invariant mass, otherwise it returns 0
+    double inv = 0;
+    double charge1 = MuonCharge->at(mu_index1);
+    double charge2 = MuonCharge->at(mu_index2);
+    double pt1 = MuonPt->at(mu_index1);
+    double pt2 = MuonPt->at(mu_index2);
+    double eta1 = MuonEta->at(mu_index1);
+    double eta2 = MuonEta->at(mu_index2);
+    double phi1 = MuonPhi->at(mu_index1);
+    double phi2 = MuonPhi->at(mu_index2);
+    double en1 = MuonEnergy->at(mu_index1);
+    double en2 = MuonEnergy->at(mu_index2);
+    if(charge1 + charge2 != 0)  return inv;
+    else {
+        TLorentzVector mu1, mu2, mutot;
+        mu1.SetPtEtaPhiE(pt1, eta1, phi1, en1);
+        mu2.SetPtEtaPhiE(pt2, eta2, phi2, en2);
+        mutot = mu1 + mu2;
+        return mutot.M();
+    }
+}
+/*
+Double_t ntupleClass_MC::DimuonMass(Double_t charge1, Double_t charge2, Double_t pt1, Double_t pt2, Double_t eta1, Double_t eta2, Double_t phi1, Double_t phi2, Double_t en1, Double_t en2,){
     // Given the characteristics of 2 muons, if their charge is opposite the function returns their invariant mass, otherwise it returns 0
     double inv = 0;
     if(charge1 + charge2 != 0)  return inv;
     else {
         TLorentzVector mu1, mu2, mutot;
-        mu1.SetPtEtaPhiM(pt1, eta1, phi1, mumass);
-        mu2.SetPtEtaPhiM(pt2, eta2, phi2, mumass);
+        mu1.SetPtEtaPhiE(pt1, eta1, phi1, en1);
+        mu2.SetPtEtaPhiE(pt2, eta2, phi2, en2);
         mutot = mu1 + mu2;
         return mutot.M();
     }
 }
-
+*/
 void ntupleClass_MC::Draw_CutEffCanvas(TCanvas *canv, TH1I *hist, Int_t cut[NCUTS], TString listCut[NCUTS]){
     // This function writes on the canvas the histo of the cuts efficiency
     for(int k=0; k<NCUTS; k++){
@@ -137,30 +163,37 @@ void ntupleClass_MC::Draw_PdgIdCanvasGen(TCanvas *PdgIdCanvas_Gen, TH1I *hPdgId_
 
 void ntupleClass_MC::Fill_CutName(TString listCut[NCUTS]){
     // Init a vector of strings w/ the names of the cuts
-    listCut[0] = "BeforeCuts";
-    listCut[1] = "#chi^{2} triplet";
-    listCut[2] = "2glb+1trk";
-    listCut[3] = "MassTriplet";
-    listCut[4] = "DeltaR";
-    listCut[5] = "DeltaZ";
-    listCut[6] = "VETO #Phi mass";
-    listCut[7] = "VETO #omega mass";
-    listCut[8] = "Trigger Matching";
-    listCut[9] = "TripletMass_no_cut";
-    listCut[10] = "TripletMass_sgn";
-    listCut[11] = "TripletMass_bkg";
+
+    listCut[0] = "BeforeCuts"; //cut 0
+    listCut[1] = "L1_fired";
+    listCut[2] = "HLT_fired";
+    listCut[3] = "BeforeTripletSelection";
+    listCut[4] = "#chi^{2} triplet";
+    listCut[5] = "3global&&InsideAcceptance";
+    listCut[6] = "MassTriplet";
+    listCut[7] = "DeltaR";
+    listCut[8] = "DeltaZ";
+    listCut[9] = "VETO #Phi mass";
+    listCut[10] = "VETO #omega mass";
+    listCut[11] = "Mu1_TriggerMatching";
+    listCut[12] = "Mu2_TriggerMatching";
+    listCut[13] = "Mu3_TriggerMatching";
+    listCut[14] = "DoubleMuFired";
+    listCut[15] = "TiipleMuFired";
+    listCut[16] = "NoCut_DoubleORTripleMu";
 }
 
-void ntupleClass_MC::Fill_DimuonMass(Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t dimu[NMU]){
+std::vector< Double_t > ntupleClass_MC::Compute_DimuonMass(Int_t mu_Ind[NMU], Int_t mu[NMU]){
     // Fills the vector w/ the 3 possible dimuon masses of the muons of the triplet
     double pt[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
-    Fill_MuonVariables(mu_Ind, pt, eta, phi);
-    dimu[0] = DimuonMass(MuonCharge->at(mu[0]), MuonCharge->at(mu[1]), pt[0], pt[1], eta[0], eta[1], phi[0], phi[1]); // dimuon mass 1-2
-    dimu[1] = DimuonMass(MuonCharge->at(mu[1]), MuonCharge->at(mu[2]), pt[1], pt[2], eta[1], eta[2], phi[1], phi[2]); // dimuon mass 2-3
-    dimu[2] = DimuonMass(MuonCharge->at(mu[0]), MuonCharge->at(mu[2]), pt[0], pt[2], eta[0], eta[2], phi[0], phi[2]); // dimuon mass 1-3
+    std::vector< Double_t > dimu;
+    dimu.push_back( DimuonMass( mu[0], mu[1] ) ); // dimuon mass 0-1
+    dimu.push_back( DimuonMass( mu[1], mu[2] ) ); // dimuon mass 1-2
+    dimu.push_back( DimuonMass( mu[0], mu[2] ) ); // dimuon mass 0-2
+    return dimu;
 }
 
-void ntupleClass_MC::Fill_MuonVariables(Int_t mu_Ind[NMU], Double_t pt[NMU], Double_t eta[NMU], Double_t phi[NMU]){
+void ntupleClass_MC::Get_MuonVariables(Int_t mu_Ind[NMU], Double_t pt[NMU], Double_t eta[NMU], Double_t phi[NMU]){
     // Fills vectors w/ the variables of the muons of the triplet
     pt[0] = Mu1_Pt->at(mu_Ind[0]);
     pt[1] = Mu2_Pt->at(mu_Ind[1]);
@@ -173,7 +206,7 @@ void ntupleClass_MC::Fill_MuonVariables(Int_t mu_Ind[NMU], Double_t pt[NMU], Dou
     phi[2] = Mu3_Phi->at(mu_Ind[2]);
 }
 
-void ntupleClass_MC::Fill_MuonVariablesGen(Int_t muGen[NMU], Double_t ptGEN[NMU], Double_t etaGEN[NMU], Double_t phiGEN[NMU]){
+void ntupleClass_MC::Get_MuonVariablesGen(Int_t muGen[NMU], Double_t ptGEN[NMU], Double_t etaGEN[NMU], Double_t phiGEN[NMU]){
     // Fills vectors w/ the variables GEN of the muons of the triplet
     ptGEN[0] = GenMatchMu1_Pt->at(muGen[0]);
     ptGEN[1] = GenMatchMu2_Pt->at(muGen[1]);
@@ -186,7 +219,7 @@ void ntupleClass_MC::Fill_MuonVariablesGen(Int_t muGen[NMU], Double_t ptGEN[NMU]
     phiGEN[2] = GenMatchMu3_Phi->at(muGen[2]);
 }
 
-void ntupleClass_MC::Fill_MuonVariablesGen_Sim(Int_t muGen[NMU], Double_t ptSimGEN[NMU], Double_t etaSimGEN[NMU], Double_t phiSimGEN[NMU]){
+void ntupleClass_MC::Get_MuonVariablesGen_Sim(Int_t muGen[NMU], Double_t ptSimGEN[NMU], Double_t etaSimGEN[NMU], Double_t phiSimGEN[NMU]){
     // Fills vectors w/ the variables GEN of the muons of the triplet @gen level
     ptSimGEN[0] = GenMatchMu1_SimPt->at(muGen[0]);
     ptSimGEN[1] = GenMatchMu2_SimPt->at(muGen[1]);
@@ -208,13 +241,17 @@ void ntupleClass_MC::Fill_ParticleIdSummary(Int_t mu[NMU], Int_t IdsummaryDaught
     }
 }
 
-void ntupleClass_MC::FillHistoAC(Int_t ind, Int_t mu[NMU], TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, Double_t dimu[NMU], TH1F *hmassQuad, TH1F *hmassQuad_Zero){
+void ntupleClass_MC::FillHistoAC(Int_t ind, Int_t mu[NMU], TH1F *hSegmComp, TH1F *hfv_d3Dsig, TH1F *hChi2Track, TH1D *hNMatchedStat, TH1D *hFlightDist, TH1D *hFlightDist_Signif, TH2D *hFlightDistvsP, TH1D *hPtErrOverPt, TH1D *hmassdi, std::vector< Double_t > dimu, TH1F *hmassQuad, TH1F *hmassQuad_Zero){
     // Fills the histograms after cuts
+    Double_t segmComp = 999;
     for(int k=0; k<NMU; k++){
         hChi2Track->Fill(Muon_innerTrack_normalizedChi2->at(mu[k]), pileupFactor);
         hNMatchedStat->Fill(Muon_numberOfMatchedStations->at(mu[k]), pileupFactor);
         hPtErrOverPt->Fill(Muon_ptErrOverPt->at(mu[k]), pileupFactor);
+        if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
     }
+    hfv_d3Dsig->Fill(FlightDistPVSV_Significance->at(ind), pileupFactor);
+    hSegmComp->Fill(segmComp);
     hFlightDist->Fill(FlightDistPVSV->at(ind), pileupFactor);
     hFlightDist_Signif->Fill(FlightDistPVSV_Significance->at(ind), pileupFactor);
     double TripletP = MuonP(Triplet_Pt->at(ind), Triplet_Eta->at(ind), Triplet_Phi->at(ind));
@@ -239,7 +276,7 @@ void ntupleClass_MC::FillHistoBC(TString type, Int_t ind, TH1D *hMass_tripl, TH1
         }
     }
 }
-void ntupleClass_MC::FillHistoDiMuMass_AC(TH1D *hist, Double_t dimu[NMU]){
+void ntupleClass_MC::FillHistoDiMuMass_AC(TH1D *hist, std::vector< Double_t > dimu){
     // This function fills the dimuon mass histogram
     for(int i=0; i<NMU; i++){
         if(dimu[i] != 0) hist->Fill(dimu[i], pileupFactor);
@@ -251,7 +288,8 @@ void ntupleClass_MC::FillHistoDiMuMass_BC(TH1D *h_Zero, TH1D *h_Zero2){
     for (int k=0; k<(MuonPt->size()-1); k++){
         for (int l=k+1; l<(MuonPt->size()); l++){
             if(Muon_isGlobal->at(k) == 1 && Muon_isGlobal->at(l) == 1 && MuonPt->at(k) > ptmin && MuonPt->at(l) > ptmin && abs(Muon_vz->at(k) - Muon_vz->at(l)) < 0.5){
-                double dimass = DimuonMass(MuonCharge->at(k), MuonCharge->at(l), MuonPt->at(k), MuonPt->at(l), MuonEta->at(k), MuonEta->at(l), MuonPhi->at(k), MuonPhi->at(l));
+                double dimass = DimuonMass(k, l);
+                //double dimass = DimuonMass(MuonCharge->at(k), MuonCharge->at(l), MuonPt->at(k), MuonPt->at(l), MuonEta->at(k), MuonEta->at(l), MuonPhi->at(k), MuonPhi->at(l), MuonEnergy->at(k), MuonEnergy->at(l));
                 if(dimass != 0) h_Zero->Fill(dimass, pileupFactor);
                 if(MuonPt->at(k) >= 5 && MuonPt->at(l) >= 5){
                     if(dimass != 0) h_Zero2->Fill(dimass, pileupFactor);
@@ -298,8 +336,8 @@ void ntupleClass_MC::FillHistoQuadMuMass_BC(TH1F *h, TH1F *h_Zero){
 void ntupleClass_MC::FillHistoResoPt_AC(Int_t muGen[NMU], TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D *hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *hPtResEndcap, TH1D *hPtResEndcap_mu[NMU]){
     // Pt Reso After cuts
     double ptResMu[NMU] = {0}, ptGEN[NMU] = {0}, etaGEN[NMU] = {0}, phiGEN[NMU] = {0}, ptSimGEN[NMU] = {0}, etaSimGEN[NMU] = {0}, phiSimGEN[NMU] = {0};
-    Fill_MuonVariablesGen(muGen, ptGEN, etaGEN, phiGEN);
-    Fill_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
+    Get_MuonVariablesGen(muGen, ptGEN, etaGEN, phiGEN);
+    Get_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
     for(int k=0; k<NMU; k++){
         ptResMu[k] = (ptSimGEN[k] - ptGEN[k])/ptSimGEN[k];
         hPtRes_mu[k]->Fill(ptResMu[k], pileupFactor);
@@ -323,8 +361,8 @@ void ntupleClass_MC::FillHistoResoPt_BC(TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D
         for (int k=0; k<NMU; k++){
             muGen[k] = i;
         }
-        Fill_MuonVariablesGen(muGen, ptGEN, etaGEN, phiGEN);
-        Fill_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
+        Get_MuonVariablesGen(muGen, ptGEN, etaGEN, phiGEN);
+        Get_MuonVariablesGen_Sim(muGen, ptSimGEN, etaSimGEN, phiSimGEN);
         for (int k=0; k<NMU; k++){
             ptResMu[k] = (ptSimGEN[k] - ptGEN[k])/ptSimGEN[k];
             hPtRes_mu[k]->Fill(ptResMu[k], pileupFactor);
@@ -344,7 +382,7 @@ void ntupleClass_MC::FillHistoResoPt_BC(TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D
 void ntupleClass_MC::FillHistoResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hMassTriRes, TH1D *hMassTriResBarrel, TH1D *hMassTriResEndcap){
     // Fill the histo of triplet mass resolution
     double ptNO[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
-    Fill_MuonVariables(mu_Ind, ptNO, eta, phi);
+    Get_MuonVariables(mu_Ind, ptNO, eta, phi);
     double trimassReso = ResoTriplMass(mu_Ind, mu);
     hMassTriRes->Fill(trimassReso, pileupFactor);
     if(abs(eta[0]) < 1.4 && abs(eta[1]) < 1.4 && abs(eta[2]) < 1.4)   hMassTriResBarrel->Fill(trimassReso, pileupFactor);
@@ -354,7 +392,7 @@ void ntupleClass_MC::FillHistoResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU], TH
 void ntupleClass_MC::FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hist_pt, TH1D *hist_pt_mu[NMU], TH1D *hist_eta, TH1D *hist_eta_mu[NMU], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz){
     // Fills histograms w/ variables of single mu
     double pt[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
-    Fill_MuonVariables(mu_Ind, pt, eta, phi);
+    Get_MuonVariables(mu_Ind, pt, eta, phi);
     for(int i=0; i<NMU; i++){
         hist_pt->Fill(pt[i], pileupFactor);
         hist_pt_mu[i]->Fill(pt[i], pileupFactor);
@@ -382,11 +420,17 @@ void ntupleClass_MC::FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, 
     hist_mass->Fill(Triplet_Mass->at(ind), pileupFactor);
 }
 
-void ntupleClass_MC::InitHistoAC(TH1I *&hNtripl, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake){
+void ntupleClass_MC::InitHistoAC(TH1I *&hNtripl, TH1F *&hSegmComp, TH1F *&hfv_d3Dsig, TH1F *&hChi2Track, TH1D *&hMassTriRes, TH1D *&hMassTriResBarrel, TH1D *&hMassTriResEndcap, TH1D *&hmassdi, TH1F *&hmassQuad, TH1F *&hmassQuad_Zero, TH1D *&hPtRes, TH1D *hPtRes_mu[NMU], TH1D *&hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *&hPtResEndcap, TH1D *hPtResEndcap_mu[NMU], TH1D *&hNMatchedStat, TH1D *&hFlightDist, TH1D *&hFlightDist_Signif, TH2D *&hFlightDistvsP, TH1D *&hPtErrOverPt, TH1D *&hPt_tripl_good, TH1D *&hPt_tripl_fake, TH1D *&hDeltaX, TH1D *&hDeltaY, TH1D *&hDeltaZ, TH1D *&hDeltaX_fake, TH1D *&hDeltaY_fake, TH1D *&hDeltaZ_fake){
     // Init histograms for variables After Cuts
     hNtripl = new TH1I("Ntripl", "Ntripl", 5, -0.5, 4.5);
     hNtripl->GetXaxis()->SetTitle("N. triplets survived per event");
     hNtripl->GetYaxis()->SetTitle("N. entries");
+    hSegmComp = new TH1F("hSegmComp", "hSegmComp", 55, -0.1, 1);
+    hSegmComp->GetXaxis()->SetTitle("Segment Compatibility");
+    hSegmComp->GetYaxis()->SetTitle("N. entries");
+    hfv_d3Dsig = new TH1F("hfv_d3Dsig", "hfv_d3Dsig", 101, -1, 100);
+    hfv_d3Dsig->GetXaxis()->SetTitle("3D displacement significance of 3mu vtx-PV");
+    hfv_d3Dsig->GetYaxis()->SetTitle("N. entries");
     hChi2Track = new TH1F("Chi2Track", "Chi2Track", 27, -0.3, 5.1); //binning 0.2
     hChi2Track->GetXaxis()->SetTitle("#chi^{2} Muon Inner track");
     hChi2Track->GetYaxis()->SetTitle("N. muons");
@@ -685,7 +729,7 @@ Bool_t ntupleClass_MC::isPairDeltaZGood(Float_t DeltaZ1, Float_t DeltaZ2, Float_
     else return false;
 }
 
-Bool_t ntupleClass_MC::isPairNotAOmega(Double_t dimu[NMU], Double_t sigma){
+Bool_t ntupleClass_MC::isPairNotAOmega(std::vector<Double_t> dimu, Double_t sigma){
     // Given 3 muons it checks, for all the pairs of o.s. muons, if their dimuon mass is NOT compatible w/ the Omega(782)mass
     if(dimu[0] != 0 & isNotAOmega(dimu[0], sigma) == false) return false;
     else if(dimu[1] != 0 & isNotAOmega(dimu[1], sigma) == false)    return false;
@@ -693,7 +737,30 @@ Bool_t ntupleClass_MC::isPairNotAOmega(Double_t dimu[NMU], Double_t sigma){
     else    return true;
 }
 
-Bool_t ntupleClass_MC::isPairNotAPhi(Double_t dimu[NMU], Double_t sigma){
+Bool_t ntupleClass_MC::isPhi(std::vector<Double_t> dimu){
+    // Given 3 muons it checks, for each pair, if the dimuon mass is compatible w/ the Phi mass(1020)
+    int n = 0;
+    for(int i = 0; i<dimu.size(); i++){
+        if (dimu.at(i)<(PhiMass+2*sigmaPhiMass) && dimu.at(i)>(PhiMass-2*sigmaPhiMass)){
+            n++;
+        }
+    }
+    if(n==0) return false;
+    else return true;
+}
+
+Bool_t ntupleClass_MC::isOmega(std::vector<Double_t> dimu){
+    // Given 3 muons it checks, for each pair, if the dimuon mass is compatible w/ the Omega mass(782)
+    int n = 0;
+    for(int i = 0; i<dimu.size(); i++){
+        if (dimu.at(i)<(OmegaMass+2*sigmaOmegaMass) && dimu.at(i)>(OmegaMass-2*sigmaOmegaMass))
+            n++;
+    }
+    if(n==0) return false;
+    else return true;
+}
+
+Bool_t ntupleClass_MC::isPairNotAPhi(std::vector<Double_t> dimu, Double_t sigma){
     // Given 3 muons it checks, for all the pairs of o.s. muons, if their dimuon mass is NOT compatible w/ the Phi mass(1020)
     if(dimu[0] != 0 & isNotAPhi(dimu[0], sigma) == false)   return false;
     else if(dimu[1] != 0 & isNotAPhi(dimu[1], sigma) == false)  return false;
@@ -708,7 +775,7 @@ void ntupleClass_MC::MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_
     mu_Ind[2] = Mu3_TripletIndex->at(ind);
     if (mu_Ind[0] != ind || mu_Ind[1] != ind || mu_Ind[2] != ind) cout << "Error : Different triplet mu indices!" << endl;
     double pt[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
-    Fill_MuonVariables(mu_Ind, pt, eta, phi);
+    Get_MuonVariables(mu_Ind, pt, eta, phi);
     for(int k=0; k<NMU; k++){
         if (strcmp(type, "ID") == 0)    mu[k] = MuonFinder(pt[k], eta[k], phi[k]);
         if (strcmp(type, "Gen") == 0)   mu[k] = MuonFinderGen(k+1, pt[k], eta[k], phi[k]);
@@ -929,7 +996,7 @@ Double_t ntupleClass_MC::ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]){
     double pt[NMU] = {0}, ptNO[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0}, pt_res[NMU] = {0}, pt_bis[NMU] = {0}, dm[NMU] = {0};
     TLorentzVector muon[NMU], muon_bis[NMU], mutot, mutot_bis[NMU];
     
-    Fill_MuonVariables(mu_Ind, ptNO, eta, phi);
+    Get_MuonVariables(mu_Ind, ptNO, eta, phi);
     for(int k=0; k<NMU; k++){
         pt[k] = Muon_BestTrackPt->at(mu[k]);
         pt_bis[k] = pt[k] + Muon_BestTrackPtErr->at(mu[k]);
@@ -1028,11 +1095,11 @@ void ntupleClass_MC::TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched){
     
     if(Trigger_hltdecision->at(hlt_ind) == 1 && Trigger_l1decision->at(l1_ind) == 1)
         hTripTriggerMatched->Fill(Triplet_Mass->at(ind));
-    else
-    {
-        cout <<  Trigger_hltname->at(hlt_ind) << " decision " << Trigger_hltdecision->at(hlt_ind) << endl;
-        cout <<  Trigger_l1name->at(l1_ind) << " decision " << Trigger_l1decision->at(l1_ind) << endl << endl;
-    }
+    //else
+    //{
+    //    cout <<  Trigger_hltname->at(hlt_ind) << " decision " << Trigger_hltdecision->at(hlt_ind) << endl;
+    //    cout <<  Trigger_l1name->at(l1_ind) << " decision " << Trigger_l1decision->at(l1_ind) << endl << endl;
+    //}
 }
 
 Double_t ntupleClass_MC::TreeFin_Angle(Int_t ind){
@@ -1056,7 +1123,7 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
     // Fills the tree branches
     // 2016 variables
     Pmu3 = MuonP(Mu3_Pt->at(mu_Ind[2]), Mu3_Eta->at(mu_Ind[2]), Mu3_Phi->at(mu_Ind[2]));
-    cLP = 1000; tKink = 0; segmComp = 1; double temp1[NMU] = {0}, temp[NMU] = {0};
+    cLP = -999; tKink = -999; segmComp = 999; double temp1[NMU] = {0}, temp[NMU] = {0};
     temp1[0] = dxy_mu1->at(mu_Ind[0]);
     temp1[1] = dxy_mu2->at(mu_Ind[1]);
     temp1[2] = dxy_mu3->at(mu_Ind[2]);
@@ -1073,7 +1140,7 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
         //  * kink MAX
         //  * segmComp MIN
         //  * d0sig MIN
-        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) < cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
+        if (Muon_combinedQuality_chi2LocalPosition->at(mu[k]) > cLP) cLP = Muon_combinedQuality_chi2LocalPosition->at(mu[k]);
         if (Muon_combinedQuality_trkKink->at(mu[k]) > tKink) tKink = Muon_combinedQuality_trkKink->at(mu[k]);
         if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
         if (temp1[k] < d0) d0 = temp1[k];
@@ -1280,4 +1347,38 @@ void ntupleClass_MC::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, F
     tree->Branch("emVeto05", &emVeto05);
     tree->Branch("trVeto03", &trVeto03);
     tree->Branch("trVeto05", &trVeto05);
+}
+
+void ntupleClass_MC::InitMVA( TString pathToWeight ){
+
+    reader = new TMVA::Reader( "!Color:!Silent" );
+
+    reader->TMVA::Reader::AddVariable( "Pmu3", &forBDTevaluation1 );
+    reader->TMVA::Reader::AddVariable( "cLP", &forBDTevaluation2 );
+    reader->TMVA::Reader::AddVariable( "tKink", &forBDTevaluation3 );
+    reader->TMVA::Reader::AddVariable( "segmComp", &forBDTevaluation4 );
+    reader->TMVA::Reader::AddVariable( "fv_nC", &forBDTevaluation5 );
+    reader->TMVA::Reader::AddVariable( "fv_dphi3D", &forBDTevaluation6 );
+    reader->TMVA::Reader::AddVariable( "fv_d3Dsig", &forBDTevaluation7 );
+    reader->TMVA::Reader::AddVariable( "d0sig", &forBDTevaluation8 );
+    reader->TMVA::Reader::AddVariable( "mindca_iso", &forBDTevaluation9 );
+    //reader->TMVA::Reader::AddVariable( "trkRel", &forBDTevaluation10 );
+
+    reader->TMVA::Reader::BookMVA( methodName, pathToWeight );
+}
+
+float ntupleClass_MC::EvaluateMVA( Float_t Pmu3, Float_t cLP, Float_t tKink, Float_t segmComp, Float_t fv_nC, Float_t fv_dphi3D, Float_t fv_d3Dsig, Float_t d0sig, Float_t mindca_iso ){
+
+    forBDTevaluation1 = Pmu3;
+    forBDTevaluation2 = cLP;
+    forBDTevaluation3 = tKink;
+    forBDTevaluation4 = segmComp;
+    forBDTevaluation5 = fv_nC;
+    forBDTevaluation6 = fv_dphi3D;
+    forBDTevaluation7 = fv_d3Dsig;
+    forBDTevaluation8 = d0sig;
+    forBDTevaluation9 = mindca_iso;
+    //forBDTevaluation10 = trkRel;
+
+return reader->TMVA::Reader::EvaluateMVA( methodName );
 }
