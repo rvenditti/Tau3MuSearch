@@ -61,13 +61,14 @@ if args.anatype == 'control':
    if args.dataset == 'data' and args.run == '2017F':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_19Aug_newSplit/190819_222432'
 if args.dataset == 'MC' and args.MCprocess == 'Ds':
-   path = ''
+   path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v4_newSplit/190927_121422/0000/'
 if args.dataset == 'MC' and args.MCprocess == 'B0':
    path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v3_newSplit/190905_085548'
 if args.dataset == 'MC' and args.MCprocess == 'Bp':
    path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v3_newSplit/'
 if args.dataset == 'MC' and args.MCprocess == 'DsPhiPi':
-   path = '/lustre/cms/store/user/fsimone/histoSkim_twoMuonTrack_MCDsPhiPi'
+   path = '/lustre/cms/store/user/rosma/DsToPhiPi_ToMuMu_MuFilter_TuneCUEP8M1_13TeV-pythia8/DsToPhiPi_ToMuMu_MuFilter_SkimPhiPi_MC_Official_2017_v1/190927_142524/0000/'
+   #path = '/lustre/cms/store/user/fsimone/histoSkim_twoMuonTrack_MCDsPhiPi'
 
 #generating the list of all .root files in given directory and subdirectories
 fileList = []
