@@ -24,3 +24,5 @@ optional arguments:
 Depending on N, a certain number of files will be prepared in the YYYYMMDD_hhss folder:
 - an executable file for the batch system (setting the environment, compile the .cpp, execute the code)
 - a .cpp file for the given group of input files
+
+Note: path to input ntuples are hardcoded in createRunFile.py.
