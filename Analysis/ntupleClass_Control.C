@@ -44,14 +44,14 @@
 
 void ntupleClass_Control::LoopControl(){
     if (fChain == 0) return;
-    Long64_t nentries = fChain->GetEntriesFast();
+    Long64_t nentries = fChain->GetEntries();
     // Variables definition
     int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double dimu[NTOT] = {0}, massmin = 1.62, massmax = 2.00, sigma = 0.011, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString pId[NPARTICLES], listCut[NCUTS];
     // Variables for the final tree
-    double Pmu3 = 0, cLP = 0, segmComp = 0, fv_nC = 0, fv_dphi3D = 0, fv_d3Dsig = 0, d0sig = 0, mindca_iso = 0, trkRel = 0;
+    double Pmu3 = 0, cLP = 0, segmComp = 0, tripletMass = 0, fv_nC = 0, fv_dphi3D = 0, fv_d3Dsig = 0, d0sig = 0, mindca_iso = 0, trkRel = 0;
     float tKink = 0;
     //Variables inizialization
     cutevt[0] = nentries;
@@ -62,7 +62,7 @@ void ntupleClass_Control::LoopControl(){
     TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
-    TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
+    TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, tripletMass, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
     // Creation of histograms for variables BEFORE cuts
     TDirectory *dirBeforeCuts = fout->mkdir("BeforeCuts");
     dirBeforeCuts->cd();
@@ -126,7 +126,7 @@ void ntupleClass_Control::LoopControl(){
         hNPrVert_BC->Fill(PVCollection_Size);
 
         cout<<"========================"<<endl;
-        cout<<"evt "<<evt<<" run "<<run<<" lumi "<<lumi<<endl;
+        cout<<"evt "<<evt<<" run "<<run<<" lumi "<<lumi<<" jentry "<<jentry<<" nentries "<<nentries<<endl;
 
         //CUT 0 : Before cuts
         Ncut = 0; cutevt[Ncut]++; cut[Ncut] += selectedTripletsIndex->size();
@@ -156,6 +156,7 @@ void ntupleClass_Control::LoopControl(){
 
         //Loop over the TRIPLETS
         for (int j=0; j<selectedTripletsIndex->size(); j++){
+            cout<<"Loop on triplets "<<j<<endl;
             // CUT 3: all triplets w/ at least 2 track associated with PV
             if(RefittedPV2_NTracks->at(j) > 1){
                 Ncut = 3; cut[Ncut]++; cuttripl[Ncut]++;
@@ -230,7 +231,7 @@ void ntupleClass_Control::LoopControl(){
             ind = BestTripletFinder(triplIndex, ntripl);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
-            TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
+            TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, tripletMass, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
             Compute_DimuonMass(mu_Ind, mu, dimu);
 
             if(Triplet2_Mass->at(ind) >= 1.93 && Triplet2_Mass->at(ind) <= 2.01) {
@@ -299,14 +300,14 @@ void ntupleClass_Control::LoopControl(){
 
 void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     if (fChain == 0) return;
-    Long64_t nentries = fChain->GetEntriesFast();
+    Long64_t nentries = fChain->GetEntries();
     // Variables definition
     int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double dimu[NTOT] = {0}, massmin = 1.62, massmax = 2.00, sigma = 0.011, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString pId[NPARTICLES], listCut[NCUTS];
     // Variables for the final tree
-    double Pmu3 = 0, cLP = 0, segmComp = 0, fv_nC = 0, fv_dphi3D = 0, fv_d3Dsig = 0, d0sig = 0, mindca_iso = 0, trkRel = 0;
+    double Pmu3 = 0, cLP = 0, segmComp = 0, tripletMass = 0, fv_nC = 0, fv_dphi3D = 0, fv_d3Dsig = 0, d0sig = 0, mindca_iso = 0, trkRel = 0;
     float tKink = 0;
     //Variables inizialization
     cutevt[0] = nentries;
@@ -317,7 +318,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
     TTree *tree = new TTree("FinalTree_Control","FinalTree_Control");
-    TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
+    TreeFin_Init(tree, Pmu3, cLP, tKink, segmComp, tripletMass, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
     // Creation of histograms for variables BEFORE cuts
     TDirectory *dirBeforeCuts = fout->mkdir("BeforeCuts");
     dirBeforeCuts->cd();
@@ -484,7 +485,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
             ind = BestTripletFinder(triplIndex, ntripl);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
-            TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
+            TreeFin_Fill(tree, ind, mu_Ind, mu, Pmu3, cLP, tKink, segmComp, tripletMass, fv_nC, fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso, trkRel);
             Compute_DimuonMass(mu_Ind, mu, dimu);
 
             if(Triplet2_Mass->at(ind) >= 1.93 && Triplet2_Mass->at(ind) <= 2.01) {
