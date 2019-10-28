@@ -43,12 +43,12 @@ void RunT3Mu::Loop(int isMC, TString category){
    TFile *fout = new TFile("datacardT3Mu_"+category+".root","update");
    fout->cd();
    TString datasetName;
-   if(!isMC) datasetName = "data_";
-   if(isMC==1) datasetName = "signalDs_";
-   if(isMC==2) datasetName = "signalB0_";
-   if(isMC==3) datasetName = "signalBp_";
-   TH1F * hTriplMass1 = new TH1F ("hTripl"+datasetName+category+"1","Triplet mass "+category+"1",42, 1.600000, 2.020000);
-   TH1F * hTriplMass2 = new TH1F ("hTripl"+datasetName+category+"2","Triplet mass "+category+"2",42, 1.600000, 2.020000);
+   if(!isMC)   datasetName = "data_obs";
+   if(isMC==1) datasetName = "signalDs";
+   if(isMC==2) datasetName = "signalB0";
+   if(isMC==3) datasetName = "signalBp";
+   TH1F * hTriplMass1 = new TH1F (datasetName+category+"1","Triplet mass "+category+"1",42, 1.600000, 2.020000);
+   TH1F * hTriplMass2 = new TH1F (datasetName+category+"2","Triplet mass "+category+"2",42, 1.600000, 2.020000);
 
    //BDT cut
    BDTcut BDTcutvalues = Get_BDT_cut(category);
@@ -56,46 +56,57 @@ void RunT3Mu::Loop(int isMC, TString category){
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
 
-   for (Long64_t jentry=0; jentry<nentries;jentry++) {
+   //TMVA Reader initialization
+   TMVA::Tools::Instance();
+   TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );
+   float  forBDTevaluation1; 
+   float  forBDTevaluation2; 
+   float  forBDTevaluation3; 
+   float  forBDTevaluation4; 
+   float  forBDTevaluation5; 
+   float  forBDTevaluation6; 
+   float  forBDTevaluation7; 
+   float  forBDTevaluation8; 
+   float  forBDTevaluation9; 
+   float  forBDTevaluation10;
+
+   reader->TMVA::Reader::AddVariable( "Pmu3", &forBDTevaluation1 );
+   reader->TMVA::Reader::AddVariable( "cLP", &forBDTevaluation2 );
+   reader->TMVA::Reader::AddVariable( "tKink", &forBDTevaluation3 );
+   reader->TMVA::Reader::AddVariable( "segmComp", &forBDTevaluation4 );
+   reader->TMVA::Reader::AddVariable( "fv_nC", &forBDTevaluation5 );
+   reader->TMVA::Reader::AddVariable( "fv_dphi3D", &forBDTevaluation6 );
+   reader->TMVA::Reader::AddVariable( "fv_d3Dsig", &forBDTevaluation7 );
+   reader->TMVA::Reader::AddVariable( "d0sig", &forBDTevaluation8 );
+   reader->TMVA::Reader::AddVariable( "mindca_iso", &forBDTevaluation9 );
+   reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation10 );
+
+   reader->TMVA::Reader::BookMVA("BDT", "/lustrehome/fsimone/MVA_Cate/dataset_"+category+"/weights/TMVA_new_BDT.weights.xml");
+
+   //Start event Loop
+   for (Long64_t jentry=0; jentry<nentries; jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
-      float  forBDTevaluation1 = Pmu3;
-      float  forBDTevaluation2 = cLP;
-      float  forBDTevaluation3 = tKink;
-      float  forBDTevaluation4 = segmComp;
-      float  forBDTevaluation5 = fv_nC;
-      float  forBDTevaluation6 = fv_dphi3D;
-      float  forBDTevaluation7 = fv_d3Dsig;
-      float  forBDTevaluation8 = d0sig;
-      float  forBDTevaluation9 = mindca_iso;
-      float  forBDTevaluation10 = tripletMass;
-
-      TMVA::Tools::Instance();
-      TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );
-
-      reader->TMVA::Reader::AddVariable( "Pmu3", &forBDTevaluation1 );
-      reader->TMVA::Reader::AddVariable( "cLP", &forBDTevaluation2 );
-      reader->TMVA::Reader::AddVariable( "tKink", &forBDTevaluation3 );
-      reader->TMVA::Reader::AddVariable( "segmComp", &forBDTevaluation4 );
-      reader->TMVA::Reader::AddVariable( "fv_nC", &forBDTevaluation5 );
-      reader->TMVA::Reader::AddVariable( "fv_dphi3D", &forBDTevaluation6 );
-      reader->TMVA::Reader::AddVariable( "fv_d3Dsig", &forBDTevaluation7 );
-      reader->TMVA::Reader::AddVariable( "d0sig", &forBDTevaluation8 );
-      reader->TMVA::Reader::AddVariable( "mindca_iso", &forBDTevaluation9 );
-      reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation10 );
-
-      reader->TMVA::Reader::BookMVA("BDT", "/lustrehome/fsimone/MVA_Cate/dataset_"+category+"/weights/TMVA_new_BDT.weights.xml");
+      forBDTevaluation1 = Pmu3;
+      forBDTevaluation2 = cLP;
+      forBDTevaluation3 = tKink;
+      forBDTevaluation4 = segmComp;
+      forBDTevaluation5 = fv_nC;
+      forBDTevaluation6 = fv_dphi3D;
+      forBDTevaluation7 = fv_d3Dsig;
+      forBDTevaluation8 = d0sig;
+      forBDTevaluation9 = mindca_iso;
+      forBDTevaluation10 = tripletMass;
 
       double BDT_decision = reader->EvaluateMVA("BDT");
-     //EvaluateMVA( Pmu3, cLP,tKink, segmComp,fv_nC,fv_dphi3D, fv_d3Dsig, d0sig, mindca_iso);
-       cout<<" dec "<< BDT_decision<<" a cut "<<BDTcutvalues.a<<" b cut "<<BDTcutvalues.b<<endl;
+      cout<<" dec "<< BDT_decision<<" a cut "<<BDTcutvalues.a<<" b cut "<<BDTcutvalues.b<<endl;
     
-       if( BDT_decision >= BDTcutvalues.a ) //category 1
+      if( BDT_decision >= BDTcutvalues.a ) //category 1
            hTriplMass1->Fill(tripletMass);
-       else if ( BDT_decision < BDTcutvalues.a && BDT_decision >= BDTcutvalues.b) //category 2
+      else if ( BDT_decision < BDTcutvalues.a && BDT_decision >= BDTcutvalues.b) //category 2
            hTriplMass2->Fill(tripletMass);
    }
 
@@ -104,13 +115,21 @@ void RunT3Mu::Loop(int isMC, TString category){
         double DsYieldCorrection = 0.74;
         Double_t wNormMC = 1;
         if(isMC == 1) wNormMC = 0.0034*DsYieldCorrection; //Ds
-        if(isMC == 2) wNormMC = 0.0034*DsYieldCorrection; //B0
-        if(isMC == 3) wNormMC = 0.0034*DsYieldCorrection; //Bp
+        if(isMC == 2) wNormMC = 0.00061*DsYieldCorrection; //B0
+        if(isMC == 3) wNormMC = 0.00042*DsYieldCorrection; //Bp
 
-        hTriplMass1->Scale(wNormMC);  
-        hTriplMass2->Scale(wNormMC);  
+        hTriplMass1->Scale(wNormMC);
+        hTriplMass2->Scale(wNormMC);
     } 
     //Write and close the file
-    fout->Write();
+    fout->cd();
+    hTriplMass1->Write();
+    hTriplMass2->Write();
+    if(!isMC) {
+        hTriplMass1->Write("background"+category+"1");
+        hTriplMass2->Write("background"+category+"2");
+    }
     fout->Close();
+    delete reader;
+    cout<<"Done"<<endl;
 }

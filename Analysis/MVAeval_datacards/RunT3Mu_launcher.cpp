@@ -26,6 +26,11 @@ int main(int narg, char** cat){
     TString inputpath_B0 = "AnalysedTree_MC_3globalpt2_B0_tau3mu_24oct.root";
     TString inputpath_Bp = "AnalysedTree_MC_3globalpt2_Bp_tau3mu_24oct.root";
 
+    //prepare output file
+    TFile *fout = new TFile("datacardT3Mu_"+category+".root","recreate");
+    fout->cd();
+    fout->Close();
+
     //data
     isMC = 0;
     TFile *f0 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_data);
@@ -64,5 +69,28 @@ int main(int narg, char** cat){
     RunT3Mu class_Bp(tree);
     class_Bp.Loop(isMC, category);
 
+    //Add signals to inclusive distribution
+    TFile *fout_update = new TFile("datacardT3Mu_"+category+".root","update");
+    fout_update->cd();
+    TH1F *hTripletMassDs1, *hTripletMassB01, *hTripletMassBp1;
+    TH1F *hTripletMassDs2, *hTripletMassB02, *hTripletMassBp2;
+    hTripletMassDs1 = (TH1F*)fout_update->Get("signalDs"+category+"1");
+    hTripletMassDs2 = (TH1F*)fout_update->Get("signalDs"+category+"2");
+    hTripletMassB01 = (TH1F*)fout_update->Get("signalB0"+category+"1");
+    hTripletMassB02 = (TH1F*)fout_update->Get("signalB0"+category+"2");
+    hTripletMassBp1 = (TH1F*)fout_update->Get("signalBp"+category+"1");
+    hTripletMassBp2 = (TH1F*)fout_update->Get("signalBp"+category+"2");
+    //inclusive distribution
+    TH1F * hSignal1 = new TH1F ("signal"+category+"1","Triplet mass "+category+"1",42, 1.600000, 2.020000);
+    TH1F * hSignal2 = new TH1F ("signal"+category+"2","Triplet mass "+category+"2",42, 1.600000, 2.020000);
+    hSignal1->Add(hTripletMassDs1);
+    hSignal1->Add(hTripletMassB01);
+    hSignal1->Add(hTripletMassBp1);
+    hSignal2->Add(hTripletMassDs2);
+    hSignal2->Add(hTripletMassB02);
+    hSignal2->Add(hTripletMassBp2);
+    hSignal1->Write();
+    hSignal2->Write();
+    fout_update->Close();
     return 0;
 }
