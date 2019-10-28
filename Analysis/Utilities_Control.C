@@ -1074,7 +1074,7 @@ Double_t ntupleClass_Control::TreeFin_Angle(Int_t ind){
     return angle;
 }
 
-void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
     // Fills the tree branches
     Pmu3 = MuonP(Mu02_Pt->at(mu_Ind[1]), Mu02_Eta->at(mu_Ind[1]), Mu02_Phi->at(mu_Ind[1]));
     cLP = 0; tKink = 0; segmComp = 1; double temp[NMU_C] = {0};
@@ -1091,6 +1091,7 @@ void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU]
         if (Muon_segmentCompatibility->at(mu[k]) < segmComp) segmComp = Muon_segmentCompatibility->at(mu[k]);
         if (temp[k] < d0sig) d0sig = temp[k];
     }
+    tripletMass = Triplet2_Mass->at(ind);
     fv_nC = TripletVtx2_Chi2->at(ind)/3;
     fv_dphi3D = TreeFin_Angle(ind);
     fv_d3Dsig = FlightDistPVSV2_Significance->at(ind);
@@ -1099,12 +1100,13 @@ void ntupleClass_Control::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU]
     tree->Fill();
 }
 
-void ntupleClass_Control::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
+void ntupleClass_Control::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel){
     // Set tree branches
     tree->Branch("P", &Pmu3);
     tree->Branch("cLP", &cLP);
     tree->Branch("tKink", &tKink);
     tree->Branch("segmComp", &segmComp);
+    tree->Branch("tripletMass", &tripletMass);
     tree->Branch("fv_nC", &fv_nC);
     tree->Branch("fv_dphi3D", &fv_dphi3D);
     tree->Branch("fv_d3Dsig", &fv_d3Dsig);
