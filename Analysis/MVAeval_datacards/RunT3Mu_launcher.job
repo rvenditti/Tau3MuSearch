@@ -20,4 +20,4 @@ cd /lustrehome/fsimone/MVA_Cate
 g++ -I $ROOTSYS/include -I $ROOTSYS/include RunT3Mu_launcher.cpp `root-config --glibs` `root-config --libs` `root-config --cflags` -lTMVA -L $ROOTSYS/lib -o RunT3Mu_exe
 sleep 1
 
-./RunT3Mu_exe"A"
+./RunT3Mu_exe "A"
