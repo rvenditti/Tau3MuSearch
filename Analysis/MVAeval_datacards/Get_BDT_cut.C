@@ -73,15 +73,6 @@ BDTcut Get_BDT_cut(TString categ)
  	    if ( (N_b_1)>0 && (N_b_2)>0 ) {
                 S1 = N_s_1 / sqrt(N_s_1 + N_b_1);
 		S2 = N_s_2 / sqrt(N_s_2 + N_b_2);
-		//S1 = sqrt( 2*( (N_s_1+N_b_1)*lssimi,
-		//
-		//In riferimento all'avviso di scadenza qui sotto e al promemoria che mi è arrivato via posta, vi comunico che non sono interessata a sottoscrivere una nuova polizza.
-		//è necessaria una qualche azione da parte mia o è sufficiente lasciar passare la scadenza della polizza precedente?
-		//
-		//Cordialmente,
-		//
-		//Federica Simoneog(1+ (N_s_1/N_b_1)) - N_s_1 ) );
-		//S2 = sqrt( 2*( (N_s_2+N_b_2)*log(1+ (N_s_2/N_b_2)) - N_s_2 ) );
 	        //Combined significance
 	        S = sqrt(S1*S1 + S2*S2);
 	        a_list.push_back(a);
