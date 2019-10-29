@@ -28,7 +28,7 @@ int Idsummary2D_Gen[NPARTICLES][NPARTICLES] = {0};
 // * cut[3] -> all triplets w/ at least 2 track associated with PV
 // * cut[4] -> Chi2 triplet vertex (in 0 - 15)
 // * cut[5] -> There are (2 mu glb w/ pt>ptmin (=2) e 1 mu glb con pt>ptminTrack (=0.5)) & |eta|<2.4
-// * cut[6] -> Triplet mass (in 1.62 - 2 GeV)
+// * cut[6] -> Triplet mass (in 1.62 - 2.0 GeV)
 // * cut[7] -> The 3 possible pairs of mu of the triplet have proper DeltaR (<0.8)
 // * cut[8] -> The 3 possible pairs of mu of the triplet have proper |DeltaZ| (<0.5)
 // * cut[9] -> Cut on the dimuon mass w.r.t. Phi(1020) per pairs of mu of the triplet w/ opposite sign
