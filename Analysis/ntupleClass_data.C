@@ -46,7 +46,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     // Variables definition
     int ntripl, trInd = 0, ind = 0, mu_Ind[NMU] = {0}, mu[NMU] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
-    double massmin = 1.62, massmax = 2.00, sigmaPhi = 0.011, sigmaOmega = 0.0085, TripletVtx_Chi2max = 15, EtaMax = 2.4;
+    double massmin = 1.62, massmax = 2.0, sigmaPhi = 0.011, sigmaOmega = 0.0085, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString listCut[NCUTS], pId[NPARTICLES];
     std::vector< Double_t > dimu;
     // Variables for the final tree
@@ -219,7 +219,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                                 Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
                                 FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                 //CUT 6: check condition on trimuon mass
-                                if(Triplet_Mass->at(j) > 0 && Triplet_Mass->at(j) < 10){
+                                if(Triplet_Mass->at(j) > massmin && Triplet_Mass->at(j) < massmax){
                                     Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
                                     FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                     //CUT 7: Loop on PAIRS of muons of the triplet & check DeltaR
