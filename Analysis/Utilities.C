@@ -1000,8 +1000,8 @@ Double_t ntupleClass_MC::ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]){
     for(int k=0; k<NMU; k++){
         pt[k] = Muon_BestTrackPt->at(mu[k]);
         pt_bis[k] = pt[k] + Muon_BestTrackPtErr->at(mu[k]);
-        muon[k].SetPtEtaPhiE(pt[k], eta[k], phi[k], MuonEnergy->at(mu[k]));
-        muon_bis[k].SetPtEtaPhiE(pt_bis[k], eta[k], phi[k], MuonEnergy->at(mu[k]));
+        muon[k].SetPtEtaPhiM(pt[k], eta[k], phi[k], mumass);
+        muon_bis[k].SetPtEtaPhiM(pt_bis[k], eta[k], phi[k], mumass);
     }
     mutot = muon[0] + muon[1] + muon[2];
     mutot_bis[0] = muon_bis[0] + muon[1] + muon[2];
