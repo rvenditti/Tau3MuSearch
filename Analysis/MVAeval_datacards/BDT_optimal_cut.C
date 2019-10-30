@@ -28,17 +28,26 @@ void BDT_optimal_cut()
     double S1, S2, S;
     std::vector<double> S1_list, S2_list, S_list, a_list, b_list;
     Double_t sig_norm = 0.0014; //average normalization factor for the three signal samples
+    TString Method = "BDT"; //"BDT"
     for(int k=0; k<3; k++)
     {
 	    TFile *f = new TFile(file_name[k],"READ");
 
 	    TH1F *h_test_signal;
 	    TH1F *h_test_bkg;
+	    TH1F *h_test_signal2;
+	    TH1F *h_test_bkg2;
             //high granularity BDT scores
-	    h_test_signal = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_BDT/BDT/MVA_BDT_S_high");
-	    h_test_bkg = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_BDT/BDT/MVA_BDT_B_high");
-	    //h_test_signal = (TH1F*)f->Get("dataset/Method_BDT/BDT/MVA_BDT_S");
-	    //h_test_bkg = (TH1F*)f->Get("dataset/Method_BDT/BDT/MVA_BDT_B");
+	    h_test_signal = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_"+Method+"/"+Method+"/MVA_"+Method+"_S_high");
+	    h_test_bkg = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_"+Method+"/"+Method+"/MVA_"+Method+"_B_high");
+            //Normal binning BDT scores
+	    h_test_signal2 = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_"+Method+"/"+Method+"/MVA_"+Method+"_S");
+	    h_test_bkg2 = (TH1F*)f->Get("dataset_"+cat_name[k]+"/Method_"+Method+"/"+Method+"/MVA_"+Method+"_B");
+            h_test_signal->SetDirectory(0);
+            h_test_bkg->SetDirectory(0);
+            h_test_signal2->SetDirectory(0);
+            h_test_bkg2->SetDirectory(0);
+            f->Close();
 
 	    //Signal is normalized to "sig_norm" factor
 	    h_test_signal->Scale(sig_norm);
@@ -99,18 +108,18 @@ void BDT_optimal_cut()
             //Computing cut efficiency on signal
             Double_t N_S_12 = TH1_integral(h_test_signal,b_max,X_max);
             Double_t N_S_tot = TH1_integral(h_test_signal,X_min,X_max);
-            cout<<"Signal events kept by BDT "<<N_S_12<<" over "<<N_S_tot<<" ratio: "<<N_S_12/N_S_tot<<endl;
+            cout<<"Signal events kept by classifier: "<<N_S_12<<" over "<<N_S_tot<<" ratio: "<<N_S_12/N_S_tot<<endl;
             //Computing cut efficiency on backgroup
             Double_t N_B_12 = TH1_integral(h_test_bkg,b_max,X_max);
             Double_t N_B_tot = TH1_integral(h_test_bkg,X_min,X_max);
-            cout<<"Background events kept by BDT "<<N_B_12<<" over "<<N_B_tot<<" ratio: "<<N_B_12/N_B_tot<<endl;
+            cout<<"Background events kept by classifier: "<<N_B_12<<" over "<<N_B_tot<<" ratio: "<<N_B_12/N_B_tot<<endl;
 	    
             TLine l;
             l.DrawLine(a_max,X_min,a_max,X_max);
             l.DrawLine(X_min,b_max,X_max,b_max);
 
 	    c3->Update();
-	    c3->SaveAs("BDT_2Dmap_"+cat_name[k]+".png");
+	    c3->SaveAs(Method+"_2Dmap_"+cat_name[k]+".png");
 
 	    TCanvas *c1 = new TCanvas("c1","c1",150,10,990,660);
 	    h_test_bkg->Draw();
@@ -124,15 +133,10 @@ void BDT_optimal_cut()
 	    leg->AddEntry(h_test_bkg,cat_name[k]+"_bkg","f");
 	    leg->Draw();
 	    c1->Update();
-            c1->SaveAs("BDT_"+cat_name[k]+"normalizedSignal.png");
+            c1->SaveAs(Method+"_"+cat_name[k]+"normalizedSignal.png");
 
             //Drawing BDT score from scratch without signal normalization
 	    TCanvas *c2 = new TCanvas("c2","c2",150,10,990,660);
-	    TFile *f2 = new TFile(file_name[k],"READ");
-	    TH1F *h_test_signal2;
-	    TH1F *h_test_bkg2;
-	    h_test_signal2 = (TH1F*)f2->Get("dataset_"+cat_name[k]+"/Method_BDT/BDT/MVA_BDT_S");
-	    h_test_bkg2 = (TH1F*)f2->Get("dataset_"+cat_name[k]+"/Method_BDT/BDT/MVA_BDT_B");
 	    h_test_signal2->GetXaxis()->SetRangeUser(X_min,X_max);
 	    h_test_signal2->SetLineColor(kRed);
 	    h_test_signal2->Scale(1/h_test_signal2->GetEntries());
@@ -152,7 +156,7 @@ void BDT_optimal_cut()
 	    leg2->AddEntry(h_test_bkg2,cat_name[k]+"_bkg","f");
 	    leg2->Draw();
 	    c2->Update();
-            c2->SaveAs("BDT_"+cat_name[k]+".png");
+            c2->SaveAs(Method+"_"+cat_name[k]+".png");
 
 	    S_list.clear();
 	    S1_list.clear();
