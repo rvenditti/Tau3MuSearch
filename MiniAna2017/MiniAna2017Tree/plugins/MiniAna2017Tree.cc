@@ -702,7 +702,7 @@ private:
                   double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
                   double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
                   double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
-                  if (dR1 == 0 || dR2 == 0 || dR3 == 0) { 
+                  if (dR1 < 0.01 || dR2 < 0.01 || dR3 < 0.01) { 
 		    //cout<<"Skip muon track"<<endl; 
 		    continue;}
                   double dz = abs(track.dz(SVertexPoint));
