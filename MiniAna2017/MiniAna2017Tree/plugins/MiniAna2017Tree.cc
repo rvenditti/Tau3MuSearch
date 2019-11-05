@@ -163,18 +163,7 @@ private:
     
     TH1F *hEvents;
    edm::InputTag algInputTag_;
-    /*
-     TH1F *hEvents_3Mu, *hEvents_MuFilter, *hEvents_DiMuonDz, * hEvent_TauCharge,  * hEvent_3MuonVtx, *  hEvent_3MuonMass, *hEvent_Valid3MuonVtx;
-     
-     TH1F *hGenMuonPt;  TH1F *hGenMuonEta;
-     TH1F *hMuonPt;TH1F *hMuonP; TH1F *hMuonEta, *hGlobalMuonEta, *hTrackerMuonEta, *hLooseMuonEta, *hSoftMuonEta;
-     TH1F *  hGlobalMuonPt,  *  hSoftMuonPt,  *  hLooseMuonPt, *  hTrackerMuonPt;
-     TH1F *hMuonNumberOfValidHits;
-     TH1F * hMuonDB;   TH1F * hMuonTime;   TH1F * hMuonTimeErr;
-     TH1F  *hGenTauPt, *hDiMuonDz, *hDiMuonDR, *hGoodMuSize, *hMuonSize_GoodDiMu;
-     TH1F  *hThreeMuonInvMass, *hThreeMuonCharge, * hVtxSize, * hTau_vFit_chi2 ,  *h3MuonMassVtxFit  ;
-     TH2F * hMuonTimeVsP;
-     */
+
     //tree
     TTree*      tree_;
     std::vector<float>  MuonPt, MuonEta, MuonPhi;
@@ -229,7 +218,7 @@ private:
     std::vector<double>  FlightDistPVSV_Significance;
     std::vector<double>  FlightDistPVSV_chi2;
     
-    double PV_x,  PV_y,  PV_z,  PV_NTracks;
+   std::vector<double> PV_x,  PV_y,  PV_z,  PV_NTracks;
     
     uint  evt, run, lumi, puN;
   std::vector<string>  Trigger_l1name;
@@ -396,6 +385,9 @@ private:
         iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder);
         theTransientTrackBuilder_ = theTransientTrackBuilder.product();
 
+	//edm::Handle<SimTrackContainer> simTracks;
+	//iEvent.getByLabel("g4SimHits",simTracks);
+
         hEvents->Fill(1);
 
 
@@ -456,7 +448,7 @@ private:
             for(edm::View<reco::GenParticle>::const_iterator gp=genParticles->begin(); gp!=genParticles->end(), j<ngenP; ++gp , ++j){
                 //if(fabs(gp->pdgId())==15) tauRaw = j;
                 
-                if(fabs(gp->pdgId())==13 || fabs(gp->pdgId())==15  || fabs(gp->pdgId())==11 || fabs(gp->pdgId())==211 || fabs(gp->pdgId())==321 ||  fabs(gp->pdgId())==12  || fabs(gp->pdgId())==14 || fabs(gp->pdgId())==16) {
+	      if(fabs(gp->pdgId())==13 || fabs(gp->pdgId())==15  || fabs(gp->pdgId())==11 || fabs(gp->pdgId())==211 || fabs(gp->pdgId())==321 ||  fabs(gp->pdgId())==12  || fabs(gp->pdgId())==14 || fabs(gp->pdgId())==16 || fabs(gp->pdgId())==431 || fabs(gp->pdgId())==511 || fabs(gp->pdgId())==521) {
                     GenParticle_PdgId.push_back(gp->pdgId());
                     GenParticle_Pt.push_back(gp->pt());
                     GenParticle_Eta.push_back(gp->eta());
@@ -481,25 +473,27 @@ private:
         ///////////////Fill GenParticles///////////////
         
         //Primary Vtx
-        std::vector<reco::TransientTrack> pvTracks_original;
-        TransientTrackMap pvTrackMap_refit;
-        //  const reco::Vertex* eventVertex;
-        
+	//  const reco::Vertex* eventVertex;
+
         PVCollection_Size = vertices->size();
-        
-        for ( reco::Vertex::trackRef_iterator pvTrack = (*vertices)[0].tracks_begin(); pvTrack != (*vertices)[0].tracks_end(); ++pvTrack ) {
-            reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
-            pvTracks_original.push_back(pvTrack_transient);
-            pvTrackMap_refit.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
-        }
-        //  cout<<" Number of tracks associated to the PV="<<pvTracks_original.size()<<endl;
-        
-        PV_x = (*vertices)[0].x();
-        PV_y = (*vertices)[0].y();
-        PV_z = (*vertices)[0].z();
-        PV_NTracks = pvTracks_original.size();
-        // PV_Chi2.push_back((*vertices)[0].Chi2());
-        
+        //cout<<" PV size ="<<vertices->size()<<endl;
+
+	//std::vector<TransientTrackMap> pvTrackMap_refitVec;	
+	//for (reco::VertexCollection::const_iterator it = vertices.begin(); it != vertices.end() && VtxIt != vertices->size() ; ++it, ++VtxIt) {
+	//for(uint VtxIt =0;VtxIt<vertices->size();VtxIt++ ){
+	//std::vector<reco::TransientTrack> pvTracks_original2;
+	//TransientTrackMap pvTrackMap_refit2;
+	//for ( reco::Vertex::trackRef_iterator pvTrack =  (*vertices)[VtxIt].tracks_begin(); pvTrack != (*vertices)[VtxIt].tracks_end(); ++pvTrack ) {
+	    //cout<<" pv track size"<<(*vertices)[VtxIt].tracks_size()<<endl;
+	    //reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
+            //pvTracks_original2.push_back(pvTrack_transient);
+            //pvTrackMap_refit2.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
+	    //pvTrackMap_refitVec.push_back(pvTrackMap_refit2);
+	//}
+	//cout<<"Vtx id="<<VtxIt<<" Number of tracks associated to the PV="<<pvTracks_original2.size()<<endl;
+	//}
+	
+	
         //Triplets  Loop
         //cout<<"Number Of Triplets="<<Cand3Mu->size()<<endl;
 	if(isAna){
@@ -567,25 +561,13 @@ private:
                 bool isMatch1=false; bool isMatch2=false; bool isMatch3=false;
                 if( (mu1->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu1->simMotherPdgId()) == 15) ){
                     isMatch1=true;
-                    /*Mu1_SimPt.push_back(mu1->simPt());
-                     Mu1_SimEta.push_back(mu1->simEta());
-                     Mu1_SimPhi.push_back(mu1->simPhi());
-                     */
+
                 }
                 if( (mu2->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu2->simMotherPdgId()) == 15) ){
                     isMatch2=true;
-                    /*      Mu2_SimPt.push_back(mu2->simPt());
-                     Mu2_SimEta.push_back(mu2->simEta());
-                     Mu2_SimPhi.push_back(mu2->simPhi());
-                     */
                 }
                 if( (mu3->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu3->simMotherPdgId()) == 15) ){
                     isMatch3=true;
-                    /*
-                     Mu3_SimPt.push_back(mu3->simPt());
-                     Mu3_SimEta.push_back(mu3->simEta());
-                     Mu3_SimPhi.push_back(mu3->simPhi());
-                     */
                 }
                 
                 //    cout<<TripletIndex<<"Triplet Mass:"<<TauIt->mass()<<" pt="<<TauIt->pt()<<" vtx.x="<<TauIt->vx()<<" vtx x="<<TripletVtx.x()<<" chi2="<<TauIt->vertexChi2()<<" ndof="<<TauIt->vertexNdof()<<endl;
@@ -638,6 +620,8 @@ private:
             Triplet_Eta.push_back(TauIt->eta());
             Triplet_Phi.push_back(TauIt->phi());
             Triplet_Charge.push_back(TauIt->charge());
+	    TLorentzVector ThreeCandidate;
+	    ThreeCandidate.SetPtEtaPhiM(TauIt->pt(), TauIt->eta(), TauIt->phi(), TauIt->mass());
             //Matrix covariance to be added!!!!
             
             //Refitted Vars
@@ -665,22 +649,69 @@ private:
             SVTrackRef.push_back(TrackRef1);
             SVTrackRef.push_back(TrackRef2);
             SVTrackRef.push_back(TrackRef3);
+
+	    /*
+	    typedef std::vector<reco::TransientTrack> TTVect;
+	    std::vector<TTVect> TTVectContainer;
+	    for (uint k=0; k<pvTrackMap_refitVec.size(); k++){
+	      removeTracks( pvTrackMap_refitVec.at(k),  SVTrackRef);
+	      cout<<" k="<<k<<" size after TrackRemoval="<<pvTrackMap_refitVec.at(k)
+	      //std::vector<reco::TransientTrack> pvTracks_refitTmp;
+	      //for ( TransientTrackMap::iterator pvTrack = pvTrackMap_refitVec.at(k).begin();  pvTrack != pvTrackMap_refitVec.at(k).end(); ++pvTrack ) {
+	      //pvTracks_refitTmp.push_back(pvTrack->second);
+	      //}  
+	      //cout<<" pvTracks_refitTmp size"<<pvTracks_refitTmp.size()<<endl;
+	      //TTVectContainer.push_back(pvTracks_refitTmp);
+	    }
+	    //cout<<"TTVectContainer size "<<TTVectContainer.size()<<endl;
+	    */
+
+
+	    //KalmanVertexFitter PV_fitter (true);
+	    //TransientVertex PVertex = PV_fitter.vertex(pvTracks_refit);
+
+
+	    double dphi_pv = -1.0;
+	    uint primaryvertex_index=0;
+
+	    for(uint VtxIt =0;VtxIt<vertices->size();VtxIt++ ){
+	      //cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
+
+	      TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
+	      double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
+	      if(Cosdphi_3D>dphi_pv){
+		dphi_pv = Cosdphi_3D;
+		primaryvertex_index=VtxIt;
+	      }
+	    }
+	    //cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
+
+	    std::vector<reco::TransientTrack> pvTracks_original;
+	    TransientTrackMap pvTrackMap_refit;
+
+	    for ( reco::Vertex::trackRef_iterator pvTrack = (*vertices)[primaryvertex_index].tracks_begin(); pvTrack != (*vertices)[primaryvertex_index].tracks_end(); ++pvTrack ) {
+	      reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
+	      pvTracks_original.push_back(pvTrack_transient);
+	      pvTrackMap_refit.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
+	    }
+
+
+
+	    /////////////PV Refit//////////////////////////////
+	    //cout<<" pvTrackMap_refit size "<<pvTrackMap_refit.size()<<endl;
             removeTracks(pvTrackMap_refit,  SVTrackRef);
-            
-            std::vector<reco::TransientTrack> pvTracks_refit;
+	    std::vector<reco::TransientTrack> pvTracks_refit;
             for ( TransientTrackMap::iterator pvTrack = pvTrackMap_refit.begin();  pvTrack != pvTrackMap_refit.end(); ++pvTrack ) {
-                pvTracks_refit.push_back(pvTrack->second);}
-            //cout<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
-            
-            
-            
-            RefittedPV_NTracks.push_back(pvTracks_refit.size()); //remember to select events with at least 2 tracks associated to the PV
+	      pvTracks_refit.push_back(pvTrack->second);}
+            //cout<<" trInd="<<TripletIndex<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
+            //RefittedPV_NTracks.push_back(pvTracks_refit.size()); //remember to select events with at least 2 tracks associated to the PV
             /*for(uint i=0; i<pvTracks_refit.size(); i++){
              TrackRef tr = TrackRef(pvTracks_refit, i);
              //reco::Track pvTr=pvTracks_refit.at(i).track();
              //TrackRef pvTrRef = pvTr.get<TrackRef>();
              cout<<i<<"PV track ID="<<tr.id()<<endl;
              }*/
+	    /////////////PV Refit//////////////////////////////
 
             //Defining ISO VAR related to the triplet
             math::XYZPoint SVertexPoint = math::XYZPoint(TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
@@ -702,8 +733,9 @@ private:
                   double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
                   double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
                   double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
-                  if (dR1 == 0 || dR2 == 0 || dR3 == 0) { 
-		    //cout<<"Skip muon track"<<endl; 
+                  //if (dR1 == 0 || dR2 == 0 || dR3 == 0) { 
+		  //cout<<"Skip muon track"<<endl; 
+		  if (dR1 < 0.01 || dR2 < 0.01 || dR3 < 0.01) { 
 		    continue;}
                   double dz = abs(track.dz(SVertexPoint));
                   double dxy = abs(track.dxy(SVertexPoint));
@@ -748,10 +780,11 @@ private:
                 
                 //cout<<"Valid Vtx1="<<PVertex.isValid()<<endl;
                 if(PVertex.isValid()){
-                    //   cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
+                    //cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
                     //CachingVertex<5> fittedVertex = vertexFitter.vertex(tracksToVertex);
                     GlobalPoint PVertexPos  (PVertex.position());
                     GlobalPoint SVertexPos  (TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
+		    //cout<<" PV Coord after refit="<<PVertexPos.x()<<" y="<<PVertexPos.y()<<" z="<<PVertexPos.z()<<endl;
                     double FlightDist = TMath::Sqrt( pow(( PVertexPos.x() -SVertexPos.x()),2)+ pow(( PVertexPos.y() -SVertexPos.y()),2) + pow(( PVertexPos.z() -SVertexPos.z()),2));
                     
                     VertexDistance3D vertTool;
@@ -763,11 +796,17 @@ private:
                     double chi2 = vertTool.compatibility(PVstate, TripletVtx);
                     
                     ////
+
+		    PV_x.push_back( (*vertices)[primaryvertex_index].x());
+		    PV_y.push_back( (*vertices)[primaryvertex_index].y());
+		    PV_z.push_back( (*vertices)[primaryvertex_index].z());
+		    PV_NTracks.push_back(pvTracks_original.size());
+
                     
                     RefittedPV_x.push_back(PVertexPos.x());
                     RefittedPV_y.push_back(PVertexPos.y());
                     RefittedPV_z.push_back(PVertexPos.z());
-                    
+                    RefittedPV_NTracks.push_back(pvTracks_refit.size());
                     //RefittedPV_Chi2.push_back(PVertex.);
                     
                     FlightDistPVSV.push_back(distance);
@@ -828,14 +867,14 @@ private:
         }
 	}
         
-        cout<<"***Number of Muons="<<muons->size()<<endl; uint k=0;
+	//    cout<<"***Number of Muons="<<muons->size()<<endl; uint k=0;
         
         
         std::vector<int> MuFilter;
         vector<pat::Muon>    MyMu, MyMu2, SyncMu;
         double AllMuPt =0;
         MuonCollectionSize = muons->size();
-        
+	uint k=0;        
         for(edm::View<pat::Muon>::const_iterator mu=muons->begin(); mu!=muons->end(), k<muons->size(); ++mu, ++k){
             
             /*
@@ -1222,11 +1261,12 @@ private:
         Triplet_mindca_iso.clear();
         Triplet_relativeiso.clear();
 
-        PV_x=-99;
-        PV_y=-99;
-        PV_z=-99;
-        PV_NTracks=-99;
+        PV_x.clear();
+        PV_y.clear();
+        PV_z.clear();
+        PV_NTracks.clear();
         
+
         Mu1_Pt.clear();
         Mu1_Eta.clear();
         Mu1_Phi.clear();
