@@ -1,10 +1,10 @@
-//root -l MVA_code_09oct.cpp\(\"A\"\)
+//root -l MVA_train.cpp\(\"A\"\)
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 
 using namespace TMVA;
 
-void MVA_code_09oct(TString categ){
+void MVA_train(TString categ){
     //Check on input argument
     if(strcmp(categ, "A") != 0 && strcmp(categ, "B") != 0 && strcmp(categ, "C") != 0 && strcmp(categ, "B+C") != 0){
         cout << "Please choose between 'A', 'B', 'B+C' and 'C'" << endl;
