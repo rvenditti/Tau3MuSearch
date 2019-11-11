@@ -29,33 +29,12 @@ PatMuons = patMuons.clone(
 )
 
 
-#selectedPatMuons.src = cms.InputTag("PatMuons")
-#patTrigger.onlyStandAlone = cms.bool( True )
-##patTrigger.addL1Algos =cms.bool( False )
 
 
-"""
-muonTriggerMatchHLTMuons = cms.EDProducer(
-  # matching in DeltaR, sorting by best DeltaR
-  "PATTriggerMatcherDRDPtLessByR"
-  # matcher input collections
-, src     = cms.InputTag( 'selectedPatMuons' )
-, matched = cms.InputTag( 'patTrigger' )
-  # selections of trigger objects
-, matchedCuts = cms.string( 'type( "TriggerMuon" ) && path("HLT_DoubleMu3_TkMu_DsTau3Mu_v*" )' )
-  # selection of matches
-, maxDPtRel   = cms.double( 0.5 ) 
-, maxDeltaR   = cms.double( 0.5 )
-, maxDeltaEta = cms.double( 0.2 ) # no effect here
-  # definition of matcher output
-, resolveAmbiguities    = cms.bool( False )
-, resolveByMatchQuality = cms.bool( False )
-)
-"""
 looseMuons = cms.EDFilter("PATMuonSelector",
                           src = cms.InputTag("PatMuons"),
                           #cut = cms.string('pt > 0.5 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0) && innerTrack.quality("highPurity")'), 
-                          cut = cms.string('pt > 0.5 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0)'), 
+                          cut = cms.string('pt > 2 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0)'), 
                           filter = cms.bool(True)                                
 )
 
