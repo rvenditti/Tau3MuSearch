@@ -50,8 +50,6 @@ void RunT3Mu::Loop(int isMC, TString category){
    TH1F * hTriplMass1 = new TH1F (datasetName+category+"1","Triplet mass "+category+"1",42, 1.600000, 2.020000);
    TH1F * hTriplMass2 = new TH1F (datasetName+category+"2","Triplet mass "+category+"2",42, 1.600000, 2.020000);
 
-   //BDT cut
-   BDTcut BDTcutvalues = Get_BDT_cut(category);
    if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -69,6 +67,8 @@ void RunT3Mu::Loop(int isMC, TString category){
    float  forBDTevaluation8; 
    float  forBDTevaluation9; 
    float  forBDTevaluation10;
+   float  forBDTevaluation11;
+   float  forBDTevaluation12;
 
    reader->TMVA::Reader::AddVariable( "Pmu3", &forBDTevaluation1 );
    reader->TMVA::Reader::AddVariable( "cLP", &forBDTevaluation2 );
@@ -79,9 +79,18 @@ void RunT3Mu::Loop(int isMC, TString category){
    reader->TMVA::Reader::AddVariable( "fv_d3Dsig", &forBDTevaluation7 );
    reader->TMVA::Reader::AddVariable( "d0sig", &forBDTevaluation8 );
    reader->TMVA::Reader::AddVariable( "mindca_iso", &forBDTevaluation9 );
-   reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation10 );
+   reader->TMVA::Reader::AddVariable( "trkRel", &forBDTevaluation10 );
+   reader->TMVA::Reader::AddVariable( "nMatchesMu3", &forBDTevaluation11 );
+   reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation12 );
 
-   reader->TMVA::Reader::BookMVA("BDT", "/lustrehome/fsimone/MVA_Cate/dataset_"+category+"/weights/TMVA_new_BDT.weights.xml");
+   TString cat_weights = category;
+   if(category == "B" || category == "C") cat_weights = "B+C";
+   reader->TMVA::Reader::BookMVA("BDT", "/lustrehome/fsimone/MVA_Cate/dataset_"+cat_weights+"/weights/TMVA_new_BDT.weights.xml");
+
+   //BDT cut
+   BDTcut BDTcutvalues = Get_BDT_cut(cat_weights);
+   cout<<"Category"<< category<<" a cut "<<BDTcutvalues.a<<" b cut "<<BDTcutvalues.b<<endl;
+//   if(category=="C") { BDTcutvalues = {0.182048, 0.1}; cout<<"Category C BDT cut reset as:\n"<<BDTcutvalues.a<<" "<<BDTcutvalues.b<<endl; }
 
    //Start event Loop
    for (Long64_t jentry=0; jentry<nentries; jentry++) {
@@ -99,10 +108,12 @@ void RunT3Mu::Loop(int isMC, TString category){
       forBDTevaluation7 = fv_d3Dsig;
       forBDTevaluation8 = d0sig;
       forBDTevaluation9 = mindca_iso;
-      forBDTevaluation10 = tripletMass;
+      forBDTevaluation10 = trkRel;
+      forBDTevaluation11 = nMatchesMu3;
+      forBDTevaluation12 = tripletMass;
 
       double BDT_decision = reader->EvaluateMVA("BDT");
-      cout<<" dec "<< BDT_decision<<" a cut "<<BDTcutvalues.a<<" b cut "<<BDTcutvalues.b<<endl;
+   //   cout<<" dec "<< BDT_decision<<" a cut "<<BDTcutvalues.a<<" b cut "<<BDTcutvalues.b<<endl;
     
       if( BDT_decision >= BDTcutvalues.a ) //category 1
            hTriplMass1->Fill(tripletMass);
@@ -114,7 +125,7 @@ void RunT3Mu::Loop(int isMC, TString category){
         //Normalizing Monte Carlo 
         double DsYieldCorrection = 0.74;
         Double_t wNormMC = 1;
-        if(isMC == 1) wNormMC = 0.0034*DsYieldCorrection; //Ds
+        if(isMC == 1) wNormMC = 0.00115*DsYieldCorrection; //Ds
         if(isMC == 2) wNormMC = 0.00061*DsYieldCorrection; //B0
         if(isMC == 3) wNormMC = 0.00042*DsYieldCorrection; //Bp
 
@@ -125,6 +136,7 @@ void RunT3Mu::Loop(int isMC, TString category){
     fout->cd();
     hTriplMass1->Write();
     hTriplMass2->Write();
+    //duplicate
     if(!isMC) {
         hTriplMass1->Write("background"+category+"1");
         hTriplMass2->Write("background"+category+"2");

@@ -16,15 +16,15 @@ int main(int narg, char** cat){
     std::cout << "category: " << category << std::endl;
     
     // Check input arguments
-    if (!(category == "A" || category == "B" || category == "C")) {
+    if (!(category == "A" || category == "B" || category == "C"|| category == "B+C")) {
         std::cout<<"Wrong category name, please chooose between: A B C"<<std::endl;
         return 0;
     }
 
-    TString inputpath_data = "AnalysedTree_data_3globalpt2_2017_merged_tau3mu_24oct.root";
-    TString inputpath_Ds = "AnalysedTree_MC_3globalpt2_Ds_tau3mu_24oct.root";
-    TString inputpath_B0 = "AnalysedTree_MC_3globalpt2_B0_tau3mu_24oct.root";
-    TString inputpath_Bp = "AnalysedTree_MC_3globalpt2_Bp_tau3mu_24oct.root";
+    TString inputpath_data = "Analysed_07nov/AnalysedTree_data_2017_merged_tau3mu_07nov.root";
+    TString inputpath_Ds =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
+    TString inputpath_B0 =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
+    TString inputpath_Bp =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
 
     //prepare output file
     TFile *fout = new TFile("datacardT3Mu_"+category+".root","recreate");
@@ -36,38 +36,74 @@ int main(int narg, char** cat){
     TFile *f0 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_data);
     if (!f0 || !f0->IsOpen()) f0 = new TFile(inputpath_data);
     std::cout<<"Opened input file: "<<inputpath_data<<std::endl;
-    TDirectory * dir0 = (TDirectory*)f0->Get(inputpath_data+":/FinalTree"+category+"_Bkg");
-    dir0->GetObject("FinalTree"+category+"_Bkg",tree);
-    RunT3Mu class_data(tree);
-    class_data.Loop(isMC, category);
+    if(category == "B+C") {
+        TChain* chain_data = new TChain("FinalTreeB_Bkg");
+        chain_data->Add(inputpath_data);
+        chain_data->Add(inputpath_data+"/FinalTreeC_Bkg");
+        RunT3Mu class_data(chain_data);
+        class_data.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_data = new TChain("FinalTree"+category+"_Bkg");
+        chain_data->Add(inputpath_data);
+        RunT3Mu class_data(chain_data);
+        class_data.Loop(isMC, category);
+    }
 
     //MC Ds
     isMC = 1;
     TFile *f1 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Ds);
     if (!f1 || !f1->IsOpen()) f1 = new TFile(inputpath_Ds);
     std::cout<<"Opened input file: "<<inputpath_Ds<<std::endl;
-    TDirectory * dir1 = (TDirectory*)f1->Get(inputpath_Ds+":/FinalTree"+category+"_sgn");
-    dir1->GetObject("FinalTree"+category+"_sgn",tree);
-    RunT3Mu class_Ds(tree);
-    class_Ds.Loop(isMC, category);
+    if(category == "B+C") {
+        TChain* chain_ds = new TChain("FinalTreeB_sgn");
+        chain_ds->Add(inputpath_Ds);
+        chain_ds->Add(inputpath_Ds+"/FinalTreeC_sgn");
+        RunT3Mu class_Ds(chain_ds);
+        class_Ds.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_ds = new TChain("FinalTree"+category+"_sgn");
+        chain_ds->Add(inputpath_Ds);
+        RunT3Mu class_Ds(chain_ds);
+        class_Ds.Loop(isMC, category);
+    }
     //MC B0
     isMC = 2;
     TFile *f2 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_B0);
     if (!f2 || !f2->IsOpen()) f2 = new TFile(inputpath_B0);
     std::cout<<"Opened input file: "<<inputpath_B0<<std::endl;
-    TDirectory * dir2 = (TDirectory*)f2->Get(inputpath_B0+":/FinalTree"+category+"_sgn");
-    dir2->GetObject("FinalTree"+category+"_sgn",tree);
-    RunT3Mu class_B0(tree);
-    class_B0.Loop(isMC, category);
+    if(category == "B+C") {
+        TChain* chain_b0 = new TChain("FinalTreeB_sgn");
+        chain_b0->Add(inputpath_B0);
+        chain_b0->Add(inputpath_B0+"/FinalTreeC_sgn");
+        RunT3Mu class_B0(chain_b0);
+        class_B0.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_b0 = new TChain("FinalTree"+category+"_sgn");
+        chain_b0->Add(inputpath_B0);
+        RunT3Mu class_B0(chain_b0);
+        class_B0.Loop(isMC, category);
+    }
     //MC Bp
     isMC = 3;
     TFile *f3 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
     if (!f3 || !f3->IsOpen()) f3 = new TFile(inputpath_Bp);
     std::cout<<"Opened input file: "<<inputpath_Bp<<std::endl;
-    TDirectory * dir3 = (TDirectory*)f3->Get(inputpath_Bp+":/FinalTree"+category+"_sgn");
-    dir3->GetObject("FinalTree"+category+"_sgn",tree);
-    RunT3Mu class_Bp(tree);
-    class_Bp.Loop(isMC, category);
+    if(category == "B+C") {
+        TChain* chain_bp = new TChain("FinalTreeB_sgn");
+        chain_bp->Add(inputpath_Bp);
+        chain_bp->Add(inputpath_Bp+"/FinalTreeC_sgn");
+        RunT3Mu class_Bp(chain_bp);
+        class_Bp.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_bp = new TChain("FinalTree"+category+"_sgn");
+        chain_bp->Add(inputpath_Bp);
+        RunT3Mu class_Bp(chain_bp);
+        class_Bp.Loop(isMC, category);
+    }
 
     //Add signals to inclusive distribution
     TFile *fout_update = new TFile("datacardT3Mu_"+category+".root","update");

@@ -25,7 +25,7 @@ double TH1_integral (TH1F *h, float xmin, float xmax){
 BDTcut Get_BDT_cut(TString categ) 
 {
     //Check on input argument
-    if(strcmp(categ, "A") != 0 && strcmp(categ, "B") != 0 && strcmp(categ, "C") != 0){
+    if(strcmp(categ, "A") != 0 && strcmp(categ, "B") != 0 && strcmp(categ, "C") != 0 && strcmp(categ, "B+C") != 0){
           cout << "Please choose between 'A', 'B' and 'C'" << endl;
     return{-999,-999};
     }
@@ -37,7 +37,7 @@ BDTcut Get_BDT_cut(TString categ)
     double N_s_2, N_b_2;
     double S1, S2, S;
     std::vector<double> S1_list, S2_list, S_list, a_list, b_list;
-    Double_t sig_norm = 0.0014; //average normalization factor for the three signal samples
+    Double_t sig_norm = 0.00072; //average normalization factor for the three signal samples
     TFile *f = new TFile(file_name,"READ");
     TH1F *h_test_signal;
     TH1F *h_test_bkg;
@@ -70,6 +70,9 @@ BDTcut Get_BDT_cut(TString categ)
             //computing areas in range [b;a]
 	    N_s_2 = TH1_integral(h_test_signal,b,a);
             N_b_2 = TH1_integral(h_test_bkg,b,a);
+            //skip iteration if integral in cat 2 is < 0.1% of total (sensitive to fluctuations!)
+            if(N_s_2 < TH1_integral(h_test_signal,X_min,X_max)*0.001) continue;
+            if(N_b_2 < TH1_integral(h_test_bkg,X_min,X_max)*0.001) continue;
  	    if ( (N_b_1)>0 && (N_b_2)>0 ) {
                 S1 = N_s_1 / sqrt(N_s_1 + N_b_1);
 		S2 = N_s_2 / sqrt(N_s_2 + N_b_2);
