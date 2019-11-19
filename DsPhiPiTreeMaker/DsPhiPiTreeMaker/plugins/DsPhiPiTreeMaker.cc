@@ -232,7 +232,7 @@ private:
     std::vector<double>  FlightDistPVSV_Significance, FlightDistPVSV2_Significance;
     std::vector<double>  FlightDistPVSV_chi2, FlightDistPVSV2_chi2;
     
-    double PV_x,  PV_y,  PV_z,  PV_NTracks;
+    std::vector<double> PV_x,  PV_y,  PV_z,  PV_NTracks;
     
     uint  evt, run, lumi, puN;
     std::vector<string>  Trigger_l1name;
@@ -554,10 +554,8 @@ private:
             cout<<"****************GenLevel Info End ********************"<<endl;
         }
         
-        
+       /* 
         //Primary Vtx
-        std::vector<reco::TransientTrack> pvTracks_original;
-        TransientTrackMap pvTrackMap_refit;
         //  const reco::Vertex* eventVertex;
         
         PVCollection_Size = vertices->size();
@@ -574,7 +572,7 @@ private:
         PV_z = (*vertices)[0].z();
         PV_NTracks = pvTracks_original.size();
         // PV_Chi2.push_back((*vertices)[0].Chi2());
-
+       */
         
         bool is2Mu=true;
         if(is2Mu) {
@@ -720,7 +718,9 @@ private:
               Triplet2_Phi.push_back(PhiIt->phi());
               Triplet2_Charge.push_back(PhiIt->charge());
               //Matrix covariance to be added!!!!
-              
+              TLorentzVector ThreeCandidate;
+ 	      ThreeCandidate.SetPtEtaPhiM(PhiIt->pt(), PhiIt->eta(), PhiIt->phi(), PhiIt->mass());     
+
               //Refitted Vars
               //vector < TransientTrack > ttrks = TripletVtx.refittedTracks();
               
@@ -743,6 +743,34 @@ private:
               SVTrackRef2.push_back(TrackRef1);
               SVTrackRef2.push_back(TrackRef2);
               SVTrackRef2.push_back(TrackRef3); //da sistemare con kin fit phi->2mu
+
+              ///////////////PV taken as closest to candidate
+	      double dphi_pv = -1.0;
+ 	      uint primaryvertex_index=0;
+
+	      for(uint VtxIt =0; VtxIt<vertices->size(); VtxIt++ ){
+ 	          cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
+ 	      
+ 	          TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
+ 	          double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
+ 	          if(Cosdphi_3D>dphi_pv){
+ 	              dphi_pv = Cosdphi_3D;
+ 		      primaryvertex_index=VtxIt;
+ 	          }
+ 	      }
+	      cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
+
+	      std::vector<reco::TransientTrack> pvTracks_original;
+ 	      TransientTrackMap pvTrackMap_refit;
+
+ 	      for ( reco::Vertex::trackRef_iterator pvTrack = (*vertices)[primaryvertex_index].tracks_begin(); pvTrack != (*vertices)[primaryvertex_index].tracks_end(); ++pvTrack ) {
+ 	          reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
+ 	          pvTracks_original.push_back(pvTrack_transient);
+ 	          pvTrackMap_refit.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
+ 	      }
+
+              /////////////PV Refit//////////////////////////////
+	      // 	    //cout<<" pvTrackMap_refit size "<<pvTrackMap_refit.size()<<endl;
               removeTracks(pvTrackMap_refit,  SVTrackRef2);
               
               std::vector<reco::TransientTrack> pvTracks_refit2;
@@ -750,7 +778,7 @@ private:
                   pvTracks_refit2.push_back(pvTrack->second);}
               //cout<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
               
-              RefittedPV2_NTracks.push_back(pvTracks_refit2.size()); //remember to select events with at least 2 tracks associated to the PV
+              //RefittedPV2_NTracks.push_back(pvTracks_refit2.size()); //remember to select events with at least 2 tracks associated to the PV
               /*for(uint i=0; i<pvTracks_refit.size(); i++){
                TrackRef tr = TrackRef(pvTracks_refit, i);
                //reco::Track pvTr=pvTracks_refit.at(i).track();
@@ -758,6 +786,8 @@ private:
                cout<<i<<"PV track ID="<<tr.id()<<endl;
                }*/
              
+	      /////////////PV Refit//////////////////////////////
+
               ////Defining ISO VAR related to the triplet
               math::XYZPoint SVertexPoint = math::XYZPoint(TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
               TLorentzVector LV1=TLorentzVector( mu1->px(), mu1->py(), mu1->pz(), mu1->energy() );
@@ -788,7 +818,7 @@ private:
                     double dR1 = dR(Track1.eta(), track.eta(), Track1.phi(), track.phi() );
                     double dR2 = dR(Track2.eta(), track.eta(), Track2.phi(), track.phi() );
                     double dR3 = dR(Track3.eta(), track.eta(), Track3.phi(), track.phi() );
-                    if (dR1 == 0 || dR2 == 0 || dR3 == 0) {  
+                    if (dR1 < 0.01 || dR2 < 0.01 || dR3 < 0.01) {  
 		       //cout<<"Skip muon track"<<endl; 
 		       continue;}
                     double dz = abs(track.dz(SVertexPoint));
@@ -832,10 +862,12 @@ private:
                   
                   //cout<<"Valid Vtx1="<<PVertex.isValid()<<endl;
                   if(PVertex.isValid()){
-                      //   cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
+                      cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
                       //CachingVertex<5> fittedVertex = vertexFitter.vertex(tracksToVertex);
                       GlobalPoint PVertexPos  (PVertex.position());
                       GlobalPoint SVertexPos  (TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
+		      cout<<" PV Coord after refit="<<PVertexPos.x()<<" y="<<PVertexPos.y()<<" z="<<PVertexPos.z()<<endl;
+
                       double FlightDist = TMath::Sqrt( pow(( PVertexPos.x() -SVertexPos.x()),2)+ pow(( PVertexPos.y() -SVertexPos.y()),2) + pow(( PVertexPos.z() -SVertexPos.z()),2));
                       
                       VertexDistance3D vertTool;
@@ -847,11 +879,15 @@ private:
                       double chi2 = vertTool.compatibility(PVstate, TripletVtx);
                       
                       ////
-                      
+                      PV_x.push_back( (*vertices)[primaryvertex_index].x());
+ 		      PV_y.push_back( (*vertices)[primaryvertex_index].y());
+ 		      PV_z.push_back( (*vertices)[primaryvertex_index].z());
+ 		      PV_NTracks.push_back(pvTracks_original.size());
+
                       RefittedPV2_x.push_back(PVertexPos.x());
                       RefittedPV2_y.push_back(PVertexPos.y());
                       RefittedPV2_z.push_back(PVertexPos.z());
-                      
+                      RefittedPV2_NTracks.push_back(pvTracks_refit2.size());                      
                       //RefittedPV_Chi2.push_back(PVertex.);
                       
                       FlightDistPVSV2.push_back(distance);
@@ -1320,10 +1356,10 @@ private:
         Track_vy.clear();
         Track_vz.clear();
  
-        PV_x=-99;
-        PV_y=-99;
-        PV_z=-99;
-        PV_NTracks=-99;
+        PV_x.clear();
+        PV_y.clear();
+        PV_z.clear();
+        PV_NTracks.clear();
         
         Trigger_l1name.clear();
 	Trigger_l1decision.clear();
