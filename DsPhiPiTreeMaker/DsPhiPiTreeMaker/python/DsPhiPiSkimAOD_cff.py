@@ -29,7 +29,7 @@ PatMuons = patMuons.clone(
 looseMuons = cms.EDFilter("PATMuonSelector",
                           src = cms.InputTag("PatMuons"),
                           #cut = cms.string('pt > 0.5 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0) && innerTrack.quality("highPurity")'), 
-                          cut = cms.string('pt > 1 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0)'), 
+                          cut = cms.string('pt > 2 &&  abs(eta)<2.4 && (innerTrack().isNonnull) && (charge!=0) && (innerTrack().hitPattern().numberOfValidPixelHits()>0)'), 
                           filter = cms.bool(True)                                
 )
 
@@ -66,7 +66,7 @@ OneTrackFilter = cms.EDFilter("CandViewCountFilter",
 DiMuonCand  = cms.EDProducer("CandViewShallowCloneCombiner",
                               checkCharge = cms.bool(False),
                               #cut = cms.string('(mass < 10) && (mass >0.5)  && (abs(charge)=1) && (abs(daughter(0).vz - daughter(1).vz) < 1) && (abs(daughter(1).vz - daughter(2).vz) < 1) && (abs(daughter(0).vz - daughter(2).vz) < 1)'),
-                              cut = cms.string('(abs(charge)=0) && (mass < 3) && (mass >0.5)'),
+                              cut = cms.string('(abs(charge)=0) && (mass < 4) && (mass >0.5)'),
                               decay = cms.string("looseMuons looseMuons")
                               )
 

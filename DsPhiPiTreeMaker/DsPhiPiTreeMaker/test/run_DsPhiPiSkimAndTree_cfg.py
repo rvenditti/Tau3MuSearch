@@ -27,35 +27,17 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+         'root://xrootd-cms.infn.it//store/mc/RunIIFall17DRPremix/DsToPhiPi_ToMuMu_MuFilter_TuneCUEP8M1_13TeV-pythia8/AODSIM/PU2017_94X_mc2017_realistic_v11-v2/70000/F2F57A92-6686-E911-8E6B-B499BAAC055E.root',
         #'root://xrootd-cms.infn.it//store/data/Run2017B/DoubleMuonLowMass/AOD/23Jun2017-v1/90000/FC4BB0C3-E358-E711-9EFE-0025904B739A.root',
         #'root://xrootd-cms.infn.it//store/data/Run2017F/DoubleMuonLowMass/AOD/09May2018-v1/80000/FEDF5D97-BEB0-E811-95BF-0CC47AD98B94.root',
         #'root://xrootd-cms.infn.it//store/data/Run2017F/DoubleMuonLowMass/AOD/09May2018-v1/80000/AECC4C56-BAB0-E811-B92A-008CFA1979AC.root'
-             'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_10.root',
-             'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_11.root',
-             'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_12.root',
-             'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_13.root',
-             'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_14.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_15.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_16.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_17.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_18.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_19.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_20.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_21.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_22.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_23.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_24.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_25.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_26.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_27.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_28.root',
-             #'file:/lustre/cms/store/user/fsimone/DsPhiPi/crab_crab_DsPhiPi_13TeV_RECO/190225_141742/0000/DsPhiPi_13TeV_RECO_29.root',
+  
     )
 )
 
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string("histoSkim_twoMuonTrack.root"))
+                                   fileName = cms.string("Tree_PhiPi_MC.root"))
 
 
 process.Tree3Mu = cms.EDAnalyzer("DsPhiPiTreeMaker",
@@ -68,7 +50,10 @@ process.Tree3Mu = cms.EDAnalyzer("DsPhiPiTreeMaker",
                               #Cand3MuLabel=cms.InputTag("ThreeMuonsVtxKalmanFit"),
                               Cand2Mu1TrackLabel=cms.InputTag("TwoMuonsOneTrackKalmanVtxFit"),
                               DiMuonLabel=cms.InputTag("DiMuonsVtxFit"),
-                              pileupSummary = cms.InputTag("addPileupInfo")
+                              pileupSummary = cms.InputTag("addPileupInfo"),
+                              triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
+                              triggerSummary = cms.InputTag("hltTriggerSummaryAOD", "", "HLT"),
+                              AlgInputTag = cms.InputTag( "gtStage2Digis" )
 )
 
 

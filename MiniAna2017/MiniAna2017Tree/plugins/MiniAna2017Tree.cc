@@ -160,8 +160,10 @@ private:
     
     edm::Service<TFileService> fs;
     l1t::L1TGlobalUtil* gtUtil_;
-    
-    TH1F *hEvents;
+  TH1F *hEvents;
+  TH1F *hEventsAfterGoodCand;
+  //      TH1F *hEventsAfterGoodCand;
+  //    TH1F *hEventsAfterGoodCand;
    edm::InputTag algInputTag_;
 
     //tree
@@ -219,7 +221,7 @@ private:
     std::vector<double>  FlightDistPVSV_chi2;
     
    std::vector<double> PV_x,  PV_y,  PV_z,  PV_NTracks;
-    
+  std::vector<int> NGoodTriplets;
     uint  evt, run, lumi, puN;
   std::vector<string>  Trigger_l1name;
   std::vector<int> Trigger_l1decision;
@@ -496,6 +498,7 @@ private:
 	
         //Triplets  Loop
         //cout<<"Number Of Triplets="<<Cand3Mu->size()<<endl;
+	std::vector<int> NTripl;
 	if(isAna){
         TripletCollectionSize = Cand3Mu->size() ;
         int TripletIndex =-99; uint trIn=0;
@@ -543,6 +546,17 @@ private:
 	    ThreeCandidate.SetPtEtaPhiM(TauIt->pt(), TauIt->eta(), TauIt->phi(), TauIt->mass());
 
 
+	    for(uint VtxIt =0;VtxIt<vertices->size();VtxIt++ ){
+	      //cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
+	      TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
+	      double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
+	      if(Cosdphi_3D>dphi_pv){
+		dphi_pv = Cosdphi_3D;
+		primaryvertex_index=VtxIt;
+	      }
+	    }
+
+
 	    std::vector<reco::TransientTrack> pvTracks_original;
 	    TransientTrackMap pvTrackMap_refit;
 
@@ -557,17 +571,8 @@ private:
             for ( TransientTrackMap::iterator pvTrack = pvTrackMap_refit.begin();  pvTrack != pvTrackMap_refit.end(); ++pvTrack ) {
 	      pvTracks_refit.push_back(pvTrack->second);}
 
-	    for(uint VtxIt =0;VtxIt<vertices->size();VtxIt++ ){
-	      //cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
 
-	      TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
-	      double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
-	      if(Cosdphi_3D>dphi_pv){
-		dphi_pv = Cosdphi_3D;
-		primaryvertex_index=VtxIt;
-	      }
-	    }
-	    //cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
+	    cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
 
 	    //std::vector<reco::transientTrack> pvtracks_original;
 	    //Transienttrackmap Pvtrackmap_Refit;
@@ -588,7 +593,7 @@ private:
 	      //cout<<"Valid Vtx1="<<PVertex.isValid()<<endl;
 	      if(PVertex.isValid()){
 
-
+		NTripl.push_back(1);
             
 		TripletIndex=trIn;
 		//    if (!(TauIt->vertexChi2() < 20)) continue ;
@@ -962,7 +967,8 @@ private:
             
         }
 	}
-        
+        NGoodTriplets.push_back(NTripl.size());
+	if(NTripl.size()>0) hEventsAfterGoodCand->Fill(1);
 	//    cout<<"***Number of Muons="<<muons->size()<<endl; uint k=0;
         
         
@@ -1462,6 +1468,7 @@ private:
 
 	Trigger_hltname.clear();
 	Trigger_hltdecision.clear();
+	NGoodTriplets.clear();
 
 
 
@@ -1473,12 +1480,14 @@ private:
     MiniAna2017Tree::beginJob()
     {
         
-        hEvents = fs->make<TH1F>("hEvents","hEvents",10,0,10);
+      hEvents = fs->make<TH1F>("hEvents","hEvents",10,0,10);
+      hEventsAfterGoodCand = fs->make<TH1F>("hEventsAfterGoodCand","hEventsAfterGoodCand",10,0,10);
         
         tree_ = fs->make<TTree>("ntuple","LFVTau ntuple");
         tree_->Branch("evt", &evt);
         tree_->Branch("run", &run);
         tree_->Branch("lumi", &lumi);
+	tree_->Branch("NGoodTriplets", &NGoodTriplets);
         tree_->Branch("nPileUpInt", &puN);
         
 	tree_->Branch("Trigger_l1name", &Trigger_l1name);

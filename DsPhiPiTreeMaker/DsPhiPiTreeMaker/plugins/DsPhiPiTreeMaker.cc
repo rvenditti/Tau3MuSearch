@@ -158,6 +158,7 @@ private:
     edm::Service<TFileService> fs;
     l1t::L1TGlobalUtil* gtUtil_; 
     TH1F *hEvents;
+    TH1F *hEventsAfterGoodCand;
     
     /*
      TH1F *hEvents_3Mu, *hEvents_MuFilter, *hEvents_DiMuonDz, * hEvent_TauCharge,  * hEvent_3MuonVtx, *  hEvent_3MuonMass, *hEvent_Valid3MuonVtx;
@@ -241,6 +242,7 @@ private:
 	
     std::vector<string>  Trigger_hltname;
     std::vector<int> Trigger_hltdecision;
+  std::vector<int> NGoodTriplets;
     //SyncTree
     /*  TTree*      SyncTree_;
      std::vector<float>  allmuons_pt, leadmuon_pt, leadmuon_phi, leadmuon_eta;
@@ -469,22 +471,22 @@ private:
                 int isB = -1; //-1:not B //0:is not prompt B//1:is prompt B
                 int isBdecay = -1; //-1:not B //0:isB //1: is B to Ds//2: is B to anything else
                 if ( fabs(gp->pdgId()) == 511 || fabs(gp->pdgId()) == 521 || fabs(gp->pdgId()) == 531 ) { //B0 or B+ or Bs found
-                   cout<<"B meson"<<endl;
+		  //                  cout<<"B meson"<<endl;
                    isB=0;
                    isBdecay=0;
                    for(uint t=0; t<gp->numberOfMothers(); t++) {
                       cout<<"  gp->mother("<<t<<")->pdgId() = "<<gp->mother(t)->pdgId()<<endl;
                       if( fabs(gp->mother(t)->pdgId()) == 513 || fabs(gp->mother(t)->pdgId()) == 523 || fabs(gp->mother(t)->pdgId()) == 533 || fabs(gp->mother(t)->pdgId()) == 535 ) { //B*
                          for(uint i=0; i<gp->mother(t)->numberOfMothers(); i++) {
-                            cout<<"    gp->mother("<<t<<")->mother("<<i<<")->pdgId() = "<<gp->mother(t)->mother(i)->pdgId()<<endl;
+			   //        cout<<"    gp->mother("<<t<<")->mother("<<i<<")->pdgId() = "<<gp->mother(t)->mother(i)->pdgId()<<endl;
                             if(fabs(gp->mother(t)->mother(i)->pdgId())==5) { //b quark
-                               cout<<"    prompt"<<endl;
+			      //  cout<<"    prompt"<<endl;
                                isB=1;
                             }
                          }
                       }else{
                          if(fabs(gp->mother(t)->pdgId()) == 5){ //b quark
-                            cout<<"    prompt"<<endl;
+			   //cout<<"    prompt"<<endl;
                             isB=1;
                          }
                       }
@@ -492,7 +494,7 @@ private:
                    cout<<"B->"<<endl;
                    for(uint b=0; b<gp->numberOfDaughters(); b++) {
                       if ( fabs(gp->daughter(b)->pdgId()) == 431 || fabs(gp->daughter(b)->pdgId()) == 433 || fabs(gp->daughter(b)->pdgId()) == 435 ) {
-                         cout<<"   Ds"<<endl;
+			//cout<<"   Ds"<<endl;
                          isBdecay=1;
                       }else isBdecay=2;
                    }
@@ -573,11 +575,12 @@ private:
         PV_NTracks = pvTracks_original.size();
         // PV_Chi2.push_back((*vertices)[0].Chi2());
        */
-        
+
+	std::vector<int> NTripl;
         bool is2Mu=true;
         if(is2Mu) {
           //Triplets  Loop
-          cout<<"Number Of Triplets="<<Cand2Mu1Track->size()<<endl;
+          //cout<<"Number Of Triplets="<<Cand2Mu1Track->size()<<endl;
           TripletCollectionSize2 = Cand2Mu1Track->size();
           //int TripletIndex2 =-99; 
 	  uint trIn2=0;
@@ -607,7 +610,7 @@ private:
 	      if(!(PhiIt->vertexChi2()>0)) continue;
 	      //if(!(PhiIt->vertexChi2()<100)) continue;
 	      //selectedTriplets.push_back(trIn2);
-	      selectedTripletsIndex.push_back(trIn2);
+
 	      //TripletIndex2=trIn2;
 	      //Bool Ov1=false; bool Ov2=false; bool Ov12=false;
 	      //if (fabs(c1->eta()-c3->eta())> 1.e-6) Ov1=true;
@@ -617,28 +620,108 @@ private:
 	      //cout<<TripletIndex2<<" Reco mu2 pt="<<c2->pt()<<" eta="<<c2->eta()<<" phi="<<c2->phi()<<" DEta(mu2,c3)="<<fabs(c2->eta()-c3->eta())<<endl;
 	      //cout<<TripletIndex2<<" Reco mu3 pt="<<c3->pt()<<" eta="<<c3->eta()<<" phi="<<c3->phi()<<endl;
 		//				}
-	      Mu01_Pt.push_back(mu1->pt());
-	      Mu01_Eta.push_back(mu1->eta());
-	      Mu01_Phi.push_back(mu1->phi());
-	      Mu01_TripletIndex.push_back(trIn2);
-              
-              Mu02_Pt.push_back(mu2->pt());
-              Mu02_Eta.push_back(mu2->eta());
-              Mu02_Phi.push_back(mu2->phi());
-              Mu02_TripletIndex.push_back(trIn2);
-              
-              Tr_Pt.push_back(Track3.pt());
-              Tr_Eta.push_back(Track3.eta());
-              Tr_Phi.push_back(Track3.phi());
-              Tr_TripletIndex.push_back(trIn2);
-	      //cout<<trIn2<<"Triplet track"<<Track3.pt()<<" "<<endl;
 
 
-	      //cout<<"Reco mu1 eta="<<mu1->eta()<<" mu2 eta="<<mu2->eta()<<" mu3 eta="<<c3->eta()<<endl;
-	      //cout<<"Reco mu1 phi="<<mu1->phi()<<" mu2 pt="<<mu2->phi()<<" mu3 pt="<<c3->phi()<<endl;
+
+              /////////////////VertexFit///////////////////////////////////
+              TrackRef trk01, trk02;
+              if (mu1->isGlobalMuon()) { trk01 = mu1->get<TrackRef,reco::CombinedMuonTag>();}
+              else { trk01 = mu1->get<TrackRef>();}
+              if (mu2->isGlobalMuon()) { trk02 = mu2->get<TrackRef,reco::CombinedMuonTag>();}
+              else{ trk02 = mu2->get<TrackRef>();}
+              //if (mu3->isGlobalMuon()) { trk3 = mu3->get<TrackRef,reco::CombinedMuonTag>();}
+              //else{  trk3 = mu3->get<TrackRef>();}
+              //cout<<" trk1 id="<<trk1.id()<<" tr2:"<<trk2.id()<<" trk3="<<trk3.id()<<endl;
+              const reco::TransientTrack transientTrack1=theTransientTrackBuilder_->build( trk01 );
+              const reco::TransientTrack transientTrack2=theTransientTrackBuilder_->build( trk02 );
+              reco::Track Track1 =transientTrack1.track();
+              reco::Track Track2 =transientTrack2.track();
+              reco::Track* TrackRef1=&Track1;
+              reco::Track* TrackRef2=&Track2;
+              vector<reco::Track*> SVTrackRef2;
+              SVTrackRef2.push_back(TrackRef1);
+              SVTrackRef2.push_back(TrackRef2);
+              SVTrackRef2.push_back(TrackRef3); //da sistemare con kin fit phi->2mu
+
+              ///////////////PV taken as closest to candidate
 	      reco::Vertex TripletVtx = reco::Vertex(PhiIt->vertex(), PhiIt->vertexCovariance(), PhiIt->vertexChi2(), PhiIt->vertexNdof(), PhiIt->numberOfDaughters() );
-              //TransientVertex TransientTripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
-              //cout<<" number of muons in triplet="<<TauIt->numberOfDaughters()<<endl;
+	      double dphi_pv = -1.0;
+ 	      uint primaryvertex_index=-99;
+
+              TLorentzVector ThreeCandidate;
+ 	      ThreeCandidate.SetPtEtaPhiM(PhiIt->pt(), PhiIt->eta(), PhiIt->phi(), PhiIt->mass());     
+
+	      for(uint VtxIt =0; VtxIt<vertices->size(); VtxIt++ ){
+		// cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
+ 	      
+ 	          TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
+ 	          double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
+ 	          if(Cosdphi_3D>dphi_pv){
+ 	              dphi_pv = Cosdphi_3D;
+ 		      primaryvertex_index=VtxIt;
+ 	          }
+ 	      }
+	      //cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
+
+
+
+	      std::vector<reco::TransientTrack> pvTracks_original;
+ 	      TransientTrackMap pvTrackMap_refit;
+ 	      for ( reco::Vertex::trackRef_iterator pvTrack = (*vertices)[primaryvertex_index].tracks_begin(); pvTrack != (*vertices)[primaryvertex_index].tracks_end(); ++pvTrack ) {
+ 	          reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
+ 	          pvTracks_original.push_back(pvTrack_transient);
+ 	          pvTrackMap_refit.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
+ 	      }
+
+
+	      //cout<<" pvTrackMap_refit size "<<pvTrackMap_refit.size()<<endl;
+              removeTracks(pvTrackMap_refit,  SVTrackRef2);
+
+              std::vector<reco::TransientTrack> pvTracks_refit2;
+              for ( TransientTrackMap::iterator pvTrack = pvTrackMap_refit.begin();  pvTrack != pvTrackMap_refit.end(); ++pvTrack ) {
+                  pvTracks_refit2.push_back(pvTrack->second);}
+              //cout<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
+
+
+
+	      RefittedPV2_NTracks.push_back(pvTracks_refit2.size());                                   
+	      /////////////PV Refit//////////////////////////////
+              if(pvTracks_refit2.size() >1){
+		KalmanVertexFitter PV_fitter (true);
+		TransientVertex PVertex = PV_fitter.vertex(pvTracks_refit2); //Kinematic?
+                
+		RefittedPV2_isValid.push_back(PVertex.isValid());
+                
+		//cout<<"Valid Vtx1="<<PVertex.isValid()<<endl;
+		if(PVertex.isValid()){
+		  
+		  NTripl.push_back(1);
+
+		  selectedTripletsIndex.push_back(trIn2);
+
+
+		  Mu01_Pt.push_back(mu1->pt());
+		  Mu01_Eta.push_back(mu1->eta());
+		  Mu01_Phi.push_back(mu1->phi());
+		  Mu01_TripletIndex.push_back(trIn2);
+              
+		  Mu02_Pt.push_back(mu2->pt());
+		  Mu02_Eta.push_back(mu2->eta());
+		  Mu02_Phi.push_back(mu2->phi());
+		  Mu02_TripletIndex.push_back(trIn2);
+              
+		  Tr_Pt.push_back(Track3.pt());
+		  Tr_Eta.push_back(Track3.eta());
+		  Tr_Phi.push_back(Track3.phi());
+		  Tr_TripletIndex.push_back(trIn2);
+		  //cout<<trIn2<<"Triplet track"<<Track3.pt()<<" "<<endl;
+
+
+		  //cout<<"Reco mu1 eta="<<mu1->eta()<<" mu2 eta="<<mu2->eta()<<" mu3 eta="<<c3->eta()<<endl;
+		  //cout<<"Reco mu1 phi="<<mu1->phi()<<" mu2 pt="<<mu2->phi()<<" mu3 pt="<<c3->phi()<<endl;
+
+		  //TransientVertex TransientTripletVtx = reco::Vertex(TauIt->vertex(), TauIt->vertexCovariance(), TauIt->vertexChi2(), TauIt->vertexNdof(), TauIt->numberOfDaughters() );
+		  //cout<<" number of muons in triplet="<<TauIt->numberOfDaughters()<<endl;
 
               ///////////////Check Trigger Matching///////////////
               float dR1 = 999., dR2 = 999., dR3 = 999.;
@@ -718,75 +801,12 @@ private:
               Triplet2_Phi.push_back(PhiIt->phi());
               Triplet2_Charge.push_back(PhiIt->charge());
               //Matrix covariance to be added!!!!
-              TLorentzVector ThreeCandidate;
- 	      ThreeCandidate.SetPtEtaPhiM(PhiIt->pt(), PhiIt->eta(), PhiIt->phi(), PhiIt->mass());     
+
 
               //Refitted Vars
               //vector < TransientTrack > ttrks = TripletVtx.refittedTracks();
               
-              ////
-              TrackRef trk01, trk02;
-              if (mu1->isGlobalMuon()) { trk01 = mu1->get<TrackRef,reco::CombinedMuonTag>();}
-              else { trk01 = mu1->get<TrackRef>();}
-              if (mu2->isGlobalMuon()) { trk02 = mu2->get<TrackRef,reco::CombinedMuonTag>();}
-              else{ trk02 = mu2->get<TrackRef>();}
-              //if (mu3->isGlobalMuon()) { trk3 = mu3->get<TrackRef,reco::CombinedMuonTag>();}
-              //else{  trk3 = mu3->get<TrackRef>();}
-              //cout<<" trk1 id="<<trk1.id()<<" tr2:"<<trk2.id()<<" trk3="<<trk3.id()<<endl;
-              const reco::TransientTrack transientTrack1=theTransientTrackBuilder_->build( trk01 );
-              const reco::TransientTrack transientTrack2=theTransientTrackBuilder_->build( trk02 );
-              reco::Track Track1 =transientTrack1.track();
-              reco::Track Track2 =transientTrack2.track();
-              reco::Track* TrackRef1=&Track1;
-              reco::Track* TrackRef2=&Track2;
-              vector<reco::Track*> SVTrackRef2;
-              SVTrackRef2.push_back(TrackRef1);
-              SVTrackRef2.push_back(TrackRef2);
-              SVTrackRef2.push_back(TrackRef3); //da sistemare con kin fit phi->2mu
 
-              ///////////////PV taken as closest to candidate
-	      double dphi_pv = -1.0;
- 	      uint primaryvertex_index=0;
-
-	      for(uint VtxIt =0; VtxIt<vertices->size(); VtxIt++ ){
- 	          cout<<"Vtx id="<<VtxIt<<" x="<<(*vertices)[VtxIt].x()<<endl;
- 	      
- 	          TVector3 Dv3D_reco(TripletVtx.x() - (*vertices)[VtxIt].x(), TripletVtx.y() - (*vertices)[VtxIt].y(), TripletVtx.z() - (*vertices)[VtxIt].z());
- 	          double Cosdphi_3D = Dv3D_reco.Dot(ThreeCandidate.Vect())/(Dv3D_reco.Mag()*ThreeCandidate.Vect().Mag());
- 	          if(Cosdphi_3D>dphi_pv){
- 	              dphi_pv = Cosdphi_3D;
- 		      primaryvertex_index=VtxIt;
- 	          }
- 	      }
-	      cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
-
-	      std::vector<reco::TransientTrack> pvTracks_original;
- 	      TransientTrackMap pvTrackMap_refit;
-
- 	      for ( reco::Vertex::trackRef_iterator pvTrack = (*vertices)[primaryvertex_index].tracks_begin(); pvTrack != (*vertices)[primaryvertex_index].tracks_end(); ++pvTrack ) {
- 	          reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
- 	          pvTracks_original.push_back(pvTrack_transient);
- 	          pvTrackMap_refit.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
- 	      }
-
-              /////////////PV Refit//////////////////////////////
-	      // 	    //cout<<" pvTrackMap_refit size "<<pvTrackMap_refit.size()<<endl;
-              removeTracks(pvTrackMap_refit,  SVTrackRef2);
-              
-              std::vector<reco::TransientTrack> pvTracks_refit2;
-              for ( TransientTrackMap::iterator pvTrack = pvTrackMap_refit.begin();  pvTrack != pvTrackMap_refit.end(); ++pvTrack ) {
-                  pvTracks_refit2.push_back(pvTrack->second);}
-              //cout<<" PV Tracks after refit="<<pvTracks_refit.size()<<endl;
-              
-              //RefittedPV2_NTracks.push_back(pvTracks_refit2.size()); //remember to select events with at least 2 tracks associated to the PV
-              /*for(uint i=0; i<pvTracks_refit.size(); i++){
-               TrackRef tr = TrackRef(pvTracks_refit, i);
-               //reco::Track pvTr=pvTracks_refit.at(i).track();
-               //TrackRef pvTrRef = pvTr.get<TrackRef>();
-               cout<<i<<"PV track ID="<<tr.id()<<endl;
-               }*/
-             
-	      /////////////PV Refit//////////////////////////////
 
               ////Defining ISO VAR related to the triplet
               math::XYZPoint SVertexPoint = math::XYZPoint(TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
@@ -854,19 +874,11 @@ private:
              Triplet_relativeiso.push_back(relativeiso);
             
 
-              if(pvTracks_refit2.size() >1){
-                  KalmanVertexFitter PV_fitter (true);
-                  TransientVertex PVertex = PV_fitter.vertex(pvTracks_refit2); //Kinematic?
-                  
-                  RefittedPV2_isValid.push_back(PVertex.isValid());
-                  
-                  //cout<<"Valid Vtx1="<<PVertex.isValid()<<endl;
-                  if(PVertex.isValid()){
-                      cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
+
                       //CachingVertex<5> fittedVertex = vertexFitter.vertex(tracksToVertex);
                       GlobalPoint PVertexPos  (PVertex.position());
                       GlobalPoint SVertexPos  (TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
-		      cout<<" PV Coord after refit="<<PVertexPos.x()<<" y="<<PVertexPos.y()<<" z="<<PVertexPos.z()<<endl;
+		      //cout<<" PV Coord after refit="<<PVertexPos.x()<<" y="<<PVertexPos.y()<<" z="<<PVertexPos.z()<<endl;
 
                       double FlightDist = TMath::Sqrt( pow(( PVertexPos.x() -SVertexPos.x()),2)+ pow(( PVertexPos.y() -SVertexPos.y()),2) + pow(( PVertexPos.z() -SVertexPos.z()),2));
                       
@@ -887,7 +899,7 @@ private:
                       RefittedPV2_x.push_back(PVertexPos.x());
                       RefittedPV2_y.push_back(PVertexPos.y());
                       RefittedPV2_z.push_back(PVertexPos.z());
-                      RefittedPV2_NTracks.push_back(pvTracks_refit2.size());                      
+
                       //RefittedPV_Chi2.push_back(PVertex.);
                       
                       FlightDistPVSV2.push_back(distance);
@@ -911,33 +923,100 @@ private:
 		      dxyErr_mu2.push_back(signed_IP2D_mu2.second.error());
 		      dxyErr_mu3.push_back(signed_IP2D_mu3.second.error());
                       
-                  }else{
-                      RefittedPV2_x.push_back(-99);
-                      RefittedPV2_y.push_back(-99);
-                      RefittedPV2_z.push_back(-99);
-                      RefittedPV2_NTracks.push_back(-99);
-                      //RefittedPV2_Chi2.push_back(PVertex.);
+		}else{
+
+		  Mu01_dRtriggerMatch.push_back(-99);
+		  Mu02_dRtriggerMatch.push_back(-99);
+		  Tr_dRtriggerMatch.push_back(-99);
+		  RefittedPV2_x.push_back(-99);
+		  RefittedPV2_y.push_back(-99);
+		  RefittedPV2_z.push_back(-99);
+		  RefittedPV2_NTracks.push_back(-99);
+		  //RefittedPV2_Chi2.push_back(PVertex.);
                       
-                      FlightDistPVSV2.push_back(-99);
-                      FlightDistPVSV2_Err.push_back(-99);
-                      FlightDistPVSV2_Significance.push_back(-99);
-                      FlightDistPVSV2_chi2.push_back(-99);
+		  FlightDistPVSV2.push_back(-99);
+		  FlightDistPVSV2_Err.push_back(-99);
+		  FlightDistPVSV2_Significance.push_back(-99);
+		  FlightDistPVSV2_chi2.push_back(-99);
+		  
+		  dxy_mu1.push_back(-99);
+		  dxy_mu2.push_back(-99);
+		  dxy_mu3.push_back(-99);
+		  
+		  dxyErr_mu1.push_back(-99);
+		  dxyErr_mu2.push_back(-99);
+		  dxyErr_mu3.push_back(-99);
+		      
 
-		      dxy_mu1.push_back(-99);
-		      dxy_mu2.push_back(-99);
-		      dxy_mu3.push_back(-99);
+		  PV_x.push_back(-99);
+		  PV_y.push_back(-99);
+		  PV_z.push_back(-99);
+		  PV_NTracks.push_back(-99);
+		  
+		  Triplet_mindca_iso.push_back(-99);
+		  Triplet_relativeiso.push_back(-99);
+		  
+		  GenMatchMu01_SimPt.push_back(-99);
+		  GenMatchMu02_SimPt.push_back(-99);
+		  // GenMatchMu3_SimPt.push_back(mu3->simPt());                                                                                                        
+		  
+		  GenMatchMu01_SimEta.push_back(-99);
+		  GenMatchMu02_SimEta.push_back(-99);
+		  
+		  GenMatchMu01_SimPhi.push_back(-99);
+		  GenMatchMu02_SimPhi.push_back(-99);
+		  GenMatchMu01_Pt.push_back(-99);
+		  GenMatchMu02_Pt.push_back(-99);
+		  GenMatchMu01_Eta.push_back(-99);
+		  GenMatchMu02_Eta.push_back(-99);
+		  GenMatchMu01_Phi.push_back(-99);
+		  GenMatchMu02_Phi.push_back(-99);
+		  
+		  TripletVtx2_x.push_back(-99);
+		  TripletVtx2_y.push_back(-99);
+		  TripletVtx2_z.push_back(-99);
+		      
+		  TripletVtx2_Chi2.push_back(-99);
+		  TripletVtx2_NDOF.push_back(-99);
+		  
+		  Triplet2_Mass.push_back(-99);
+		  Triplet2_Pt.push_back(-99);
+		  Triplet2_Eta.push_back(-99);
+		  Triplet2_Phi.push_back(-99);
+		  Triplet2_Charge.push_back(-99);
+		  
+		  Mu01_Pt.push_back(-99);
+		  Mu01_Eta.push_back(-99);
+		  Mu01_Phi.push_back(-99);
+		  Mu01_TripletIndex.push_back(-99);
+		  
+		  Mu02_Pt.push_back(-99);
+		  Mu02_Eta.push_back(-99);
+		  Mu02_Phi.push_back(-99);
+		  Mu02_TripletIndex.push_back(-99);
+		  
+		  Tr_Pt.push_back(-99);
+		  Tr_Eta.push_back(-99);
+		  Tr_Phi.push_back(-99);
+		  Tr_TripletIndex.push_back(-99);
+		  
 
-		      dxyErr_mu1.push_back(-99);
-		      dxyErr_mu2.push_back(-99);
-		      dxyErr_mu3.push_back(-99);
-		  }
+		  RefittedPV2_NTracks.push_back(-99);
+		  RefittedPV2_isValid.push_back(-99);
+
+    
+		  selectedTripletsIndex.push_back(-99);
+
+
+		}
                   
               }
 	      //	      }//check overlap
 	  }//loops on 2Mu+1track candidates
 	  
 	}//is2Mu
-    
+	NGoodTriplets.push_back(NTripl.size());
+	if(NTripl.size()>0) hEventsAfterGoodCand->Fill(1);
 
         TripletCollectionSize2 = Cand2Mu1Track->size();
 	SelectedTripletsSize = selectedTripletsIndex.size();        
@@ -1230,10 +1309,12 @@ private:
          nmuons = -999;
          */
         run= -999;
-        evt= -999;                                                                                                                                                                                                                                                                                                lumi= -999;
+        evt= -999;
+	lumi= -999;
         puN= -99;
         
-        GenParticle_PdgId.clear();
+	NGoodTriplets.clear();  
+      GenParticle_PdgId.clear();
         GenParticle_Pt.clear();
         GenParticle_Eta.clear();
         GenParticle_Phi.clear();
@@ -1516,13 +1597,14 @@ private:
     {
         
         hEvents = fs->make<TH1F>("hEvents","hEvents",10,0,10);
-        
+        hEventsAfterGoodCand= fs->make<TH1F>("hEventsAfterGoodCand","hEventsAfterGoodCand",10,0,10);
         tree_ = fs->make<TTree>("ntuple","LFVTau ntuple");
         
         
         tree_->Branch("evt", &evt);
         tree_->Branch("run", &run);
         tree_->Branch("lumi", &lumi);
+	tree_->Branch("NGoodTriplets", &NGoodTriplets);
         tree_->Branch("nPileUpInt", &puN);
         
         tree_->Branch("GenParticle_PdgId", &GenParticle_PdgId);
@@ -1666,74 +1748,6 @@ private:
 	tree_->Branch("Trigger_hltdecision",&Trigger_hltdecision);       
 
 
- 
-       /* tree_->Branch("TripletCollectionSize", &TripletCollectionSize);
-        tree_->Branch("Mu1_Pt",&Mu1_Pt);
-        tree_->Branch("Mu1_Eta", &Mu1_Eta);
-        tree_->Branch("Mu1_Phi", &Mu1_Phi);
-        tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex); 
-        
-        tree_->Branch("Mu2_Pt", &Mu2_Pt);
-        tree_->Branch("Mu2_Eta", &Mu2_Eta);
-        tree_->Branch("Mu2_Phi", &Mu2_Phi);
-        tree_->Branch("Mu2_TripletIndex", &Mu2_TripletIndex); 
-        
-        tree_->Branch("Mu3_Pt", &Mu3_Pt);
-        tree_->Branch("Mu3_Eta",&Mu3_Eta);
-        tree_->Branch("Mu3_Phi", &Mu3_Phi);
-        tree_->Branch("Mu3_TripletIndex", &Mu3_TripletIndex); 
-      
-        tree_->Branch("GenMatchMu1_SimPt", &GenMatchMu1_SimPt);
-        tree_->Branch("GenMatchMu2_SimPt", &GenMatchMu2_SimPt);
-        tree_->Branch("GenMatchMu3_SimPt", &GenMatchMu3_SimPt);
-        
-        tree_->Branch("GenMatchMu1_SimEta", &GenMatchMu1_SimEta);
-        tree_->Branch("GenMatchMu2_SimEta", &GenMatchMu2_SimEta);
-        tree_->Branch("GenMatchMu3_SimEta", &GenMatchMu3_SimEta);
-        
-        tree_->Branch("GenMatchMu1_SimPhi", &GenMatchMu1_SimPhi);
-        tree_->Branch("GenMatchMu2_SimPhi", &GenMatchMu2_SimPhi);
-        tree_->Branch("GenMatchMu3_SimPhi", &GenMatchMu3_SimPhi);
-        
-        tree_->Branch("GenMatchMu1_Pt", &GenMatchMu1_Pt);
-        tree_->Branch("GenMatchMu2_Pt", &GenMatchMu2_Pt);
-        tree_->Branch("GenMatchMu3_Pt", &GenMatchMu3_Pt);
-        
-        tree_->Branch("GenMatchMu1_Eta", &GenMatchMu1_Eta);
-        tree_->Branch("GenMatchMu2_Eta", &GenMatchMu2_Eta);
-        tree_->Branch("GenMatchMu3_Eta", &GenMatchMu3_Eta);
-        
-        tree_->Branch("GenMatchMu1_Phi", &GenMatchMu1_Phi);
-        tree_->Branch("GenMatchMu2_Phi", &GenMatchMu2_Phi);
-        tree_->Branch("GenMatchMu3_Phi", &GenMatchMu3_Phi);
-      
-        
-        tree_->Branch("TripletVtx_x", &TripletVtx_x);
-        tree_->Branch("TripletVtx_y", &TripletVtx_y);
-        tree_->Branch("TripletVtx_z", &TripletVtx_z);
-        
-        tree_->Branch("TripletVtx_Chi2", &TripletVtx_Chi2);
-        tree_->Branch("TripletVtx_NDOF", &TripletVtx_NDOF);
-        
-        tree_->Branch("Triplet_Mass", &Triplet_Mass);
-        tree_->Branch("Triplet_Pt", &Triplet_Pt);
-        tree_->Branch("Triplet_Eta", &Triplet_Eta);
-        tree_->Branch("Triplet_Phi", &Triplet_Phi);
-        tree_->Branch("Triplet_Charge", &Triplet_Charge);
-        
-        tree_->Branch("RefittedPV_x", &RefittedPV_x);
-        tree_->Branch("RefittedPV_y", &RefittedPV_y);
-        tree_->Branch("RefittedPV_z", &RefittedPV_z);
-        tree_->Branch("RefittedPV_NTracks", &RefittedPV_NTracks);
-        tree_->Branch("RefittedPV_isValid", &RefittedPV_isValid);
-         
-        
-        tree_->Branch("FlightDistPVSV", &FlightDistPVSV);
-        tree_->Branch("FlightDistPVSV_Err", &FlightDistPVSV_Err);
-        tree_->Branch("FlightDistPVSV_Significance", &FlightDistPVSV_Significance);
-        tree_->Branch("FlightDistPVSV_chi2", &FlightDistPVSV_chi2);
-        */
-        
         
         tree_->Branch("TripletCollectionSize2", &TripletCollectionSize2);  
 	tree_->Branch("SelectedTripletsSize", &SelectedTripletsSize);
