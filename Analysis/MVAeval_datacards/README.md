@@ -1,9 +1,10 @@
 **Train and Test MVA methods: example of call**
-
+```
 cd <work_directory>/CMSSW_9_4_4/src
 cmsenv
 cd <work_directory>/CMSSW_9_4_4/src/Analysis/MVAeval_datacards
 root -l MVA_Code.cpp\(\”cat\”\)
+```
 where cat = “A”, “B”, “C”, “B+C” (different combinations are easy to implement)
 
 Input files for MVA_Code.cpp are the “AnalysedTree_*.root” produced analysing the ntuples. The training is done using the small ntuples stored in the root files containing variables for BDT, pileup-reweighting factor and triplet invariant mass.
@@ -23,10 +24,13 @@ Code RunT3Mu_launcher.cpp:
 
 Usage example:
 compile RunT3Mu.C
-
+```
 g++ -I $ROOTSYS/include -I $ROOTSYS/include RunT3Mu_launcher.cpp `root-config --glibs` `root-config --libs` `root-config --cflags` -lTMVA -L $ROOTSYS/lib -o RunT3Mu_exe
-
-execute ./RunT3Mu_exe “cat”
+```
+execute
+```
+./RunT3Mu_exe “cat”
+```
 
 Macro BDT_optimal_cut.C:
 - Set cut values on BDT scuse (same as Get_BDT_cut.C)
