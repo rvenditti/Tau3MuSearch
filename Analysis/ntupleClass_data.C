@@ -54,7 +54,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     float tKink = 0;
     //Variables inizialization
     Fill_particleName(pId);
-    cutevt[0] = nentries;
+    //cutevt[0] = nentries;
     Fill_CutName(listCut);
     // Creation of the output file & final tree
     TString root_fileName = fileName;
@@ -131,10 +131,15 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
     TH1D *hPt[NCUTS], *hPt_mu[NCUTS][NMU], *hEta[NCUTS], *hEta_mu[NCUTS][NMU], *hPhi[NCUTS], *hVx[NCUTS], *hVy[NCUTS], *hVz[NCUTS];
     InitHistoStepByStep_SingleMu(hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz);
     dirStepByStep->cd();
+    TDirectory *dirPair = dirStepByStep->mkdir("Pair");  // Pair variables histo
+    dirPair->cd();
+    TH1D *hMass_pair[NCUTS], *hDeltaR_pair[NCUTS], *hDeltaZ_pair[NCUTS];
+    InitHistoStepByStep_Pair(hMass_pair, hDeltaR_pair, hDeltaZ_pair);
+    dirStepByStep->cd();
     TDirectory *dirTriplet = dirStepByStep->mkdir("Triplet");  // Triplet variables histo
     dirTriplet->cd();
-    TH1D *hL1[NCUTS], *hPt_tripl[NCUTS], *hEta_tripl[NCUTS], *hPhi_tripl[NCUTS], *hMass_tripl[NCUTS];
-    InitHistoStepByStep_Triplet(hL1, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl);
+    TH1D *hL1[NCUTS], *hPt_tripl[NCUTS], *hEta_tripl[NCUTS], *hPhi_tripl[NCUTS], *hMass_tripl[NCUTS], *hChi2_tripl[NCUTS];
+    InitHistoStepByStep_Triplet(hL1, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl);
     dirStepByStep->cd();
     TDirectory *dirPdgId = dirStepByStep->mkdir("PdgId"); // PdgId histograms
     dirPdgId->cd();
@@ -159,7 +164,7 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
         if(NGoodTriplets->at(0) == 0) continue;
         cout<<"========================"<<endl;
         cout<<"evt "<<evt<<" run "<<run<<" lumi "<<lumi<<" jentry "<<jentry<<endl;
-        if(TripletVtx_Chi2->size() != FlightDistPVSV->size()) continue; //check on branch dimention, bug in ntuple maker        
+    //    if(TripletVtx_Chi2->size() != FlightDistPVSV->size()) continue; //check on branch dimention, bug in ntuple maker        
         //CUT 0 : Before cuts
         Ncut = 0; cutevt[Ncut]++; cut[Ncut] += TripletVtx_Chi2->size();
         
@@ -211,11 +216,11 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             MatchIndex("ID", j, mu_Ind, mu);
             // Fill histograms
             FillHistoBC("data", j, hMass_tripl_BC, hChi2Vertex, hMassvsChi2, hMass_quad_BC, hMass_quad_Zero_BC, hMass_di_Zero_BC, hMass_di_Zero2_BC, hPtRes_BC, hPtRes_BC_mu, hPtResBarrel_BC, hPtResBarrel_BC_mu, hPtResEndcap_BC, hPtResEndcap_BC_mu, IdsummaryDaughter_Gen, IdsummaryMother_Gen, Idsummary2D_Gen);
-            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             //CUT 4 : check condition on * Chi2 vertex ( 0 < Chi2 < 15)
             if (TripletVtx_Chi2->at(j) < TripletVtx_Chi2max && TripletVtx_Chi2->at(j) > 0 ){
                 Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                 // CUT 5 :
                 // Check that mu1 is glb & pt>2 & |eta|<Etamax
                 if((Muon_isGlobal->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax){
@@ -227,41 +232,41 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
                         if((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptmin) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                             DeltaZ3 = Muon_vz->at(mu[2]);
                             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                             //CUT 6: check condition on trimuon mass
                             if(Triplet_Mass->at(j) > 1.62 && Triplet_Mass->at(j) < 2.0){
                                 Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                 //CUT 7: Loop on PAIRS of muons of the triplet & check DeltaR
                                 if(isPairDeltaRGood(j, DeltaRmax) == true){
                                     Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                    FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                    FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                     //CUT 8 : Check |Delta Z|
                                     if(isPairDeltaZGood(DeltaZ1, DeltaZ2, DeltaZ3, DeltaZmax) == true){
                                         Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                        FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                        FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                         //CUT 9: VETO on Phi(1020) mass
                                         dimu = Compute_DimuonMass(mu_Ind, mu);
                                         if(isPhi(dimu) == false){
                                             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                            FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                             //CUT 10: VETO on Omega(782) mass
                                             if(isOmega(dimu) == false){
                                                 Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                                FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                 //CUT 11: Mu1 Trigger Matching
                                                 if(Mu1_dRtriggerMatch->at(j)<0.03){
                                                    Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                   FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                                   FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                     //CUT 12: Mu2 Trigger Matching
                                                     if(Mu2_dRtriggerMatch->at(j)<0.03){
                                                        Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                       FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                                       FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                         //CUT 13: Mu3 Trigger Matching
                                                         if(Mu3_dRtriggerMatch->at(j)<0.03){
                                                            Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
                                                            ntripl++; triplIndex[trInd] = j; trInd++;
-                                                           FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                                           FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                         }
                                                     }
                                                 }
@@ -313,18 +318,18 @@ void ntupleClass_MC::LoopData_New(TString type, TString datasetName){
             if( isSB_tripletMass && isTrigger_forAna ){
                //CUT 14 : final plot sideband
                cutevt[NCUTS-3]++; cut[NCUTS-3]++;
-               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-3, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
             if( !isSB_tripletMass && isTrigger_forAna  ){
                //CUT 15 : final plot peak
                cutevt[NCUTS-2]++; cut[NCUTS-2]++;
-               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-2, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             }
             // Filling histogram with triplet mass if hlt fired AND (l1_DoubleMu || l1_TripleMu) fired
             if (isTrigger_forAna) {
                //CUT 16 : final plot full invariant mass range
                cutevt[NCUTS-1]++; cut[NCUTS-1]++;
-               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+               FillHistoStepByStep("data", ind, mu_Ind, mu, NCUTS-1, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                for(int k=0; k<NMU; k++){
                    hIsolation_03->Fill(Muon_emEt03->at(mu[k]));
                    hIsolation_05->Fill(Muon_emEt05->at(mu[k]));
