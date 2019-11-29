@@ -16,8 +16,8 @@
 #include <iostream>
 #include <TMVA/Reader.h>
 
-double pileup_weight[100] = {0};
-double pileupFactor = 0;
+std::vector<double> pileup_weight;
+double pileupFactor = 1;
 
 Int_t ntupleClass_MC::BestTripletFinder(Int_t triplIndex[1000], Int_t n){
     // Given the index of all the triplets of an event that passed all the cuts, it returns the index of the one with the smallest Chi2 of the vertex
@@ -178,9 +178,9 @@ void ntupleClass_MC::Fill_CutName(TString listCut[NCUTS]){
     listCut[11] = "Mu1_TriggerMatching";
     listCut[12] = "Mu2_TriggerMatching";
     listCut[13] = "Mu3_TriggerMatching";
-    listCut[14] = "DoubleMuFired";
-    listCut[15] = "TiipleMuFired";
-    listCut[16] = "NoCut_DoubleORTripleMu";
+    listCut[14] = "Sideband_HLT_L1OR";
+    listCut[15] = "Peak_HLT_L1OR";
+    listCut[16] = "Full_HLT_L1OR";
 }
 
 std::vector< Double_t > ntupleClass_MC::Compute_DimuonMass(Int_t mu_Ind[NMU], Int_t mu[NMU]){
@@ -405,11 +405,14 @@ void ntupleClass_MC::FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *h
     }
 }
 
-void ntupleClass_MC::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Int_t Ncut, TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]){
+void ntupleClass_MC::FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Int_t Ncut, bool l1double_fired, bool l1triple_fired, TH1D *hL1[NCUTS], TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]){
     // Fills the "StepByStep" histograms
     FillHistoSingleMu(mu_Ind, mu, hPt[Ncut], hPt_mu[Ncut], hEta[Ncut], hEta_mu[Ncut], hPhi[Ncut], hVx[Ncut], hVy[Ncut], hVz[Ncut]);
     FillHistoTriplet(ind, hPt_tripl[Ncut], hEta_tripl[Ncut], hPhi_tripl[Ncut], hMass_tripl[Ncut]);
     if (strcmp(type, "data") != 0) Fill_ParticleIdSummary(mu, IdsummaryDaughter[Ncut], IdsummaryMother[Ncut], Idsummary2D[Ncut]);
+    if (l1double_fired == 1) hL1[Ncut]->Fill(1);    
+    if (l1triple_fired == 1) hL1[Ncut]->Fill(2);    
+    if (l1double_fired == 1 || l1triple_fired == 1) hL1[Ncut]->Fill(3);    
 }
 
 void ntupleClass_MC::FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, TH1D *hist_phi, TH1D *hist_mass){
@@ -663,13 +666,15 @@ void ntupleClass_MC::InitHistoStepByStep_SingleMu(TH1D *hPt[NCUTS], TH1D *hPt_mu
     }
 }
 
-void ntupleClass_MC::InitHistoStepByStep_Triplet(TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS]){
+void ntupleClass_MC::InitHistoStepByStep_Triplet(TH1D *hL1[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS]){
     for(int i=0; i<NCUTS; i++){
         // Init histograms StepByStep w/ the variables of the triplet
+        TString hL1Name = "L1 fired (Double=1, Triple=2, OR=3) cut"; hL1Name += i;
         TString hPtTriplName = "Pt triplet_cut"; hPtTriplName += i;
         TString hEtaTriplName = "Eta triplet_cut"; hEtaTriplName += i;
         TString hPhiTriplName = "Phi triplet_cut"; hPhiTriplName += i;
         TString hMassTriplName = "Mass triplet_cut"; hMassTriplName += i;
+        hL1[i] = new TH1D(hL1Name, hL1Name, 4, -0.5, 3.5); // binning 1
         hPt_tripl[i] = new TH1D(hPtTriplName, hPtTriplName, 160, -0.05, 39.95); // binning 250 MeV
         hEta_tripl[i] = new TH1D(hEtaTriplName, hEtaTriplName, 100, -2.5, 2.5); // binning 0.05
         hPhi_tripl[i] = new TH1D(hPhiTriplName, hPhiTriplName, 140, -3.5, 3.5); // binning 0.05
@@ -682,6 +687,7 @@ void ntupleClass_MC::InitHistoStepByStep_Triplet(TH1D *hPt_tripl[NCUTS], TH1D *h
         hPhi_tripl[i]->GetYaxis()->SetTitle("N. triplets");
         hMass_tripl[i]->GetXaxis()->SetTitle("Mass triplet (GeV/c^{2})");
         hMass_tripl[i]->GetYaxis()->SetTitle("N. triplets");
+        hL1[i]->Sumw2();
         hPt_tripl[i]->Sumw2();
         hEta_tripl[i]->Sumw2();
         hPhi_tripl[i]->Sumw2();
@@ -770,9 +776,9 @@ Bool_t ntupleClass_MC::isPairNotAPhi(std::vector<Double_t> dimu, Double_t sigma)
 
 void ntupleClass_MC::MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU]){
     // This function matches the index of muons in different cases (ID or GEN muons)
-    mu_Ind[0] = Mu1_TripletIndex->at(ind);
-    mu_Ind[1] = Mu2_TripletIndex->at(ind);
-    mu_Ind[2] = Mu3_TripletIndex->at(ind);
+    mu_Ind[0] = ind; 
+    mu_Ind[1] = ind; 
+    mu_Ind[2] = ind; 
     if (mu_Ind[0] != ind || mu_Ind[1] != ind || mu_Ind[2] != ind) cout << "Error : Different triplet mu indices!" << endl;
     double pt[NMU] = {0}, eta[NMU] = {0}, phi[NMU] = {0};
     Get_MuonVariables(mu_Ind, pt, eta, phi);
@@ -1133,7 +1139,7 @@ Double_t ntupleClass_MC::TreeFin_Angle(Int_t ind){
     return angle;
 }
 
-void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
+void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &puFactor, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
     // Fills the tree branches
     // 2016 variables
     Pmu3 = MuonP(Mu3_Pt->at(mu_Ind[2]), Mu3_Eta->at(mu_Ind[2]), Mu3_Phi->at(mu_Ind[2]));
@@ -1146,8 +1152,6 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
     temp[1] = abs(dxy_mu2->at(mu_Ind[1])/ dxyErr_mu2->at(mu_Ind[1]));
     temp[2] = abs(dxy_mu3->at(mu_Ind[2])/ dxyErr_mu3->at(mu_Ind[2]));
     d0sig = 999;
-    mindca_iso = Triplet_mindca_iso->at(ind);
-    trkRel = Triplet_relativeiso->at(ind);
     
     for (int k=0; k<NMU; k++){
         //  * cLP MAX
@@ -1160,11 +1164,15 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
         if (temp1[k] < d0) d0 = temp1[k];
         if (temp[k] < d0sig) d0sig = temp[k];
     }
+    puFactor = pileupFactor;
     tripletMass = Triplet_Mass->at(ind);
     tripletMassReso = ResoTriplMass(mu_Ind, mu);
     fv_nC = TripletVtx_Chi2->at(ind)/3;
     fv_dphi3D = TreeFin_Angle(ind);
     fv_d3Dsig = FlightDistPVSV_Significance->at(ind);
+    fv_d3D = FlightDistPVSV->at(ind);
+    mindca_iso = Triplet_mindca_iso->at(ind);
+    trkRel = Triplet_relativeiso->at(ind);
     
     
     // Other variables
@@ -1263,8 +1271,9 @@ void ntupleClass_MC::TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int
     tree->Fill();
 }
 
-void ntupleClass_MC::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
+void ntupleClass_MC::TreeFin_Init(TTree *&tree, Double_t &puFactor, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3D,  Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05){
     // Set tree branches
+    tree->Branch("puFactor", &puFactor);
     tree->Branch("Pmu3", &Pmu3);
     tree->Branch("cLP", &cLP);
     tree->Branch("tKink", &tKink);
@@ -1273,6 +1282,7 @@ void ntupleClass_MC::TreeFin_Init(TTree *&tree, Double_t &Pmu3, Double_t &cLP, F
     tree->Branch("tripletMassReso", &tripletMassReso);
     tree->Branch("fv_nC", &fv_nC);
     tree->Branch("fv_dphi3D", &fv_dphi3D);
+    tree->Branch("fv_d3D", &fv_d3D);
     tree->Branch("fv_d3Dsig", &fv_d3Dsig);
     tree->Branch("d0", &d0);
     tree->Branch("d0sig", &d0sig);
