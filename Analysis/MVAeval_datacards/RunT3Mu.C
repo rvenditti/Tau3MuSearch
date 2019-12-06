@@ -84,7 +84,7 @@ void RunT3Mu::Loop(int isMC, TString category){
    reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation12 );
 
    TString cat_weights = category;
-   if(category == "B" || category == "C") cat_weights = "B+C";
+   //if(category == "B" || category == "C") cat_weights = "B+C";
    reader->TMVA::Reader::BookMVA("BDT", "/lustrehome/fsimone/MVA_Cate/dataset_"+cat_weights+"/weights/TMVA_new_BDT.weights.xml");
 
    //BDT cut
