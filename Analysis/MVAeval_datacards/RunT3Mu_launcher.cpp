@@ -23,8 +23,8 @@ int main(int narg, char** cat){
 
     TString inputpath_data = "Analysed_07nov/AnalysedTree_data_2017_merged_tau3mu_07nov.root";
     TString inputpath_Ds =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
-    TString inputpath_B0 =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
-    TString inputpath_Bp =   "Analysed_07nov/AnalysedTree_MC_Ds_tau3mu_07nov.root";
+    TString inputpath_B0 =   "Analysed_07nov/AnalysedTree_MC_B0_tau3mu_07nov.root";
+    TString inputpath_Bp =   "Analysed_07nov/AnalysedTree_MC_Bp_tau3mu_07nov.root";
 
     //prepare output file
     TFile *fout = new TFile("datacardT3Mu_"+category+".root","recreate");
