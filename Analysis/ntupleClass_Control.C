@@ -59,7 +59,8 @@ void ntupleClass_Control::LoopControl(){
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntries();
     // Variables definition
-    int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
+    std::vector<Int_t> triplIndex;
+    int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double dimu[NTOT] = {0}, massmin = 1.62, massmax = 2.00, sigma = 0.011, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString pId[NPARTICLES], listCut[NCUTS];
@@ -229,7 +230,7 @@ void ntupleClass_Control::LoopControl(){
                                                     // CUT 13 : Trk Trigger matching
                                                     if(Tr_dRtriggerMatch->at(j)<0.03){
                                                         Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                        ntripl++; triplIndex[trInd] = j; trInd++;
+                                                        ntripl++; triplIndex.push_back(j);
                                                         FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                     }
                                                 }
@@ -251,7 +252,7 @@ void ntupleClass_Control::LoopControl(){
         hNtripl->Fill(ntripl);
         if(ntripl > 0) {
             
-            ind = BestTripletFinder(triplIndex, ntripl);
+            ind = BestTripletFinder(triplIndex);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
 
@@ -327,7 +328,8 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntries();
     // Variables definition
-    int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
+    std::vector<Int_t> triplIndex;
+    int ntripl, trInd = 0, ind = 0, mu_Ind[NTOT] = {0}, mu[NTOT] = {0}, muGen[NTOT] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double dimu[NTOT] = {0}, massmin = 1.62, massmax = 2.00, sigma = 0.011, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString pId[NPARTICLES], listCut[NCUTS];
@@ -490,7 +492,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
                                                     // CUT 13 : Trk Trigger matching
                                                     if( Tr_dRtriggerMatch->at(j)<0.03 ){
                                                         Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                        ntripl++; triplIndex[trInd] = j; trInd++;
+                                                        ntripl++; triplIndex.push_back(j);
                                                         FillHistoStepByStep("data", j, mu_Ind, mu, Ncut, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hPt_Tr, hEta_Tr, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                     }
                                                 }
@@ -511,7 +513,7 @@ void ntupleClass_Control::LoopControl_Data(TString type, TString datasetName){
         // Histo N. triplets passed for each event
         hNtripl->Fill(ntripl);
         if(ntripl > 0) {
-            ind = BestTripletFinder(triplIndex, ntripl);
+            ind = BestTripletFinder(triplIndex);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
 

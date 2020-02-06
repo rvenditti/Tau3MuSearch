@@ -8,11 +8,11 @@
 #define OmegaMass 0.78265 // Omega mass in GeV
 #define ptmin 2.0
 
-Int_t ntupleClass_Control::BestTripletFinder(Int_t triplIndex[1000], Int_t n){
+Int_t ntupleClass_Control::BestTripletFinder(std::vector< Int_t > triplIndex){
     // Given the index of all the triplets of an event that passed all the cuts, it returns the index of the one with the smallest Chi2 of the vertex
-    int index = 0; double bestChi2 = 15;
-    if (n>1000) cout << "There are too many good triplets!" << endl;
-    for(int i=0; i<n; i++){
+    int index = 0; double bestChi2 = 100000;
+    int dim = triplIndex.size();
+    for(int i=0; i<dim; i++){
         if(TripletVtx2_Chi2->at(triplIndex[i]) < bestChi2){
             bestChi2 = TripletVtx2_Chi2->at(triplIndex[i]);
             index = triplIndex[i];

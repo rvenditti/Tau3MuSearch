@@ -50,18 +50,21 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     
     // Pile-up reweighting
     // data pileup from full 2017
-    TFile *fPileUp = new TFile("/lustrehome/fsimone/Analysis/Pile_up_reweighing_tools/PileUp_ReweightingStudy_2017_"+datasetName+"Tau3Mu.root");
-    TH1 *hPileUpRew = (TH1*)fPileUp->Get("PileUp_Reweighting");
-    int Nbins = hPileUpRew->GetNbinsX();
-    for(int m=0; m<Nbins; m++){
-        pileup_weight.push_back(hPileUpRew->GetBinContent(m));
+    if( datasetName.Contains("2017") ) {
+        TFile *fPileUp = new TFile("/lustrehome/fsimone/Analysis/Pile_up_reweighing_tools/PileUp_ReweightingStudy_"+datasetName+"Tau3Mu.root");
+        TH1 *hPileUpRew = (TH1*)fPileUp->Get("PileUp_Reweighting");
+        int Nbins = hPileUpRew->GetNbinsX();
+        for(int m=0; m<Nbins; m++){
+            pileup_weight.push_back(hPileUpRew->GetBinContent(m));
+        }
     }
     // End pile-up reweighting
     
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntries();
     // Variables definition
-    int ntripl, trInd = 0, ind = 0, mu_Ind[NMU] = {0}, mu[NMU] = {0}, muGen[NMU] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, triplIndex[1000] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
+    std::vector<Int_t> triplIndex;
+    int ntripl, trInd = 0, ind = 0, mu_Ind[NMU] = {0}, mu[NMU] = {0}, muGen[NMU] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double massmin = 0, massmax = 0, sigmaPhi = 0.011, sigmaOmega = 0.0085, TripletVtx_Chi2max = 15, EtaMax = 2.4;
     TString listCut[NCUTS], pId[NPARTICLES];
@@ -77,6 +80,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     // Variables for the final tree
     double Pmu3 = 0, cLP = 0, segmComp = 0, tripletMass = 0, tripletMassReso = 0, fv_nC = 0, fv_dphi3D = 0, fv_d3D = 0, fv_d3Dsig = 0, d0 = 0, d0sig = 0, mindca_iso = 0, trkRel = 0, Pmu1 = 0, Ptmu1 = 0, etamu1 = 0, Pmu2 = 0, Ptmu2 = 0, etamu2 = 0, Ptmu3 = 0, etamu3 = 0, P_trip = 0, Pt_trip = 0, eta_trip = 0, nStationsMu1 = 0, nStationsMu2 = 0, nStationsMu3 = 0, Iso03Mu1 = 0, Iso03Mu2 = 0, Iso03Mu3 = 0, Iso05Mu1 = 0, Iso05Mu2 = 0, Iso05Mu3 = 0, nMatchesMu1 = 0, nMatchesMu2 = 0, nMatchesMu3 = 0, timeAtIpInOutMu1 = 0, timeAtIpInOutMu2 = 0, timeAtIpInOutMu3 = 0, cQ_uS = 0, cQ_tK, cQ_gK = 0, cQ_tRChi2 = 0, cQ_sRChi2 = 0, cQ_Chi2LM = 0, cQ_Chi2lD = 0, cQ_gDEP = 0, cQ_tM = 0, cQ_gTP = 0, calEn_emMu1 = 0, calEn_emMu2 = 0, calEn_emMu3 = 0, calEn_hadMu1 = 0, calEn_hadMu2 = 0, calEn_hadMu3 = 0, caloComp = 0, fliDistPVSV_Chi2 = 0, isGlb3 = 0, isTracker3 = 0, isLoose3 = 0, isSoft3 = 0, isPF3 = 0, isRPC3 = 0, isSA3 = 0, isCalo3 = 0, vx1 = 0, vx2 = 0, vx3 = 0, vy1 = 0, vy2 = 0, vy3 = 0, vz1 = 0, vz2 = 0, vz3 = 0, Refvx1 = 0, Refvx2 = 0, Refvx3 = 0, Refvy1 = 0, Refvy2 = 0, Refvy3 = 0, Refvz1 = 0, Refvz2 = 0, Refvz3 = 0, SVx = 0, SVy = 0, SVz = 0, had03 = 0, had05 = 0, nJets03 = 0, nJets05 = 0, nTracks03 = 0, nTracks05 = 0, sumPt03 = 0, sumPt05 = 0, hadVeto03 = 0, hadVeto05 = 0, emVeto03 = 0, emVeto05 = 0, trVeto03 = 0, trVeto05 = 0;
     float tKink = 0;
+    double run_n = 0, lumi_n = 0, evt_n = 0;
     //Variables inizialization
     Fill_particleName(pId);
     //cutevt[0] = nentries;
@@ -87,12 +91,14 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     TString root_fileName = fileName;
     TFile *fout = new TFile(root_fileName, "RECREATE");
     fout->cd();
+    TTree *tree_forsync = new TTree("Tree_forsync","Tree_forsync");
     TTree *treeA = new TTree("FinalTreeA_sgn","FinalTreeA_sgn");
     TTree *treeB = new TTree("FinalTreeB_sgn","FinalTreeB_sgn");
     TTree *treeC = new TTree("FinalTreeC_sgn","FinalTreeC_sgn");
-    TreeFin_Init(treeA, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
-    TreeFin_Init(treeB, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
-    TreeFin_Init(treeC, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso,  fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+    TreeFin_Init(tree_forsync, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+    TreeFin_Init(treeA, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+    TreeFin_Init(treeB, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+    TreeFin_Init(treeC, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso,  fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
     // Creation of histograms for variables BEFORE cuts
     TDirectory *dirBeforeCuts = fout->mkdir("BeforeCuts");
     dirBeforeCuts->cd();
@@ -193,17 +199,40 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
         bool l1double_fired = 0;
         bool l1triple_fired = 0;
         for(int h=0; h<Trigger_hltname->size(); h++) {
-           TString hltName = Trigger_hltname->at(h);
-           if(strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0 && Trigger_hltdecision->at(h) == 1) {
-              hlt_fired = 1;
-           }
+            TString hltName = Trigger_hltname->at(h);
+            //HLT 2016
+            if( (datasetName.Contains("2016") != std::string::npos) && strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0 && Trigger_hltdecision->at(h) == 1) hlt_fired = 1;
+            //HLT 2017
+            if( (datasetName.Contains("2017") != std::string::npos) && strncmp(hltName, "HLT_DoubleMu3_Trk_Tau3mu_v", 26) == 0 && Trigger_hltdecision->at(h) == 1) hlt_fired = 1;
+            //HLT 2018
+            if( (datasetName.Contains("2018") != std::string::npos) && strncmp(hltName, "HLT_DoubleMu3_TkMu_DsTau3Mu_v", 29) == 0 && Trigger_hltdecision->at(h) == 1) hlt_fired = 1;
         }
         for(int k=0; k<Trigger_l1name->size(); k++) {
-           TString l1Name = Trigger_l1name->at(k);
-           //HLT + L1_DoubleMu
-           if(strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0 && Trigger_l1decision->at(k) == 1) l1double_fired = 1;
-           //HLT + L1_TripleMu
-           if( ( strcmp(l1Name, "L1_TripleMu_5_3_0_DoubleMu_5_3_OS_Mass_Max17") == 0 || strcmp(l1Name, "L1_TripleMu_5SQ_3SQ_0_DoubleMu_5_3_SQ_OS_Mass_Max9") == 0 ) && Trigger_l1decision->at(k) == 1)  l1triple_fired = 1;
+            TString l1Name = Trigger_l1name->at(k);
+            //2016 + 2017 + 2018 L1_DoubleMu
+            if( ( 
+                  strcmp(l1Name, "L1_DoubleMu0er1p6_dEta_Max1p8_OS") == 0 || //2016 Main
+                  strcmp(l1Name, "L1_DoubleMu_10_0_dEta_Max1p8") == 0 ||     //2016 Main
+                  strcmp(l1Name, "L1_DoubleMu_11_4") == 0 ||                 //2016 Backup
+                  strcmp(l1Name, "L1_DoubleMu0er1p4_dEta_Max1p8_OS") == 0 || //2016 Backup
+                  strcmp(l1Name, "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4") == 0 ||//2017 + 2018
+                  strcmp(l1Name, "L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4") == 0 ||//2017 + 2018 Backup
+                  strcmp(l1Name, "L1_DoubleMu4_SQ_OS_dR_Max1p2") == 0 ||     //2017 + 2018
+                  strcmp(l1Name, "L1_DoubleMu4p5_SQ_OS_dR_Max1p2") == 0 )    //2017 + 2018 Backup
+                  && Trigger_l1decision->at(k) == 1){
+                l1double_fired = 1;
+            //    if ( hlt_fired == 1 ) h_l1prescaleDouble->Fill(Trigger_l1prescale->at(k));
+            }
+            //2016 + 2017 + 2018  L1_TripleMu
+            if( ( 
+                 strcmp(l1Name, "L1_TripleMu0") == 0 ||                                      //2016 Main
+                 strcmp(l1Name, "L1_TripleMu_5_0_0") == 0 ||                                 //2016 Backup
+                 strcmp(l1Name, "L1_TripleMu_5_3_0_DoubleMu_5_3_OS_Mass_Max17") == 0 ||      //2017 + 2018
+                 strcmp(l1Name, "L1_TripleMu_5SQ_3SQ_0_DoubleMu_5_3_SQ_OS_Mass_Max9") == 0 ) //2017 + 2018
+                 && Trigger_l1decision->at(k) == 1){
+                l1triple_fired = 1;
+            //    if ( hlt_fired == 1 ) h_l1prescaleTriple->Fill(Trigger_l1prescale->at(k));
+            }
         }
         bool isTrigger_forAna = 0;
         if( hlt_fired == 1 && ( l1double_fired == 1 || l1triple_fired == 1 ) ) isTrigger_forAna = 1;
@@ -224,15 +253,15 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
         if (l1double_fired == 1 || l1triple_fired == 1) hL1[2]->Fill(3);
 
         //cout<<"l1triple_fired "<<l1triple_fired<<" l1double_fired "<<l1double_fired<<endl;
-
-        hPileUp_BC->Fill(nPileUpInt);
-        //cout << "N. pileUpInt = " << nPileUpInt << endl;
         pileupFactor = 1;
-        cout<<"nPileUpInt "<<nPileUpInt<<endl;
-        if(nPileUpInt<80) pileupFactor = pileup_weight.at(nPileUpInt);
-	cout << "PileUpFactor : " << pileupFactor << endl << endl;
-	hNPrVert_BC->Fill(PVCollection_Size, pileupFactor);
-
+       // if(!(datasetName.Contains("2018"))) {
+       //     hPileUp_BC->Fill(nPileUpInt);
+       //     //cout << "N. pileUpInt = " << nPileUpInt << endl;
+       //     cout<<"nPileUpInt "<<nPileUpInt<<endl;
+       //     if(nPileUpInt<80) pileupFactor = pileup_weight.at(nPileUpInt);
+       //     cout << "PileUpFactor : " << pileupFactor << endl << endl;
+       //     hNPrVert_BC->Fill(PVCollection_Size, pileupFactor);
+       // }
         //Loop over the TRIPLETS
         for (int j=0; j<TripletVtx_Chi2->size(); j++){
             //Matching between index of single mu of the triplet (mu#_Ind) & that of 'MUONID' (mu#)
@@ -244,6 +273,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
             FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
             //CUT 4 : check condition on * Chi2 vertex ( 0 < Chi2 < 15)
             if(TripletVtx_Chi2->at(j) < TripletVtx_Chi2max && TripletVtx_Chi2->at(j) > 0 ){
+            //if(TripletVtx_Chi2->at(j) > 0 ){
                 Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
                 FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                 // CUT 5 :
@@ -253,7 +283,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                     // Check that mu2 is glb & pt>2 & |eta|<Etamax
                     if((Muon_isGlobal->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax){
                         DeltaZ2 = Muon_vz->at(mu[1]);
-                        // Check that mu3 is tracker & pt>2 & |eta|<Etamax
+                        // Check that mu3 is glb & pt>2 & |eta|<Etamax
                         if((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptmin) && abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax){
                             DeltaZ3 = Muon_vz->at(mu[2]);
                             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
@@ -282,13 +312,16 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                                                 // CUT 11: Mu1 Trigger Matching
                                                 if(Mu1_dRtriggerMatch->at(j)<0.03){
                                                     Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+                                                    FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                     // CUT 12: Mu2 Trigger Matching
                                                     if(Mu2_dRtriggerMatch->at(j)<0.03){
                                                         Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+                                                        FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                                                         // CUT 13: Mu3 Trigger Matching
                                                         if(Mu3_dRtriggerMatch->at(j)<0.03){
                                                             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
-                                                            ntripl++; triplIndex[trInd] = j; trInd++;
+                                                            FillHistoStepByStep("MC", j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
+                                                            ntripl++; triplIndex.push_back(j);
                                                         }
                                                     }
                                                 }
@@ -309,13 +342,16 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
         // Histo N. triplets passed for each event
         hNtripl->Fill(ntripl);
         if(ntripl > 0) {
-            ind = BestTripletFinder(triplIndex, ntripl);
+            ind = BestTripletFinder(triplIndex);
             //RiMatching between index of single mu of the triplet (mu#_Ind) & that of  'MUONID' (mu#) & Ricomputing the 3 possible dimuon masses
             MatchIndex("ID", ind, mu_Ind, mu);
-
-            // Resolution & final histograms
-            MatchIndex("Gen", ind, mu_Ind, muGen);
-            if(muGen[0] != -999 && muGen[1] != -999 && muGen[2] != -999) {
+            if( datasetName.Contains("2017") ) { 
+                // Resolution & final histograms
+                MatchIndex("Gen", ind, mu_Ind, muGen);}
+            //Gen Matching
+            bool GenMatch_Tau3Mu = 1;
+            //if (std::abs(Muon_simPdgId->at(mu[0])) == 13 && std::abs(Muon_simPdgId->at(mu[1])) == 13 && std::abs(Muon_simPdgId->at(mu[2])) == 13 && std::abs(Muon_simMotherPdgId->at(mu[0])) == 15 && std::abs(Muon_simMotherPdgId->at(mu[1])) == 15 && std::abs(Muon_simMotherPdgId->at(mu[2])) == 15 ) GenMatch_Tau3Mu = 1;
+            if((muGen[0] != -999 && muGen[1] != -999 && muGen[2] != -999) || ( !datasetName.Contains("2017") && GenMatch_Tau3Mu ) ){
                 NgoodTripl++;
                 dimu = Compute_DimuonMass(mu_Ind, mu);
                 if( ((strcmp(type, "MC_sgn") == 0) && Triplet_Mass->at(ind) >= 1.73 && Triplet_Mass->at(ind) <= 1.82) || (strcmp(type, "MC") == 0) ){
@@ -334,30 +370,32 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
                       cutevt[NCUTS-1]++; cut[NCUTS-1]++;
                       FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-1, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                     }
-                 //   else if( isTrigger_forAna && ((Triplet_Mass->at(ind) >= 1.65 && Triplet_Mass->at(ind) <= 1.73) || (Triplet_Mass->at(ind) >= 1.82 && Triplet_Mass->at(ind) <= 1.90)) ){
+                 //   else if( isTrigger_forAna && ((Triplet_Mass->at(ind) >= 1.62 && Triplet_Mass->at(ind) <= 1.75) || (Triplet_Mass->at(ind) >= 1.80 && Triplet_Mass->at(ind) <= 2.0)) ){
                  //     //plot bkg
                  //      FillHistoStepByStep("MC", ind, mu_Ind, mu, NCUTS-2, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
                  //   }
                 }
-                FillHistoResoPt_AC(muGen, hPtRes_AC, hPtRes_AC_mu, hPtResBarrel_AC, hPtResBarrel_AC_mu, hPtResEndcap_AC, hPtResEndcap_AC_mu);
+                if( datasetName.Contains("2017") ) FillHistoResoPt_AC(muGen, hPtRes_AC, hPtRes_AC_mu, hPtResBarrel_AC, hPtResBarrel_AC_mu, hPtResEndcap_AC, hPtResEndcap_AC_mu);
                 StudyOnTriplet("good", ind, mu, hDeltaX, hDeltaY, hDeltaZ, hPt_tripl_good);
                 if(strcmp(datasetName, "Ds") == 0) FillHistoResoTriplMass(mu_Ind, mu, hMassTriRes, hMassTriResBarrel, hMassTriResEndcap);
                 if(isTrigger_forAna && (((strcmp(type, "MC_sgn") == 0) && Triplet_Mass->at(ind) >= 1.73 && Triplet_Mass->at(ind) <= 1.82) || (strcmp(type, "MC") == 0) )){
                     double tripReso = ResoTriplMass(mu_Ind, mu);
+                    run_n = run; lumi_n = lumi; evt_n = evt;
+                    TreeFin_Fill(tree_forsync, ind, mu_Ind, mu, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
                     if(tripReso < catA){
                         hTripMassA->Fill(Triplet_Mass->at(ind), pileupFactor);
                         hEtaA->Fill(std::max(std::max(abs(MuonEta->at(mu[0])),abs(MuonEta->at(mu[1]))) , abs(MuonEta->at(mu[2])) ), pileupFactor);                        
-                        TreeFin_Fill(treeA, ind, mu_Ind, mu, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+                        TreeFin_Fill(treeA, ind, mu_Ind, mu, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
                     }
                     else if (tripReso >= catA && tripReso <= catB){
                         hTripMassB->Fill(Triplet_Mass->at(ind), pileupFactor);
                         hEtaB->Fill(std::max(std::max(abs(MuonEta->at(mu[0])),abs(MuonEta->at(mu[1]))) , abs(MuonEta->at(mu[2])) ), pileupFactor);                        
-                        TreeFin_Fill(treeB, ind, mu_Ind, mu, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+                        TreeFin_Fill(treeB, ind, mu_Ind, mu, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
                     }
                     else if(tripReso > catB){
                         hTripMassC->Fill(Triplet_Mass->at(ind), pileupFactor);
                         hEtaC->Fill(std::max(std::max(abs(MuonEta->at(mu[0])),abs(MuonEta->at(mu[1]))) , abs(MuonEta->at(mu[2])) ), pileupFactor);
-                        TreeFin_Fill(treeC, ind, mu_Ind, mu, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
+                        TreeFin_Fill(treeC, ind, mu_Ind, mu, lumi_n, run_n, evt_n, pileupFactor, Pmu3, cLP, tKink, segmComp, tripletMass, tripletMassReso, fv_nC, fv_dphi3D, fv_d3D, fv_d3Dsig, d0, d0sig, mindca_iso, trkRel, Pmu1, Ptmu1, etamu1, Pmu2, Ptmu2, etamu2, Ptmu3, etamu3, P_trip, Pt_trip, eta_trip, nStationsMu1, nStationsMu2, nStationsMu3, Iso03Mu1, Iso03Mu2, Iso03Mu3, Iso05Mu1, Iso05Mu2, Iso05Mu3, nMatchesMu1, nMatchesMu2, nMatchesMu3, timeAtIpInOutMu1, timeAtIpInOutMu2, timeAtIpInOutMu3, cQ_uS, cQ_tK, cQ_gK, cQ_tRChi2, cQ_sRChi2, cQ_Chi2LM, cQ_Chi2lD, cQ_gDEP, cQ_tM, cQ_gTP, calEn_emMu1, calEn_emMu2, calEn_emMu3, calEn_hadMu1, calEn_hadMu2, calEn_hadMu3, caloComp, fliDistPVSV_Chi2, isGlb3, isTracker3, isLoose3,  isSoft3, isPF3, isRPC3, isSA3, isCalo3, vx1, vx2, vx3, vy1, vy2, vy3, vz1, vz2, vz3, Refvx1, Refvx2, Refvx3, Refvy1, Refvy2, Refvy3, Refvz1, Refvz2, Refvz3, SVx, SVy, SVz, had03, had05, nJets03, nJets05, nTracks03, nTracks05, sumPt03, sumPt05, hadVeto03, hadVeto05, emVeto03, emVeto05, trVeto03, trVeto05);
                     }
                 }
                //

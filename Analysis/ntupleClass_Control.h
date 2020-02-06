@@ -395,7 +395,7 @@ public :
     virtual void    Fill_particleId_2D(Int_t pdgId, Int_t pdgIdMother, Int_t IdSummary[NPARTICLES][NPARTICLES]);
     virtual void    Fill_particleName(TString pId[NPARTICLES]);
     // in "Utilities_Control.C"
-    virtual Int_t    BestTripletFinder(Int_t triplIndex[1000], Int_t n);
+    virtual Int_t    BestTripletFinder(std::vector<Int_t> triplIndex);
     virtual Double_t DimuonMass(Double_t charge1, Double_t charge2, Double_t pt1, Double_t pt2, Double_t eta1, Double_t eta2, Double_t phi1, Double_t phi2);
         // Functions for drawing canvas
     virtual void     Draw_CutEffCanvas(TCanvas *canv, TH1I *hist, Int_t cut[NCUTS], TString listCut[NCUTS]);

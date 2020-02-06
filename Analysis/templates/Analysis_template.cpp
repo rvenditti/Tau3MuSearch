@@ -34,56 +34,103 @@ int main(int narg, char** arg){
     char datasetName[15];
     strcpy(datasetName, arg[2]);
     cout << "datasetName : " << datasetName << endl << endl;
+    TString fileout = "";
     
     // Check input arguments
     if(strcmp(type, "MC") != 0 && strcmp(type, "MC_sgn") != 0 && strcmp(type, "MC_control") != 0 && strcmp(type, "data") != 0 && strcmp(type, "data_bkg") != 0 && strcmp(type, "data_control_sgn") != 0 && strcmp(type, "data_control_bkg") != 0 && strcmp(type, "data_control") != 0){
         cout << "The first argument is wrong! Please choose between 'MC', 'MC_sgn', 'MC_control', 'data','data_bkg', 'data_control', 'data_control_sgn' and 'data_control_bkg'" << endl;
         return -1;
     }
-    if((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0 ) && strcmp(datasetName, "Ds") != 0 && strcmp(datasetName, "B0") != 0 && strcmp(datasetName, "Bp") != 0 && strcmp(datasetName, "MiniBias") != 0){
+    if((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0 ) && 
+        strcmp(datasetName, "2016Ds") != 0 && strcmp(datasetName, "2016B0") != 0 && strcmp(datasetName, "2016Bp") != 0 && 
+        strcmp(datasetName, "2017Ds") != 0 && strcmp(datasetName, "2017B0") != 0 && strcmp(datasetName, "2017Bp") != 0 && 
+        strcmp(datasetName, "2018Ds") != 0 && strcmp(datasetName, "2018B0") != 0 && strcmp(datasetName, "2018Bp") != 0 && 
+        strcmp(datasetName, "MiniBias") != 0){
         cout << "The second argument is wrong! Please choose between 'Ds', 'B0', 'Bp' and 'MiniBias' " << endl;
         return -1;
     }
 
     // ################ MC
-    if ((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0) && (strcmp(datasetName, "Ds") == 0 || strcmp(datasetName, "B0") == 0 || strcmp(datasetName, "Bp") == 0 || strcmp(datasetName, "MiniBias") == 0)){
+    if ((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0) &&
+        (strcmp(datasetName, "2016Ds") == 0 || strcmp(datasetName, "2016B0") == 0 || strcmp(datasetName, "2016Bp") == 0 || 
+         strcmp(datasetName, "2017Ds") == 0 || strcmp(datasetName, "2017B0") == 0 || strcmp(datasetName, "2017Bp") == 0 || 
+         strcmp(datasetName, "2018Ds") == 0 || strcmp(datasetName, "2018B0") == 0 || strcmp(datasetName, "2018Bp") == 0 || 
+         strcmp(datasetName, "MiniBias") == 0)){
         cout << "This is a MC" << endl;
         // Ds -> Tau -> 3Mu
-        if (strcmp(datasetName, "Ds") == 0){
+        if ( strcmp(datasetName, "2017Ds") == 0 ){
             cout << "MC Dataset : Ds -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-        //AddFile_MCDs_tau3mu
-            TString fileout = "AddOutput_MCDs_tau3mu.root";
+        //AddFile_MC2017Ds_tau3mu
+        //OutFile_MC2017Ds_tau3mu
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
         }
         // B0 -> Tau -> 3Mu
-        if (strcmp(datasetName, "B0") == 0){
+        if ( strcmp(datasetName, "2017B0") == 0 ){
             cout << "MC Dataset : B0 -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-        //AddFile_MCB0_tau3mu
-            TString fileout = "AddOutput_MCB0_tau3mu.root";
+        //AddFile_MC2017B0_tau3mu
+        //OutFile_MC2017B0_tau3mu
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
         }
         // Bp -> Tau -> 3Mu
-        if (strcmp(datasetName, "Bp") == 0){
+        if ( strcmp(datasetName, "2017Bp") == 0 ){
             cout << "MC Dataset : Bp -> Tau -> 3Mu" << endl << endl;
             TChain* chain = new TChain("Tree3Mu/ntuple");
-        //AddFile_MCBp_tau3mu
-            TString fileout = "AddOutput_MCBp_tau3mu.root";
+        //AddFile_MC2017Bp_tau3mu
+        //OutFile_MC2017Bp_tau3mu
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
         }
+
+        // Ds -> Tau -> 3Mu
+        if (strcmp(datasetName, "2016Ds") == 0 || strcmp(datasetName, "2018Ds") == 0){
+            cout << "MC Dataset : Ds -> Tau -> 3Mu" << endl << endl;
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
+        //AddFile_MC2016Ds_tau3mu
+        //AddFile_MC2018Ds_tau3mu
+        //OutFile_MC2016Ds_tau3mu
+        //OutFile_MC2018Ds_tau3mu
+
+        ntupleClass_MC class_MC(chain, fileout);
+        class_MC.LoopMC_New(type, datasetName);
+        }
+        // B0 -> Tau -> 3Mu
+        if (strcmp(datasetName, "2016B0") == 0 || strcmp(datasetName, "2018B0") == 0){
+            cout << "MC Dataset : B0 -> Tau -> 3Mu" << endl << endl;
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
+        //AddFile_MC2016B0_tau3mu
+        //AddFile_MC2018B0_tau3mu
+        //OutFile_MC2016B0_tau3mu
+        //OutFile_MC2018B0_tau3mu
+
+        ntupleClass_MC class_MC(chain, fileout);
+        class_MC.LoopMC_New(type, datasetName);
+        }
+        // Bp -> Tau -> 3Mu
+        if (strcmp(datasetName, "2016Bp") == 0 || strcmp(datasetName, "2018Bp") == 0){
+            cout << "MC Dataset : Bp -> Tau -> 3Mu" << endl << endl;
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
+        //AddFile_MC2016Bp_tau3mu
+        //AddFile_MC2018Bp_tau3mu
+        //OutFile_MC2016Bp_tau3mu
+        //OutFile_MC2018Bp_tau3mu
+
+        ntupleClass_MC class_MC(chain, fileout);
+        class_MC.LoopMC_New(type, datasetName);
+        }
+
         // Minimum bias
         if(strcmp(datasetName, "MiniBias") == 0){
             cout << "Minimum Bias Dataset " << endl << endl;
             TChain* chain = new TChain("TreeMakerBkg/ntuple");
         //AddFile_MCMiniBias_tau3mu
-            TString fileout = "AddOutput_MCMiniBias_tau3mu.root";
+        //OutFile_MCMiniBias_tau3mu
 
         ntupleClass_MC class_MC(chain, fileout);
         class_MC.LoopMC_New(type, datasetName);
@@ -94,7 +141,7 @@ int main(int narg, char** arg){
         cout << "MC Dataset : Ds -> Phi -> Pi" << endl << endl;
         TChain* chain = new TChain("Tree3Mu/ntuple");
         //AddFile_MCDsPhiPi_control
-            TString fileout = "AddOutput_MCDsPhiPi_control.root";
+        //OutFile_MCDsPhiPi_control
 
         ntupleClass_Control class_Control(chain, fileout);
         class_Control.LoopControl();
@@ -106,7 +153,7 @@ int main(int narg, char** arg){
         cout << "Data " << datasetName << endl << endl;
         TChain* chain = new TChain("TreeMakerBkg/ntuple");
         //AddFile_data_tau3mu
-            TString fileout = "AddOutput_data_tau3mu.root";
+        //OutFile_data_tau3mu
 
         ntupleClass_MC class_Data(chain, fileout);
         class_Data.LoopData_New(type, datasetName);
@@ -119,7 +166,7 @@ int main(int narg, char** arg){
         cout << "Data " << datasetName << endl << endl;
         TChain* chain = new TChain("Tree3Mu/ntuple");
         //AddFile_data_control
-            TString fileout = "AddOutput_data_control.root";
+        //OutFile_data_control
 
         ntupleClass_Control class_Data(chain, fileout);
         class_Data.LoopControl_Data(type, datasetName);
