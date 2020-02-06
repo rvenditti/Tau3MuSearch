@@ -63,7 +63,6 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntries();
     // Variables definition
-    std::vector<Int_t> triplIndex;
     int ntripl, trInd = 0, ind = 0, mu_Ind[NMU] = {0}, mu[NMU] = {0}, muGen[NMU] = {0}, NgoodTripl = 0, NbadTripl = 0, cut[NCUTS] = {0}, cutevt[NCUTS] = {0}, Ncut = 0, IdsummaryDaughter[NCUTS][NPARTICLES] = {0}, IdsummaryMother[NCUTS][NPARTICLES] = {0}, IdsummaryDaughter_Gen[NPARTICLES] = {0}, IdsummaryMother_Gen[NPARTICLES] = {0};
     float ptminTrack = 0.5, DeltaRmax = 0.8, DeltaZmax = 0.5, DeltaZ1 = 0, DeltaZ2 = 0, DeltaZ3 = 0;
     double massmin = 0, massmax = 0, sigmaPhi = 0.011, sigmaOmega = 0.0085, TripletVtx_Chi2max = 15, EtaMax = 2.4;
@@ -183,6 +182,7 @@ void ntupleClass_MC::LoopMC_New(TString type, TString datasetName){
     //Loop over the events
     for (Long64_t jentry=0; jentry<nentries; jentry++) {
         //cout << "Event n. " << jentry << endl;
+        std::vector<Int_t> triplIndex;
 	ntripl = 0, trInd = 0; int cuttripl[NCUTS] = {0};
         Long64_t ientry = fChain->LoadTree(jentry);
         fChain->GetTree()->GetEntry(ientry);
