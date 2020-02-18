@@ -408,7 +408,7 @@ float MiniAna2017Tree::dPtTriggerMatch(pat::Muon m, trigger::TriggerObjectCollec
 	reco::BeamSpot beamSpot;
 	edm::Handle<reco::BeamSpot> beamSpotHandle;
         iEvent.getByToken(token_BeamSpot, beamSpotHandle);
-        //const reco::BeamSpot& beamspot = *beamSpotHandle.product();
+        const reco::BeamSpot& beamspot = *beamSpotHandle.product();
 
 
 

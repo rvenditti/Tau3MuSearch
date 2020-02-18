@@ -125,6 +125,7 @@
 #include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
 #include "CondFormats/DataRecord/interface/L1TGlobalPrescalesVetosRcd.h"
 #include "CondFormats/L1TObjects/interface/L1TGlobalPrescalesVetos.h"
+
 ////
 class MiniAna2017Tree : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 public:
@@ -133,6 +134,7 @@ public:
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     float dR(float eta1, float eta2, float phi1, float phi2);
     float dRtriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects);
+    float dPtTriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects);
     void beginRun(edm::Run const &, edm::EventSetup const&, edm::Event const&);
     
     
@@ -150,6 +152,7 @@ private:
     edm::EDGetTokenT<edm::TriggerResults> triggerToken_;
     edm::EDGetTokenT<trigger::TriggerEvent> trigeventToken_;
     edm::EDGetToken algToken_;
+    edm::EDGetTokenT<reco::BeamSpot> token_BeamSpot;
     bool isMc;
     bool isAna;
     //  edm::EDGetTokenT<edm::TriggerResults> trigResultsToken;
@@ -197,7 +200,7 @@ private:
     Muon_hadVetoEt03,Muon_emVetoEt03,    Muon_trackerVetoPt03,    Muon_hadVetoEt05,    Muon_emVetoEt05,    Muon_trackerVetoPt05;
     //dd  Mu1_SimPt,  Mu1_SimEta,  Mu1_SimPhi,  Mu2_SimPt,  Mu2_SimEta,  Mu2_SimPhi, Mu3_SimPt,  Mu3_SimEta,  Mu3_SimPhi,
     
-    std::vector<double>     Triplet_mindca_iso, Triplet_relativeiso;
+  std::vector<double>     Triplet_mindca_iso, Triplet_relativeiso,  Triplet_relativeiso2, Triplet_IsoMu1, Triplet_IsoMu2,Triplet_IsoMu3;
  
     std::vector<int>  Mu1_TripletIndex,  Mu2_TripletIndex,  Mu3_TripletIndex;
     std::vector<int>  Mu1_NTracks03iso,  Mu2_NTracks03iso,  Mu3_NTracks03iso;
@@ -206,7 +209,7 @@ private:
     std::vector<double>  TripletVtx_x,  TripletVtx_y,  TripletVtx_z,  TripletVtx_Chi2,  TripletVtx_NDOF,  Triplet_Mass,  Triplet_Pt,  Triplet_Eta,  Triplet_Phi, Triplet_Charge;
     
     std::vector<double> dxy_mu1, dxy_mu2, dxy_mu3, dxyErr_mu1, dxyErr_mu2, dxyErr_mu3; 
-    
+    std::vector<float> Mu1_dPtReltriggerMatch, Mu2_dPtReltriggerMatch, Mu3_dPtReltriggerMatch;    
     std::vector<double>  RefittedPV_x;
     std::vector<double>  RefittedPV_y;
     std::vector<double>  RefittedPV_z;
@@ -219,7 +222,7 @@ private:
     std::vector<double>  FlightDistPVSV_Err;
     std::vector<double>  FlightDistPVSV_Significance;
     std::vector<double>  FlightDistPVSV_chi2;
-    
+  std::vector<double>   FlightDistBS_SV,  FlightDistBS_SV_Err,  FlightDistBS_SV_Significance;
    std::vector<double> PV_x,  PV_y,  PV_z,  PV_NTracks;
   std::vector<int> NGoodTriplets;
     uint  evt, run, lumi, puN;
@@ -229,6 +232,9 @@ private:
 
   std::vector<string>  Trigger_hltname;
   std::vector<int> Trigger_hltdecision;
+
+
+  std::vector<double>  MuonPt_HLT,   MuonEta_HLT, MuonPhi_HLT;
     //SyncTree
     /*  TTree*      SyncTree_;
      std::vector<float>  allmuons_pt, leadmuon_pt, leadmuon_phi, leadmuon_eta;
@@ -253,6 +259,7 @@ private:
 	trigeventToken_ = consumes<trigger::TriggerEvent>(iConfig.getParameter<edm::InputTag>("triggerSummary"));
 	algToken_ = consumes<BXVector<GlobalAlgBlk>>(iConfig.getParameter<edm::InputTag>("AlgInputTag"));
 	gtUtil_ = new l1t::L1TGlobalUtil(iConfig, consumesCollector(), *this, algInputTag_, algInputTag_);
+	token_BeamSpot = consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
         //  _hltInputTag(iConfig.getParameter<edm::InputTag>("hltInputTag")),
         //tauToken_(consumes(iConfig.getParameter("taus"))),
         //metToken_(consumes(iConfig.getParameter("mets")))
@@ -283,6 +290,17 @@ private:
         }                                                                                          
         return dRmin;                                                                              
     }
+
+float MiniAna2017Tree::dPtTriggerMatch(pat::Muon m, trigger::TriggerObjectCollection triggerObjects) {
+  float dPtmin = 10000.;
+  for (unsigned int i = 0 ; i < triggerObjects.size() ; i++) {
+    float deltaPtRel = (triggerObjects[i].pt() - m.pt())/m.pt();
+    //float deltaPtMin = sqrt( reco::deltaR2(triggerObjects[i].eta(), triggerObjects[i].phi(), m.eta(), m.phi()));                                    
+    //float deltaR = sqrt( pow(triggerObjects[i].eta() - m.eta(), 2) + pow(acos(cos(triggerObjects[i].phi() - m.phi())), 2));                         
+    if (deltaPtRel < dPtmin) dPtmin = deltaPtRel;
+  }
+  return dPtmin;
+}
 
     
     bool isGoodTrack(const reco::Track &track) {
@@ -387,17 +405,36 @@ private:
         iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTransientTrackBuilder);
         theTransientTrackBuilder_ = theTransientTrackBuilder.product();
 
+	reco::BeamSpot beamSpot;
+	edm::Handle<reco::BeamSpot> beamSpotHandle;
+        iEvent.getByToken(token_BeamSpot, beamSpotHandle);
+        //const reco::BeamSpot& beamspot = *beamSpotHandle.product();
+
+
+
+        if ( beamSpotHandle.isValid() )
+          {
+            beamSpot = *beamSpotHandle;
+
+          } else
+          {
+	    edm::LogInfo("MyAnalyzer")
+              << "No beam spot available from EventSetup \n";
+          }
+
+
+
 	//edm::Handle<SimTrackContainer> simTracks;
 	//iEvent.getByLabel("g4SimHits",simTracks);
 
         hEvents->Fill(1);
-
+	//cout<<"TreeMaker 0"<<endl;
 
 	///////////////Fill Trigger Vars, L1 and HLT///////////////
 
 	gtUtil_->retrieveL1(iEvent, iSetup, algToken_);
 	const vector<pair<string, bool> > initialDecisions = gtUtil_->decisionsInitial();
-
+	//cout<<"TreeMaker 1"<<endl;
 	if (!iEvent.isRealData())
 	  {
 	    for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) 
@@ -415,30 +452,59 @@ private:
 	    ESHandle<L1TGlobalPrescalesVetos> psAndVetos;
 	    auto psRcd = iSetup.tryToGet<L1TGlobalPrescalesVetosRcd>();
 	    if(psRcd) psRcd->get(psAndVetos);
+	    //  cout<<"TreeMaker 1 -bis"<<endl;
 	    int columnN= gtUtil_->prescaleColumn();
+	    //cout<<"TreeMaker 1 -bis"<<endl;
 	    for (size_t i_l1t = 0; i_l1t < initialDecisions.size(); i_l1t++) {
 	      string l1tName = (initialDecisions.at(i_l1t)).first;
-	      if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos){
+	      //cout<<"TreeMaker 1 "<<l1tName<<endl;
+	      if(l1tName.find("DoubleMu") != string::npos || l1tName.find("TripleMu") != string::npos || l1tName.find("SingleMu") != string::npos){
+		//cout<<"ciao"<<endl;
+		//cout<<"L1Seed="<<l1tName<<endl;
+		//cout<<"decision="<<initialDecisions.at(i_l1t).second<<endl;
+		//cout<<" prescale="<<(psAndVetos->prescale_table_)[columnN][i_l1t]<<endl;              
 		//cout<<"L1Seed="<<l1tName<<" decision="<<initialDecisions.at(i_l1t).second<<" prescale="<<(psAndVetos->prescale_table_)[columnN][i_l1t]<<endl;
 		Trigger_l1name.push_back( l1tName );
 		Trigger_l1decision.push_back( initialDecisions.at(i_l1t).second );
-		Trigger_l1prescale.push_back( (psAndVetos->prescale_table_)[columnN][i_l1t]);
+		//Trigger_l1prescale.push_back( (psAndVetos->prescale_table_)[columnN][i_l1t]);
                 }
             }
+	    //cout<<" Fuori dal loop"<<endl;
         }
-        
+	//cout<<"TreeMaker 2"<<endl;        
             
 	const TriggerNames &triggerNames = iEvent.triggerNames( *triggerResults );
 	for (size_t i_hlt = 0; i_hlt != triggerResults->size(); ++i_hlt){
 	    string hltName = triggerNames.triggerName(i_hlt);
-	    if(hltName.find("HLT_DoubleMu") != string::npos){
+	    if(hltName.find("HLT_DoubleMu3") != string::npos){
 	      //cout<<" HLTPath="<<hltName<<" isPassed="<<triggerResults->accept(i_hlt )<<endl;
 	      Trigger_hltname.push_back(hltName);
 	      Trigger_hltdecision.push_back(triggerResults->accept(i_hlt ));
 	    }
 	}
-    
- 
+	//	cout<<"TreeMaker 3"<<endl;
+
+	std::vector<trigger::TriggerObject> trgobjs = triggerSummary->getObjects();
+	trigger::TriggerObjectCollection MuonsObjects;
+	edm::InputTag MuonFilterTag = edm::InputTag("hltTau3muTkVertexFilter", "", "HLT");
+	size_t MuonFilterIndex = (*triggerSummary).filterIndex(MuonFilterTag); //find the index corresponding to the event                        
+	if(MuonFilterIndex < (*triggerSummary).sizeFilters()) { //check if the trigger object is present                                          
+	  //save the trigger objetcs corresponding to muon leg                                                                                      
+	  const trigger::Keys &KEYS = (*triggerSummary).filterKeys(MuonFilterIndex);
+	  for (unsigned int ipart = 0; ipart < KEYS.size(); ipart++) {
+	    trigger::TriggerObject foundObject = (trgobjs)[KEYS[ipart]];
+	    MuonsObjects.push_back(foundObject);
+	  }
+	}
+	  for (unsigned int i = 0 ; i <MuonsObjects.size() ; i++) {
+	    MuonPt_HLT.push_back(MuonsObjects[i].pt());
+	    MuonEta_HLT.push_back(MuonsObjects[i].eta());
+	    MuonPhi_HLT.push_back(MuonsObjects[i].phi());
+	    
+	  }
+
+
+
 	///////////////Fill GenParticles///////////////
         if(isMc){
             uint j=0;
@@ -473,31 +539,15 @@ private:
 	    //            cout<<"****************GenLevel Info End ********************"<<endl;
         }
         ///////////////Fill GenParticles///////////////
-        
+        cout<<"TreeMaker 4"<<endl;
         //Primary Vtx
 	//  const reco::Vertex* eventVertex;
 
         PVCollection_Size = vertices->size();
         //cout<<" PV size ="<<vertices->size()<<endl;
 
-	//std::vector<TransientTrackMap> pvTrackMap_refitVec;	
-	//for (reco::VertexCollection::const_iterator it = vertices.begin(); it != vertices.end() && VtxIt != vertices->size() ; ++it, ++VtxIt) {
-	//for(uint VtxIt =0;VtxIt<vertices->size();VtxIt++ ){
-	//std::vector<reco::TransientTrack> pvTracks_original2;
-	//TransientTrackMap pvTrackMap_refit2;
-	//for ( reco::Vertex::trackRef_iterator pvTrack =  (*vertices)[VtxIt].tracks_begin(); pvTrack != (*vertices)[VtxIt].tracks_end(); ++pvTrack ) {
-	    //cout<<" pv track size"<<(*vertices)[VtxIt].tracks_size()<<endl;
-	    //reco::TransientTrack pvTrack_transient =theTransientTrackBuilder_->build(pvTrack->get());
-            //pvTracks_original2.push_back(pvTrack_transient);
-            //pvTrackMap_refit2.insert(std::make_pair(pvTrack->get(), pvTrack_transient));
-	    //pvTrackMap_refitVec.push_back(pvTrackMap_refit2);
-	//}
-	//cout<<"Vtx id="<<VtxIt<<" Number of tracks associated to the PV="<<pvTracks_original2.size()<<endl;
-	//}
-	
-	
         //Triplets  Loop
-        //cout<<"Number Of Triplets="<<Cand3Mu->size()<<endl;
+        cout<<"Number Of Triplets="<<Cand3Mu->size()<<endl;
 	std::vector<int> NTripl;
 	if(isAna){
         TripletCollectionSize = Cand3Mu->size() ;
@@ -572,7 +622,7 @@ private:
 	      pvTracks_refit.push_back(pvTrack->second);}
 
 
-	    cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
+	    // cout<<" Closest PV index "<<primaryvertex_index<<" x="<<(*vertices)[primaryvertex_index].x()<<" y="<<(*vertices)[primaryvertex_index].y()<<" z="<<(*vertices)[primaryvertex_index].z()<<endl;
 
 	    //std::vector<reco::transientTrack> pvtracks_original;
 	    //Transienttrackmap Pvtrackmap_Refit;
@@ -624,6 +674,7 @@ private:
 
 	    ///////////////Check Trigger Matching///////////////
             float dR1 = 999., dR2 = 999., dR3 = 999.;
+	    float dPtRel1 = 999., dPtRel2 = 999., dPtRel3 = 999.;
             std::vector<trigger::TriggerObject> trgobjs = triggerSummary->getObjects();
             trigger::TriggerObjectCollection MuonsObjects;
             edm::InputTag MuonFilterTag = edm::InputTag("hltTau3muTkVertexFilter", "", "HLT");
@@ -638,14 +689,23 @@ private:
                 dR1 = MiniAna2017Tree::dRtriggerMatch(*mu1, MuonsObjects);
                 dR2 = MiniAna2017Tree::dRtriggerMatch(*mu2, MuonsObjects);
                 dR3 = MiniAna2017Tree::dRtriggerMatch(*mu3, MuonsObjects);
+		dPtRel1 = MiniAna2017Tree::dPtTriggerMatch(*mu1, MuonsObjects);
+                dPtRel2 = MiniAna2017Tree::dPtTriggerMatch(*mu2, MuonsObjects);
+                dPtRel3 = MiniAna2017Tree::dPtTriggerMatch(*mu3, MuonsObjects);
             }
             Mu1_dRtriggerMatch.push_back(dR1);
             Mu2_dRtriggerMatch.push_back(dR2);
             Mu3_dRtriggerMatch.push_back(dR3);
 
+	    Mu1_dPtReltriggerMatch.push_back(dPtRel1);
+            Mu2_dPtReltriggerMatch.push_back(dPtRel2);
+            Mu3_dPtReltriggerMatch.push_back(dPtRel3);
+
             if(isMc){
-                bool isMatch1=false; bool isMatch2=false; bool isMatch3=false;
-                if( (mu1->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu1->simMotherPdgId()) == 15) ){
+              /*  
+	      bool isMatch1=false; bool isMatch2=false; bool isMatch3=false;
+               
+		if( (mu1->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu1->simMotherPdgId()) == 15) ){
                     isMatch1=true;
 
                 }
@@ -655,40 +715,9 @@ private:
                 if( (mu3->simType() == reco::MatchedMuonFromHeavyFlavour) && (fabs(mu3->simMotherPdgId()) == 15) ){
                     isMatch3=true;
                 }
-                
+	      */
                 //    cout<<TripletIndex<<"Triplet Mass:"<<TauIt->mass()<<" pt="<<TauIt->pt()<<" vtx.x="<<TauIt->vx()<<" vtx x="<<TripletVtx.x()<<" chi2="<<TauIt->vertexChi2()<<" ndof="<<TauIt->vertexNdof()<<endl;
-                // cout<<TripletIndex<<"--Muon 1 pt="<<mu1->pt()<<" Muon2 pt="<<mu2->pt()<<" Mu3 pt="<<mu3->pt()<<" "<<endl;
-                if( isMatch1 && isMatch2 && isMatch3) {
-		  //cout<<" Matched Triplets mass="<<TauIt->mass()<<endl;
-                    GenMatchMu1_SimPt.push_back(mu1->simPt());
-                    GenMatchMu2_SimPt.push_back(mu2->simPt());
-                    GenMatchMu3_SimPt.push_back(mu3->simPt());
-                    
-                    GenMatchMu1_SimEta.push_back(mu1->simEta());
-                    GenMatchMu2_SimEta.push_back(mu2->simEta());
-                    GenMatchMu3_SimEta.push_back(mu3->simEta());
-                    
-                    GenMatchMu1_SimPhi.push_back(mu1->simPhi());
-                    GenMatchMu2_SimPhi.push_back(mu2->simPhi());
-                    GenMatchMu3_SimPhi.push_back(mu3->simPhi());
-                    
-                    GenMatchMu1_Pt.push_back(mu1->pt());
-                    GenMatchMu2_Pt.push_back(mu2->pt());
-                    GenMatchMu3_Pt.push_back(mu3->pt());
-                    
-                    GenMatchMu1_Eta.push_back(mu1->eta());
-                    GenMatchMu2_Eta.push_back(mu2->eta());
-                    GenMatchMu3_Eta.push_back(mu3->eta());
-                    
-                    GenMatchMu1_Phi.push_back(mu1->phi());
-                    GenMatchMu2_Phi.push_back(mu2->phi());
-                    GenMatchMu3_Phi.push_back(mu3->phi());
-                    
-                    
-                }
                 
-                
-                //GenVtx vars to be added
             }
             
             //Triplets Vars
@@ -802,16 +831,32 @@ private:
                }
             }
             Triplet_mindca_iso.push_back(mindist);
+
+	    double sumPtTrackRel1=0, sumPtTrackRel2=0, sumPtTrackRel3=0, maxSumPtRelTracks =0;
+	    sumPtTrackRel1=sumPtTrack1/LV1.Pt();
+	    sumPtTrackRel2=sumPtTrack2/LV2.Pt();
+	    sumPtTrackRel3=sumPtTrack3/LV3.Pt();
+
             maxSumPtTracks = std::max(sumPtTrack1, std::max(sumPtTrack2,sumPtTrack3));
+            maxSumPtRelTracks = std::max(sumPtTrackRel1, std::max(sumPtTrackRel2,sumPtTrackRel3));
+	    
+
 	    //cout<<TripletIndex<<" TauMass "<<TauIt->mass()<<" SumPt Tracks in cone="<<maxSumPtTracks<<" TauPt="<<TauIt->pt()<<endl;
             double relativeiso = maxSumPtTracks/LVTau.Pt();
             Triplet_relativeiso.push_back(relativeiso);
-            
+	    Triplet_relativeiso2.push_back(maxSumPtRelTracks);
+
+	    //            cout<<" relativeiso="<<relativeiso<<"  relativeiso2="<<maxSumPtRelTracks<<endl;
+
             Mu1_NTracks03iso.push_back(nTracks03_mu1);
             Mu2_NTracks03iso.push_back(nTracks03_mu2);
             Mu3_NTracks03iso.push_back(nTracks03_mu3);
+
+	    Triplet_IsoMu1.push_back(sumPtTrack1);
+	    Triplet_IsoMu2.push_back(sumPtTrack2);
+	    Triplet_IsoMu3.push_back(sumPtTrack3);
  
-                    //cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
+	    //                    cout<<"Valid Vtx2="<<PVertex.isValid()<<endl;
                     //CachingVertex<5> fittedVertex = vertexFitter.vertex(tracksToVertex);
                     GlobalPoint PVertexPos  (PVertex.position());
                     GlobalPoint SVertexPos  (TripletVtx.x(), TripletVtx.y(), TripletVtx.z());
@@ -826,6 +871,19 @@ private:
                     double dist_sign =vertTool.distance(PVstate, TripletVtx).significance();
                     double chi2 = vertTool.compatibility(PVstate, TripletVtx);
                     
+
+		    //VertexDistance3D vertToolBS;
+                    VertexState BSstate(beamSpot);
+                    //double BSdistance = vertToolBS.distance(BSstate, TripletVtx).value();
+                    //double BSdist_err = vertToolBS.distance(BSstate, TripletVtx).error();
+                    //double BSdist_sign =vertToolBS.distance(BSstate, TripletVtx).significance();
+
+		    VertexDistanceXY vertTool2D;
+                    double BSdistance2D = vertTool2D.distance(BSstate, TripletVtx).value();
+                    double BSdist_err2D = vertTool2D.distance(BSstate, TripletVtx).error();
+                    double BSdist_sign2D =vertTool2D.distance(BSstate, TripletVtx).significance();
+
+		    //cout<<" BSdistance2D="<<BSdistance2D<<" BSdistance="<<BSdistance<<endl;
 		    //VertexDistance3D dist;
 		    //double fv_d3D = dist.distance(Vertex(fv), pvv).value(); // = dv_reco.Mag() ??
 		    //double fv_d3Dsig = dist.distance(Vertex(fv), pvv).significance();
@@ -849,6 +907,9 @@ private:
                     FlightDistPVSV_Err.push_back(dist_err);
                     FlightDistPVSV_Significance.push_back(dist_sign);
                     FlightDistPVSV_chi2.push_back(chi2);
+		    FlightDistBS_SV.push_back(BSdistance2D);
+                    FlightDistBS_SV_Err.push_back(BSdist_err2D);
+                    FlightDistBS_SV_Significance.push_back(BSdist_sign2D);
 
 		    //Add dxy info
 		    GlobalVector dir1(mu1->px(), mu1->py(),  mu1->pz()); //To compute sign of IP
@@ -934,33 +995,17 @@ private:
                     dxyErr_mu1.push_back(-99);
                     dxyErr_mu2.push_back(-99);
                     dxyErr_mu3.push_back(-99);
-                  
-		    GenMatchMu1_SimPt.push_back(-99);
-                    GenMatchMu2_SimPt.push_back(-99);
-                    GenMatchMu3_SimPt.push_back(-99);
+		    Mu1_dPtReltriggerMatch.push_back(-99);
+		    Mu2_dPtReltriggerMatch.push_back(-99);
+		    Mu3_dPtReltriggerMatch.push_back(-99);
+		    FlightDistBS_SV.push_back(-99);
+                    FlightDistBS_SV_Err.push_back(-99);
+                    FlightDistBS_SV_Significance.push_back(-99);
+		    Triplet_relativeiso2.push_back(-99);
+		    Triplet_IsoMu1.push_back(-99);
+		    Triplet_IsoMu2.push_back(-99);
+		    Triplet_IsoMu3.push_back(-99);
 
-                    GenMatchMu1_SimEta.push_back(-99);
-                    GenMatchMu2_SimEta.push_back(-99);
-                    GenMatchMu3_SimEta.push_back(-99);
-
-                    GenMatchMu1_SimPhi.push_back(-99);
-                    GenMatchMu2_SimPhi.push_back(-99);
-                    GenMatchMu3_SimPhi.push_back(-99);
-
-                    GenMatchMu1_Pt.push_back(-99);
-                    GenMatchMu2_Pt.push_back(-99);
-                    GenMatchMu3_Pt.push_back(-99);
-
-                    GenMatchMu1_Eta.push_back(-99);
-                    GenMatchMu2_Eta.push_back(-99);
-                    GenMatchMu3_Eta.push_back(-99);
-
-                    GenMatchMu1_Phi.push_back(-99);
-                    GenMatchMu2_Phi.push_back(-99);
-                    GenMatchMu3_Phi.push_back(-99);
-
-
-  
                 }
                 
             }
@@ -1003,13 +1048,6 @@ private:
             MuonEnergy.push_back(mu->energy());
             MuonCharge.push_back(mu->charge());
             
-            Muon_simPdgId.push_back(mu->simPdgId());
-            Muon_simMotherPdgId.push_back(mu->simMotherPdgId());
-            Muon_simFlavour.push_back(mu->simFlavour());
-	    Muon_simType.push_back(mu->simType());
-	    Muon_simBX.push_back(mu->simBX());
-	    //	    Muon_simTpEvent.push_back(mu->simTpEvent());
-	    //	    Muon_simMatchQuality.push_back(mu->simMatchQuality());
             //Vtx position
             Muon_vx.push_back(mu->vx());
             Muon_vy.push_back(mu->vy());
@@ -1256,13 +1294,6 @@ private:
         MuonEta.clear();
         MuonPhi.clear();
         
-        Muon_simPdgId.clear();
-        Muon_simMotherPdgId.clear();
-        Muon_simFlavour.clear();
-	Muon_simType.clear();
-	Muon_simBX.clear();
-	//	Muon_simTpEvent.clear();
-	//	Muon_simMatchQuality.clear();
         MuonEnergy.clear();
         MuonCharge.clear();
         
@@ -1390,6 +1421,10 @@ private:
         Mu1_TripletIndex.clear();
         Mu2_TripletIndex.clear();
         Mu3_TripletIndex.clear();
+
+	Triplet_IsoMu1.clear();
+	Triplet_IsoMu2.clear();
+	Triplet_IsoMu3.clear();
         /*
          Mu1_SimPt.clear();
          Mu1_SimEta.clear();
@@ -1403,29 +1438,6 @@ private:
          Mu3_SimEta.clear();
          Mu3_SimPhi.clear();
          */
-        GenMatchMu1_SimPhi.clear();
-        GenMatchMu2_SimPhi.clear();
-        GenMatchMu3_SimPhi.clear();
-        
-        GenMatchMu1_SimPt.clear();
-        GenMatchMu2_SimPt.clear();
-        GenMatchMu3_SimPt.clear();
-        
-        GenMatchMu1_SimEta.clear();
-        GenMatchMu2_SimEta.clear();
-        GenMatchMu3_SimEta.clear();
-        
-        GenMatchMu1_Pt.clear();
-        GenMatchMu2_Pt.clear();
-        GenMatchMu3_Pt.clear();
-        
-        GenMatchMu1_Eta.clear();
-        GenMatchMu2_Eta.clear();
-        GenMatchMu3_Eta.clear();
-        
-        GenMatchMu1_Phi.clear();
-        GenMatchMu2_Phi.clear();
-        GenMatchMu3_Phi.clear();
         
         TripletCollectionSize = -99;
         
@@ -1456,10 +1468,19 @@ private:
         RefittedPV_isValid.clear();
         //RefittedPV_Chi2.push_back(PVertex.);
         
+	Mu1_dPtReltriggerMatch.clear();
+        Mu2_dPtReltriggerMatch.clear();
+        Mu3_dPtReltriggerMatch.clear();
+
         FlightDistPVSV.clear();
         FlightDistPVSV_Err.clear();
         FlightDistPVSV_Significance.clear();
         FlightDistPVSV_chi2.clear();
+	FlightDistBS_SV.clear();
+	FlightDistBS_SV_Err.clear();
+	FlightDistBS_SV_Significance.clear();
+
+
         PVCollection_Size =0;
 
         Trigger_l1name.clear();
@@ -1469,13 +1490,16 @@ private:
 	Trigger_hltname.clear();
 	Trigger_hltdecision.clear();
 	NGoodTriplets.clear();
+	Triplet_relativeiso2.clear();
 
-
+	MuonPt_HLT.clear();
+	MuonEta_HLT.clear();
+	MuonPhi_HLT.clear();
 
     }
     
     
-    // ------------ method called once each job just before starting event loop  ------------
+    // ------------ Method called once each job just before starting event loop  ------------
     void
     MiniAna2017Tree::beginJob()
     {
@@ -1496,6 +1520,10 @@ private:
 
 	tree_->Branch("Trigger_hltname",&Trigger_hltname);
 	tree_->Branch("Trigger_hltdecision",&Trigger_hltdecision);
+
+	tree_->Branch("MuonPt_HLT",&MuonPt_HLT);
+	tree_->Branch("MuonEta_HLT",&MuonEta_HLT);
+	tree_->Branch("MuonPhi_HLT",&MuonPhi_HLT);
 
         tree_->Branch("GenParticle_PdgId", &GenParticle_PdgId);
         tree_->Branch("GenParticle_Pt", &GenParticle_Pt);
@@ -1623,6 +1651,7 @@ private:
         tree_->Branch("Mu1_NTracks03iso", &Mu1_NTracks03iso); 
         tree_->Branch("Mu1_dRtriggerMatch", &Mu1_dRtriggerMatch); 
         tree_->Branch("Mu1_TripletIndex", &Mu1_TripletIndex);
+	tree_->Branch("Mu1_dPtReltriggerMatch", &Mu1_dPtReltriggerMatch);
  
         tree_->Branch("Mu2_Pt", &Mu2_Pt);
         tree_->Branch("Mu2_Eta", &Mu2_Eta);
@@ -1630,6 +1659,7 @@ private:
         tree_->Branch("Mu2_NTracks03iso", &Mu2_NTracks03iso); 
         tree_->Branch("Mu2_dRtriggerMatch", &Mu2_dRtriggerMatch); 
         tree_->Branch("Mu2_TripletIndex", &Mu2_TripletIndex); 
+	tree_->Branch("Mu2_dPtReltriggerMatch", &Mu2_dPtReltriggerMatch);
         
         tree_->Branch("Mu3_Pt", &Mu3_Pt);
         tree_->Branch("Mu3_Eta",&Mu3_Eta);
@@ -1637,6 +1667,7 @@ private:
         tree_->Branch("Mu3_NTracks03iso", &Mu3_NTracks03iso); 
         tree_->Branch("Mu3_dRtriggerMatch", &Mu3_dRtriggerMatch); 
         tree_->Branch("Mu3_TripletIndex", &Mu3_TripletIndex); 
+	tree_->Branch("Mu3_dPtReltriggerMatch", &Mu3_dPtReltriggerMatch);
 
 	tree_->Branch("dxy_mu1", &dxy_mu1);
 	tree_->Branch("dxy_mu2", &dxy_mu2);
@@ -1708,8 +1739,15 @@ private:
         tree_->Branch("FlightDistPVSV_Significance", &FlightDistPVSV_Significance);
         tree_->Branch("FlightDistPVSV_chi2", &FlightDistPVSV_chi2);
         
-        
-        
+
+	tree_->Branch("FlightDistBS_SV", &FlightDistBS_SV);
+        tree_->Branch("FlightDistBS_SV_Err", &FlightDistBS_SV_Err);
+        tree_->Branch("FlightDistBS_SV_Significance", &FlightDistBS_SV_Significance);        
+        tree_->Branch("Triplet_relativeiso2", &Triplet_relativeiso2);
+	tree_->Branch("Triplet_IsoMu1", &Triplet_IsoMu1);
+	tree_->Branch("Triplet_IsoMu2", &Triplet_IsoMu2);
+	tree_->Branch("Triplet_IsoMu3", &Triplet_IsoMu2);
+
         /*  SyncTree_ = fs->make<TTree>("t","Sync ntuple");
          SyncTree_ ->Branch("allmuons_pt",&allmuons_pt);
          SyncTree_->Branch("leadmuon_pt",&leadmuon_pt);
@@ -1736,8 +1774,8 @@ private:
     void 
     MiniAna2017Tree::endJob() 
     {
-        //  tree_->GetDirectory()->cd();
-        tree_->Write();
+      tree_->GetDirectory()->cd();
+      tree_->Write();
         
         //  SyncTree_->GetDirectory()->cd();
         //  SyncTree_->Write();
