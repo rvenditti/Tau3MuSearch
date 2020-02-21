@@ -36,20 +36,6 @@ public :
    Int_t           fCurrent; //!current Tree number in a TChain
    TString    fileName; //output filename set in Analysis.cpp
 
-   float forBDTevaluation1;
-   float forBDTevaluation2;
-   float forBDTevaluation3;
-   float forBDTevaluation4;
-   float forBDTevaluation5;
-   float forBDTevaluation6;
-   float forBDTevaluation7;
-   float forBDTevaluation8;
-   float forBDTevaluation9;
-   float forBDTevaluation10;
-
-   TMVA::Reader *reader;
-   TString methodName = TString("BDTG method");
-
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
