@@ -1,8 +1,0 @@
-universe = vanilla
-Executable = AnalysisCode_Control_data_2017B.job
-Requirements = OpSys == "LINUX"&& (Arch != "DUMMY")
-Output = sleep_$(Cluster)_$(Process).stdout
-Error = sleep_$(Cluster)_$(Process).stderr
-Log = sleep_$(Cluster)_$(Process).log
-notify_user = caterina.aruta@ba.infn.it
-Queue
