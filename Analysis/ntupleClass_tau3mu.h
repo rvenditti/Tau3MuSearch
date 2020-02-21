@@ -5,8 +5,8 @@
 // found on file: DsTau3Mu.root
 //////////////////////////////////////////////////////////
 
-#ifndef ntupleClass_MC_h
-#define ntupleClass_MC_h
+#ifndef ntupleClass_tau3mu_h
+#define ntupleClass_tau3mu_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -30,25 +30,11 @@
 
 using namespace std;
 
-class ntupleClass_MC {
+class ntupleClass_tau3mu {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
    TString    fileName; //output filename set in Analysis.cpp
-
-   float forBDTevaluation1;
-   float forBDTevaluation2;
-   float forBDTevaluation3;
-   float forBDTevaluation4;
-   float forBDTevaluation5;
-   float forBDTevaluation6;
-   float forBDTevaluation7;
-   float forBDTevaluation8;
-   float forBDTevaluation9;
-   float forBDTevaluation10;
-
-   TMVA::Reader *reader;
-   TString methodName = TString("BDTG method");
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -74,6 +60,9 @@ public :
    vector<double>  *MuonCharge;
    vector<float>   *MuonEta;
    vector<float>   *MuonPhi;
+   vector<double>   *MuonPt_HLT;
+   vector<double>   *MuonEta_HLT;
+   vector<double>   *MuonPhi_HLT;
    vector<int>     *Muon_simPdgId;
    vector<int>     *Muon_simMotherPdgId;
    vector<int>     *Muon_simFlavour;
@@ -162,18 +151,21 @@ public :
    vector<double>  *Mu1_Eta;
    vector<double>  *Mu1_Phi;
    vector<int>     *Mu1_NTracks03iso;
+   vector<float>   *Mu1_dPtReltriggerMatch;
    vector<float>   *Mu1_dRtriggerMatch;
    vector<int>     *Mu1_TripletIndex;
    vector<double>  *Mu2_Pt;
    vector<double>  *Mu2_Eta;
    vector<double>  *Mu2_Phi;
    vector<int>     *Mu2_NTracks03iso;
+   vector<float>   *Mu2_dPtReltriggerMatch;
    vector<float>   *Mu2_dRtriggerMatch;
    vector<int>     *Mu2_TripletIndex;
    vector<double>  *Mu3_Pt;
    vector<double>  *Mu3_Eta;
    vector<double>  *Mu3_Phi;
    vector<int>     *Mu3_NTracks03iso;
+   vector<float>   *Mu3_dPtReltriggerMatch;
    vector<float>   *Mu3_dRtriggerMatch;
    vector<int>     *Mu3_TripletIndex;
    vector<double>  *dxy_mu1;
@@ -212,6 +204,10 @@ public :
    vector<double>  *Triplet_Charge;
    vector<double>  *Triplet_mindca_iso;
    vector<double>  *Triplet_relativeiso;
+   vector<double>  *Triplet_relativeiso2;
+   vector<double>  *Triplet_IsoMu1;
+   vector<double>  *Triplet_IsoMu2;
+   vector<double>  *Triplet_IsoMu3;
    vector<double>  *RefittedPV_x;
    vector<double>  *RefittedPV_y;
    vector<double>  *RefittedPV_z;
@@ -221,6 +217,9 @@ public :
    vector<double>  *FlightDistPVSV_Err;
    vector<double>  *FlightDistPVSV_Significance;
    vector<double>  *FlightDistPVSV_chi2;
+   vector<double>  *FlightDistBS_SV;
+   vector<double>  *FlightDistBS_SV_Err;
+   vector<double>  *FlightDistBS_SV_Significance;
 
    // List of branches
    TBranch        *b_evt;   //!
@@ -244,6 +243,9 @@ public :
    TBranch        *b_MuonCharge;   //!
    TBranch        *b_MuonEta;   //!
    TBranch        *b_MuonPhi;   //!
+   TBranch        *b_MuonPt_HLT;   //!
+   TBranch        *b_MuonEta_HLT;   //!
+   TBranch        *b_MuonPhi_HLT;   //!
    TBranch        *b_Muon_simPdgId;   //!
    TBranch        *b_Muon_simMotherPdgId;   //!
    TBranch        *b_Muon_simFlavour;   //!
@@ -332,18 +334,21 @@ public :
    TBranch        *b_Mu1_Eta;   //!
    TBranch        *b_Mu1_Phi;   //!
    TBranch        *b_Mu1_NTracks03iso;   //!
+   TBranch        *b_Mu1_dPtReltriggerMatch;   //!
    TBranch        *b_Mu1_dRtriggerMatch;   //!
    TBranch        *b_Mu1_TripletIndex;   //!
    TBranch        *b_Mu2_Pt;   //!
    TBranch        *b_Mu2_Eta;   //!
    TBranch        *b_Mu2_Phi;   //!
    TBranch        *b_Mu2_NTracks03iso;   //!
+   TBranch        *b_Mu2_dPtReltriggerMatch;   //!
    TBranch        *b_Mu2_dRtriggerMatch;   //!
    TBranch        *b_Mu2_TripletIndex;   //!
    TBranch        *b_Mu3_Pt;   //!
    TBranch        *b_Mu3_Eta;   //!
    TBranch        *b_Mu3_Phi;   //!
    TBranch        *b_Mu3_NTracks03iso;   //!
+   TBranch        *b_Mu3_dPtReltriggerMatch;   //!
    TBranch        *b_Mu3_dRtriggerMatch;   //!
    TBranch        *b_Mu3_TripletIndex;   //!
    TBranch        *b_dxy_mu1;   //!
@@ -382,6 +387,10 @@ public :
    TBranch        *b_Triplet_Charge;   //!
    TBranch        *b_Triplet_mindca_iso;   //!
    TBranch        *b_Triplet_relativeiso;   //!
+   TBranch        *b_Triplet_relativeiso2;   //!
+   TBranch        *b_Triplet_IsoMu1;   //!
+   TBranch        *b_Triplet_IsoMu2;   //!
+   TBranch        *b_Triplet_IsoMu3;   //!
    TBranch        *b_RefittedPV_x;   //!
    TBranch        *b_RefittedPV_y;   //!
    TBranch        *b_RefittedPV_z;   //!
@@ -391,19 +400,20 @@ public :
    TBranch        *b_FlightDistPVSV_Err;   //!
    TBranch        *b_FlightDistPVSV_Significance;   //!
    TBranch        *b_FlightDistPVSV_chi2;   //!
+   TBranch        *b_FlightDistBS_SV;   //!
+   TBranch        *b_FlightDistBS_SV_Err;   //!
+   TBranch        *b_FlightDistBS_SV_Significance;   //!
 
-    ntupleClass_MC(TTree *tree, TString fname);
-    virtual ~ntupleClass_MC();
+    ntupleClass_tau3mu(TTree *tree, TString fname);
+    virtual ~ntupleClass_tau3mu();
     virtual Int_t    Cut(Long64_t entry);
     virtual Int_t    GetEntry(Long64_t entry);
     virtual Long64_t LoadTree(Long64_t entry);
     virtual void     Init(TTree *tree);
     virtual Bool_t   Notify();
     virtual void     Show(Long64_t entry = -1);
-    // in "ntupleClass_MC.C"
-    virtual void     LoopMC_New(TString type, TString datasetName);
-    // in "ntupleClass_data.C"
-    virtual void     LoopData_New(TString type, TString datasetName);
+    // in "ntupleClass_tau3mu.C"
+    virtual void     Loop(TString type, TString datasetName);
     // in "PdgId_list.C"
     virtual void    Fill_particleId(Int_t pdgId, Int_t Idsummary[NPARTICLES]);
     virtual void    Fill_particleId_2D(Int_t pdgId, Int_t pdgIdMother, Int_t IdSummary[NPARTICLES][NPARTICLES]);
@@ -411,6 +421,7 @@ public :
     // in "Utilities.C"
     virtual Int_t    BestTripletFinder(std::vector<Int_t> triplIndex);
     virtual Double_t DimuonMass(Int_t mu_index1, Int_t mu_index2);
+    virtual Float_t  dR(Float_t eta1, Float_t eta2, Float_t phi1, Float_t phi2);
         // Functions for drawing canvas
     virtual void     Draw_CutEffCanvas(TCanvas *canv, TH1I *hist, Int_t cut[NCUTS], TString listCut[NCUTS]);
     virtual void     Draw_PdgIdCanvas(TCanvas *canv, TH1I *hist, Int_t Idsummary[NPARTICLES], TString pIdList[NPARTICLES]);
@@ -434,7 +445,7 @@ public :
     virtual void     FillHistoResoPt_BC(TH1D *hPtRes, TH1D *hPtRes_mu[NMU], TH1D *hPtResBarrel, TH1D *hPtResBarrel_mu[NMU], TH1D *hPtResEndcap, TH1D *hPtResEndcap_mu[NMU]);
     virtual void     FillHistoResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hMassTriRes, TH1D *hMassTriResBarrel, TH1D *hMassTriResEndcap);
     virtual void     FillHistoSingleMu(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hist_pt, TH1D *hist_pt_mu[NMU], TH1D *hist_eta, TH1D *hist_eta_mu[NMU], TH1D *hist_phi, TH1D *hVx, TH1D *hVy, TH1D *hVz);
-    virtual void     FillHistoStepByStep(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Int_t Ncut, bool l1double_fired, bool l1triple_fired, TH1D *hL1[NCUTS],  TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hMass_pair[NCUTS], TH1D *hDeltaR_pair[NCUTS], TH1D *hDeltaZ_pair[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], TH1D *hChi2_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]);
+    virtual void     FillHistoStepByStep(bool isMC, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Int_t Ncut, bool l1double_fired, bool l1triple_fired, TH1D *hL1[NCUTS],  TH1D *hPt[NCUTS], TH1D *hPt_mu[NCUTS][NMU], TH1D *hEta[NCUTS], TH1D *hEta_mu[NCUTS][NMU], TH1D *hPhi[NCUTS], TH1D *hVx[NCUTS], TH1D *hVy[NCUTS], TH1D *hVz[NCUTS], TH1D *hMass_pair[NCUTS], TH1D *hDeltaR_pair[NCUTS], TH1D *hDeltaZ_pair[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], TH1D *hChi2_tripl[NCUTS], Int_t IdsummaryDaughter[NCUTS][NPARTICLES], Int_t IdsummaryMother[NCUTS][NPARTICLES], Int_t Idsummary2D[NCUTS][NPARTICLES][NPARTICLES]);
     virtual void     FillHistoPair(Int_t mu_Ind[NMU], Int_t mu[NMU], TH1D *hist_dimumass, TH1D *hist_deltaR, TH1D *hist_deltaZ);
     virtual void     FillHistoTriplet(Int_t ind, TH1D *hist_pt, TH1D *hist_eta, TH1D *hist_phi, TH1D *hist_mass, TH1D *hist_chi2);
         // Functions for initializing histograms
@@ -445,14 +456,9 @@ public :
     virtual void     InitHistoStepByStep_Pair(TH1D *hMass_pair[NCUTS], TH1D *hDeltaR_pair[NCUTS], TH1D *hDeltaZ_pair[NCUTS]);
     virtual void     InitHistoStepByStep_Triplet(TH1D *hL1[NCUTS], TH1D *hPt_tripl[NCUTS], TH1D *hEta_tripl[NCUTS], TH1D *hPhi_tripl[NCUTS], TH1D *hMass_tripl[NCUTS], TH1D *hChi2_tripl[NCUTS]);
         // Other functions
-    virtual Bool_t   isDeltaRGood(Float_t eta1, Float_t eta2, Float_t phi1, Float_t phi2, Float_t DeltaRmax);
     virtual Bool_t   isDeltaZGood(Float_t vz1, Float_t vz2, Float_t DeltaZmax);
-    virtual Bool_t   isNotAOmega(Double_t dimumass, Double_t sigma);
-    virtual Bool_t   isNotAPhi(Double_t dimumass, Double_t sigma);
     virtual Bool_t   isPairDeltaRGood(Int_t ntriplet, Float_t DeltaRmax);
     virtual Bool_t   isPairDeltaZGood(Float_t DeltaZ1, Float_t DeltaZ2, Float_t DeltaZ3, Float_t DeltaZmax);
-    virtual Bool_t   isPairNotAOmega(std::vector<Double_t> dimu, Double_t sigma);
-    virtual Bool_t   isPairNotAPhi(std::vector<Double_t> dimu, Double_t sigma);
     virtual Bool_t   isPhi(std::vector<Double_t> dimu);
     virtual Bool_t   isOmega(std::vector<Double_t> dimu);
     virtual void     MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU]);
@@ -461,40 +467,34 @@ public :
     virtual Double_t MuonP(Double_t pt, Double_t eta, Double_t phi);
     virtual Float_t  QuadMuonMass(Float_t pt1, Float_t pt2, Float_t pt3, Float_t pt4, Float_t eta1, Float_t eta2, Float_t eta3, Float_t eta4, Float_t phi1, Float_t phi2, Float_t phi3, Float_t phi4);
     virtual Double_t ResoTriplMass(Int_t mu_Ind[NMU], Int_t mu[NMU]);
-    virtual void     StudyOnTriplet(TString type, Int_t ind, Int_t mu[NMU], TH1D *hDeltaX, TH1D *hDeltaY, TH1D *hDeltaZ, TH1D *hPt_tripl);
-    virtual void     TriggerRequirements(Int_t ind, TH1D *hTripTriggerMatched);
         // Functions for the final tree
     virtual Double_t TreeFin_Angle(Int_t ind);
     virtual void     TreeFin_Fill(TTree *tree, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU], Double_t &lumi, Double_t &run, Double_t &evt, Double_t &puFactor, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
     virtual void     TreeFin_Init(TTree *&tree, Double_t &lumi, Double_t &run, Double_t &evt, Double_t &puFactor, Double_t &Pmu3, Double_t &cLP, Float_t &tKink, Double_t &segmComp, Double_t &tripletMass, Double_t &tripletMassReso, Double_t &fv_nC, Double_t &fv_dphi3D, Double_t &fv_d3D, Double_t &fv_d3Dsig, Double_t &d0, Double_t &d0sig, Double_t &mindca_iso, Double_t &trkRel, Double_t &Pmu1, Double_t &Ptmu1, Double_t &etamu1, Double_t &Pmu2, Double_t &Ptmu2, Double_t &etamu2, Double_t &Ptmu3, Double_t &etamu3, Double_t &P_trip, Double_t &Pt_trip, Double_t &eta_trip, Double_t &nStationsMu1, Double_t &nStationsMu2, Double_t &nStationsMu3, Double_t &Iso03Mu1, Double_t &Iso03Mu2, Double_t &Iso03Mu3, Double_t &Iso05Mu1, Double_t &Iso05Mu2, Double_t &Iso05Mu3, Double_t &nMatchesMu1, Double_t &nMatchesMu2, Double_t &nMatchesMu3, Double_t &timeAtIpInOutMu1, Double_t &timeAtIpInOutMu2, Double_t &timeAtIpInOutMu3, Double_t &cQ_uS, Double_t &cQ_tK, Double_t &cQ_gK, Double_t &cQ_tRChi2, Double_t &cQ_sRChi2, Double_t &cQ_Chi2LM, Double_t &cQ_Chi2lD, Double_t &cQ_gDEP, Double_t &cQ_tM, Double_t &cQ_gTP, Double_t &calEn_emMu1, Double_t &calEn_emMu2, Double_t &calEn_emMu3, Double_t &calEn_hadMu1, Double_t &calEn_hadMu2, Double_t &calEn_hadMu3, Double_t &caloComp, Double_t &fliDistPVSV_Chi2, Double_t &isGlb3, Double_t &isTracker3, Double_t &isLoose3, Double_t &isSoft3, Double_t &isPF3, Double_t &isRPC3, Double_t &isSA3, Double_t &isCalo3, Double_t &Vx1, Double_t &Vx2, Double_t &Vx3, Double_t &Vy1, Double_t &Vy2, Double_t &Vy3, Double_t &Vz1, Double_t &Vz2, Double_t &Vz3, Double_t &RefVx1, Double_t &RefVx2, Double_t &RefVx3, Double_t &RefVy1, Double_t &RefVy2, Double_t &RefVy3, Double_t &RefVz1, Double_t &RefVz2, Double_t &RefVz3, Double_t &SVx, Double_t &SVy, Double_t &SVz, Double_t &had03, Double_t &had05, Double_t &nJets03, Double_t &nJets05, Double_t &nTracks03, Double_t &nTracks05, Double_t &sumPt03, Double_t &sumPt05, Double_t &hadVeto03, Double_t &hadVeto05, Double_t &emVeto03, Double_t &emVeto05, Double_t &trVeto03, Double_t &trVeto05);
-    virtual void TreeTrigger_Init(TTree *&tree, Double_t &run, Double_t &lumi, Double_t &evt, Double_t &l1Prescale, Int_t &l1Name);
-    virtual void TreeTrigger_Fill(TTree *tree, Double_t &run, Double_t &lumi, Double_t &evt, Double_t &l1Prescale, Int_t &l1Name);
-    void InitMVA( TString pathToWeight );
-    float EvaluateMVA( Float_t Pmu3, Float_t cLP, Float_t tKink, Float_t segmComp, Float_t fv_nC, Float_t fv_dphi3D, Float_t fv_d3Dsig, Float_t d0sig, Float_t mindca_iso, Float_t tripletMass);
 };
 
 #endif
 
-#ifdef ntupleClass_MC_cxx
-ntupleClass_MC::ntupleClass_MC(TTree *tree, TString fname) : fChain(0)
+#ifdef ntupleClass_tau3mu_cxx
+ntupleClass_tau3mu::ntupleClass_tau3mu(TTree *tree, TString fname) : fChain(0)
 {
    Init(tree);
    fileName=fname;
 }
 
-ntupleClass_MC::~ntupleClass_MC()
+ntupleClass_tau3mu::~ntupleClass_tau3mu()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t ntupleClass_MC::GetEntry(Long64_t entry)
+Int_t ntupleClass_tau3mu::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t ntupleClass_MC::LoadTree(Long64_t entry)
+Long64_t ntupleClass_tau3mu::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -507,7 +507,7 @@ Long64_t ntupleClass_MC::LoadTree(Long64_t entry)
    return centry;
 }
 
-void ntupleClass_MC::Init(TTree *tree)
+void ntupleClass_tau3mu::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -538,6 +538,9 @@ void ntupleClass_MC::Init(TTree *tree)
    MuonCharge = 0;
    MuonEta = 0;
    MuonPhi = 0;
+   MuonPt_HLT = 0;
+   MuonEta_HLT = 0;
+   MuonPhi_HLT = 0;
    Muon_simPdgId = 0;
    Muon_simMotherPdgId = 0;
    Muon_simFlavour = 0;
@@ -620,18 +623,21 @@ void ntupleClass_MC::Init(TTree *tree)
    Mu1_Eta = 0;
    Mu1_Phi = 0;
    Mu1_NTracks03iso = 0;
+   Mu1_dPtReltriggerMatch = 0;
    Mu1_dRtriggerMatch = 0;
    Mu1_TripletIndex = 0;
    Mu2_Pt = 0;
    Mu2_Eta = 0;
    Mu2_Phi = 0;
    Mu2_NTracks03iso = 0;
+   Mu2_dPtReltriggerMatch = 0;
    Mu2_dRtriggerMatch = 0;
    Mu2_TripletIndex = 0;
    Mu3_Pt = 0;
    Mu3_Eta = 0;
    Mu3_Phi = 0;
    Mu3_NTracks03iso = 0;
+   Mu3_dPtReltriggerMatch = 0;
    Mu3_dRtriggerMatch = 0;
    Mu3_TripletIndex = 0;
    dxy_mu1 = 0;
@@ -670,6 +676,10 @@ void ntupleClass_MC::Init(TTree *tree)
    Triplet_Charge = 0;
    Triplet_mindca_iso = 0;
    Triplet_relativeiso = 0;
+   Triplet_relativeiso2 = 0;
+   Triplet_IsoMu1 = 0;
+   Triplet_IsoMu2 = 0;
+   Triplet_IsoMu3 = 0;
    RefittedPV_x = 0;
    RefittedPV_y = 0;
    RefittedPV_z = 0;
@@ -679,6 +689,9 @@ void ntupleClass_MC::Init(TTree *tree)
    FlightDistPVSV_Err = 0;
    FlightDistPVSV_Significance = 0;
    FlightDistPVSV_chi2 = 0;
+   FlightDistBS_SV = 0;
+   FlightDistBS_SV_Err = 0;
+   FlightDistBS_SV_Significance = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -706,6 +719,9 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("MuonCharge", &MuonCharge, &b_MuonCharge);
    fChain->SetBranchAddress("MuonEta", &MuonEta, &b_MuonEta);
    fChain->SetBranchAddress("MuonPhi", &MuonPhi, &b_MuonPhi);
+   fChain->SetBranchAddress("MuonPt_HLT", &MuonPt_HLT, &b_MuonPt_HLT);
+   fChain->SetBranchAddress("MuonEta_HLT", &MuonEta_HLT, &b_MuonEta_HLT);
+   fChain->SetBranchAddress("MuonPhi_HLT", &MuonPhi_HLT, &b_MuonPhi_HLT);
    fChain->SetBranchAddress("Muon_simPdgId", &Muon_simPdgId, &b_Muon_simPdgId);
    fChain->SetBranchAddress("Muon_simMotherPdgId", &Muon_simMotherPdgId, &b_Muon_simMotherPdgId);
    fChain->SetBranchAddress("Muon_simFlavour", &Muon_simFlavour, &b_Muon_simFlavour);
@@ -794,18 +810,21 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Mu1_Eta", &Mu1_Eta, &b_Mu1_Eta);
    fChain->SetBranchAddress("Mu1_Phi", &Mu1_Phi, &b_Mu1_Phi);
    fChain->SetBranchAddress("Mu1_NTracks03iso", &Mu1_NTracks03iso, &b_Mu1_NTracks03iso);
+   fChain->SetBranchAddress("Mu1_dPtReltriggerMatch", &Mu1_dPtReltriggerMatch, &b_Mu1_dPtReltriggerMatch);
    fChain->SetBranchAddress("Mu1_dRtriggerMatch", &Mu1_dRtriggerMatch, &b_Mu1_dRtriggerMatch);
    fChain->SetBranchAddress("Mu1_TripletIndex", &Mu1_TripletIndex, &b_Mu1_TripletIndex);
    fChain->SetBranchAddress("Mu2_Pt", &Mu2_Pt, &b_Mu2_Pt);
    fChain->SetBranchAddress("Mu2_Eta", &Mu2_Eta, &b_Mu2_Eta);
    fChain->SetBranchAddress("Mu2_Phi", &Mu2_Phi, &b_Mu2_Phi);
    fChain->SetBranchAddress("Mu2_NTracks03iso", &Mu2_NTracks03iso, &b_Mu2_NTracks03iso);
+   fChain->SetBranchAddress("Mu2_dPtReltriggerMatch", &Mu2_dPtReltriggerMatch, &b_Mu2_dPtReltriggerMatch);
    fChain->SetBranchAddress("Mu2_dRtriggerMatch", &Mu2_dRtriggerMatch, &b_Mu2_dRtriggerMatch);
    fChain->SetBranchAddress("Mu2_TripletIndex", &Mu2_TripletIndex, &b_Mu2_TripletIndex);
    fChain->SetBranchAddress("Mu3_Pt", &Mu3_Pt, &b_Mu3_Pt);
    fChain->SetBranchAddress("Mu3_Eta", &Mu3_Eta, &b_Mu3_Eta);
    fChain->SetBranchAddress("Mu3_Phi", &Mu3_Phi, &b_Mu3_Phi);
    fChain->SetBranchAddress("Mu3_NTracks03iso", &Mu3_NTracks03iso, &b_Mu3_NTracks03iso);
+   fChain->SetBranchAddress("Mu3_dPtReltriggerMatch", &Mu3_dPtReltriggerMatch, &b_Mu3_dPtReltriggerMatch);
    fChain->SetBranchAddress("Mu3_dRtriggerMatch", &Mu3_dRtriggerMatch, &b_Mu3_dRtriggerMatch);
    fChain->SetBranchAddress("Mu3_TripletIndex", &Mu3_TripletIndex, &b_Mu3_TripletIndex);
    fChain->SetBranchAddress("dxy_mu1", &dxy_mu1, &b_dxy_mu1);
@@ -844,6 +863,10 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("Triplet_Charge", &Triplet_Charge, &b_Triplet_Charge);
    fChain->SetBranchAddress("Triplet_mindca_iso", &Triplet_mindca_iso, &b_Triplet_mindca_iso);
    fChain->SetBranchAddress("Triplet_relativeiso", &Triplet_relativeiso, &b_Triplet_relativeiso);
+   fChain->SetBranchAddress("Triplet_relativeiso2", &Triplet_relativeiso2, &b_Triplet_relativeiso2);
+   fChain->SetBranchAddress("Triplet_IsoMu1", &Triplet_IsoMu1, &b_Triplet_IsoMu1);
+   fChain->SetBranchAddress("Triplet_IsoMu2", &Triplet_IsoMu2, &b_Triplet_IsoMu2);
+   fChain->SetBranchAddress("Triplet_IsoMu3", &Triplet_IsoMu3, &b_Triplet_IsoMu3);
    fChain->SetBranchAddress("RefittedPV_x", &RefittedPV_x, &b_RefittedPV_x);
    fChain->SetBranchAddress("RefittedPV_y", &RefittedPV_y, &b_RefittedPV_y);
    fChain->SetBranchAddress("RefittedPV_z", &RefittedPV_z, &b_RefittedPV_z);
@@ -853,10 +876,13 @@ void ntupleClass_MC::Init(TTree *tree)
    fChain->SetBranchAddress("FlightDistPVSV_Err", &FlightDistPVSV_Err, &b_FlightDistPVSV_Err);
    fChain->SetBranchAddress("FlightDistPVSV_Significance", &FlightDistPVSV_Significance, &b_FlightDistPVSV_Significance);
    fChain->SetBranchAddress("FlightDistPVSV_chi2", &FlightDistPVSV_chi2, &b_FlightDistPVSV_chi2);
+   fChain->SetBranchAddress("FlightDistBS_SV", &FlightDistBS_SV, &b_FlightDistBS_SV);
+   fChain->SetBranchAddress("FlightDistBS_SV_Err", &FlightDistBS_SV_Err, &b_FlightDistBS_SV_Err);
+   fChain->SetBranchAddress("FlightDistBS_SV_Significance", &FlightDistBS_SV_Significance, &b_FlightDistBS_SV_Significance);
    Notify();
 }
 
-Bool_t ntupleClass_MC::Notify()
+Bool_t ntupleClass_tau3mu::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -867,14 +893,14 @@ Bool_t ntupleClass_MC::Notify()
    return kTRUE;
 }
 
-void ntupleClass_MC::Show(Long64_t entry)
+void ntupleClass_tau3mu::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t ntupleClass_MC::Cut(Long64_t entry)
+Int_t ntupleClass_tau3mu::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
@@ -882,6 +908,6 @@ Int_t ntupleClass_MC::Cut(Long64_t entry)
    return 1;
 }
 
-#endif // #ifdef ntupleClass_MC_cxx
+#endif // #ifdef ntupleClass_tau3mu_cxx
 
 

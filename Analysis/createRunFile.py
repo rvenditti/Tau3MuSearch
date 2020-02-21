@@ -49,21 +49,30 @@ else:
 
 if args.anatype == 'tau3mu':
    if args.dataset == 'data' and args.run == '2016B':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run201B_AOD_v0/200104_124224';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run201B_AOD_v1/200217_093036'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run201B_AOD_v0/200104_124224'
    if args.dataset == 'data' and args.run == '2016C':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016C_AOD_v0/200104_130806';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016C_AOD_v1/200214_182431'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016C_AOD_v0/200104_130806'
    if args.dataset == 'data' and args.run == '2016D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016D_AOD_v0/200104_130853';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016D_AOD_v1/200214_183128'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016D_AOD_v0/200104_130853'
    if args.dataset == 'data' and args.run == '2016E':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016E_AOD_v0/200104_132747';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016E_AOD_v1/200214_183658'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016E_AOD_v0/200104_132747'
    if args.dataset == 'data' and args.run == '2016F':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016F_AOD_v0/200104_133637';
+      path = ''
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016F_AOD_v0/200104_133637'
    if args.dataset == 'data' and args.run == '2016G':
-      path = '';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016G_AOD_v1bis/200214_184229'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016G_AOD_v4_IsoBS/200210_130222'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016G_AOD_v2/200204_160258'
    if args.dataset == 'data' and args.run == '2016Hv2':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv2_v0/200104_145634';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv2_v1/200214_184620'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv2_v0/200104_145634'
    if args.dataset == 'data' and args.run == '2016Hv3':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv3_v0/200104_151137';
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv3_v1/200214_184703'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv3_v0/200104_151137'
 
    if args.dataset == 'data' and args.run == '2017B':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017B_AOD_v7/191120_150348'
@@ -77,14 +86,18 @@ if args.anatype == 'tau3mu':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v7/191120_155750'
 
    if args.dataset == 'data' and args.run == '2018A':
-      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v3/200119_100145';
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v2/191122_153230/'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v4/200217_120328'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v3/200119_100145'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v2/191122_153230/'
    if args.dataset == 'data' and args.run == '2018B':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v2/191122_153359/'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v4/200217_120246'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v2/191122_153359/'
    if args.dataset == 'data' and args.run == '2018C':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v2/191122_153443/'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v4/200217_120028'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v2/191122_153443/'
    if args.dataset == 'data' and args.run == '2018D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v2/191122_153513/'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v4/200217_112055'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v2/191122_153513/'
 
 if args.anatype == 'control':
    if args.dataset == 'data' and args.run == '2017B':
@@ -122,19 +135,26 @@ if args.dataset == 'MC' and args.MCprocess == 'DsPhiPi':
    #path = '/lustre/cms/store/user/fsimone/histoSkim_twoMuonTrack_MCDsPhiPi'
 
 if args.dataset == 'MC' and args.MCprocess == '2016Ds':
-      path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignal_2016_v0/200103_114559/';
+      path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignal_2016_v2/200215_162405'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignal_2016_v1/200210_125927'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignal_2016_v0/200103_114559/'
 if args.dataset == 'MC' and args.MCprocess == '2016B0':
-      path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignal_2016_v0/200112_114429/';
+      path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignal_2016_v2/200215_162625/'
+      #path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignal_2016_v0/200112_114429/'
 if args.dataset == 'MC' and args.MCprocess == '2016Bp':
-      path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignal_2016_v0/200112_114249/';
+      path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignal_2016_v2/200215_162024/'
+      #path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignal_2016_v0/200112_114249/'
 
 if args.dataset == 'MC' and args.MCprocess == '2018Ds':
-   path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_v4/191228_143705'
-   #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_v1/191128_165636'
+      path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_Jianv2_v8/200217_121547'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_v4/191228_143705'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_v1/191128_165636'
 if args.dataset == 'MC' and args.MCprocess == '2018B0':
-      path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_090425/0000/';
+      path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122205'
+      #path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_090425/0000/'
 if args.dataset == 'MC' and args.MCprocess == '2018Bp':
-      path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_091603/0000/';
+      path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122234'
+      #path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_091603/0000/'
 
 #generating the list of all .root files in given directory and subdirectories
 fileList = []
