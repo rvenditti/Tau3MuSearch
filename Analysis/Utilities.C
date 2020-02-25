@@ -817,6 +817,116 @@ void ntupleClass_tau3mu::MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NMU], 
     }
 }
 
+std::vector< std::size_t > ntupleClass_tau3mu::trigMatchDeltaR(Int_t tripIndex, std::vector< std::array<double, 3> > Muon_HLT, bool isVerbose){
+    // For each triplet, it returns the indeces of the 3 trigger objects having minimum deltaR distance
+    std::vector< std::size_t > trigIndex = {999, 999, 999};
+    std::vector<Float_t> tmp;
+
+    //compute dR values for each triggerObject
+    for( std::size_t k=0; k<Muon_HLT.size(); k++ ){
+        Float_t dR1_temp = dR( Mu1_Eta->at(tripIndex), Muon_HLT[k][1], Mu1_Phi->at(tripIndex), Muon_HLT[k][2]);
+        Float_t dR2_temp = dR( Mu2_Eta->at(tripIndex), Muon_HLT[k][1], Mu2_Phi->at(tripIndex), Muon_HLT[k][2]);
+        Float_t dR3_temp = dR( Mu3_Eta->at(tripIndex), Muon_HLT[k][1], Mu3_Phi->at(tripIndex), Muon_HLT[k][2]);
+        tmp.push_back(dR1_temp);
+        tmp.push_back(dR2_temp);
+        tmp.push_back(dR3_temp);
+    }
+
+    //print dR values
+    if(isVerbose){
+        cout<<"\n dR1 | dR2 | dR3 | "<<endl;
+        for(std::size_t i=0; i<tmp.size(); i = i+3){
+            cout<<" "<< tmp[i] <<" | "<<tmp[i+1] <<" | "<<tmp[i+2] <<" | "<<endl;
+        } cout<<"\n";
+    }
+
+    for(int j=0; j<3; j++){
+        //gets the row and column location of the min element
+        std::size_t row = (min_element(tmp.begin(),tmp.end()) -tmp.begin())/ 3 ;//triggerObject
+        std::size_t col = (min_element(tmp.begin(),tmp.end()) -tmp.begin())% 3 ;//mu in the triplet
+        // gets the value of the min element
+        Float_t val = *min_element(tmp.begin(),tmp.end());
+        if(isVerbose) cout<<j<<" Min element is located at: "<<(row+1)<<","<<(col+1)<<" and the value is "<<val<<endl;
+        //store index
+        trigIndex[col] = row;
+        //replace col i.e. remove matched mu
+        for(std::size_t i=col; i<tmp.size(); i=i+3){
+            tmp[i] = 999.9;
+        }
+        //replace row i.e. remove matched trigger object
+        for(std::size_t i=0; i<tmp.size(); i++){
+            if(i >= row*3 && i < row*3 + 3 ) tmp[i] = 999.9;
+        }
+        //print dR values
+        if(isVerbose) {
+            for(std::size_t i=0; i<tmp.size(); i = i+3){
+                cout<<" "<< tmp[i] <<" | "<<tmp[i+1] <<" | "<<tmp[i+2] <<" | "<<endl;
+            } cout<<"\n";
+         }
+    }
+    if(isVerbose) {
+        for(int k=0; k<3; k++){
+            cout<<"mu "<<k<<" matches trigObj "<<trigIndex[k]<<" based on dR"<<endl;
+        } cout<<"\n";
+    }
+    return trigIndex;
+}
+
+std::vector< std::size_t > ntupleClass_tau3mu::trigMatchDeltaP(Int_t tripIndex, std::vector< std::array<double, 3> > Muon_HLT, bool isVerbose){
+    // For each triplet, it returns the indeces of the 3 trigger objects having minimum deltaR distance
+    std::vector< std::size_t > trigIndex = {999, 999, 999};
+    std::vector<Float_t> tmp;
+
+    //compute dP/P values for each triggerObject
+    for( std::size_t k=0; k<Muon_HLT.size(); k++ ){
+        Float_t dP1_temp = std::abs(Mu1_Pt->at(tripIndex) - Muon_HLT[k][0])/Mu1_Pt->at(tripIndex);
+        Float_t dP2_temp = std::abs(Mu2_Pt->at(tripIndex) - Muon_HLT[k][0])/Mu2_Pt->at(tripIndex);
+        Float_t dP3_temp = std::abs(Mu3_Pt->at(tripIndex) - Muon_HLT[k][0])/Mu3_Pt->at(tripIndex);
+        tmp.push_back(dP1_temp);
+        tmp.push_back(dP2_temp);
+        tmp.push_back(dP3_temp);
+    }
+
+    //print dP/P values
+    if(isVerbose){
+        cout<<"\n dP/P1 | dP/P2 | dP/P3 | "<<endl;
+        for(std::size_t i=0; i<tmp.size(); i = i+3){
+            cout<<" "<< tmp[i] <<" | "<<tmp[i+1] <<" | "<<tmp[i+2] <<" | "<<endl;
+        } cout<<"\n";
+    }
+
+    for(int j=0; j<3; j++){
+        //gets the row and column location of the min element
+        std::size_t row = (min_element(tmp.begin(),tmp.end()) -tmp.begin())/ 3 ;//triggerObject
+        std::size_t col = (min_element(tmp.begin(),tmp.end()) -tmp.begin())% 3 ;//mu in the triplet
+        // gets the value of the min element
+        Float_t val = *min_element(tmp.begin(),tmp.end());
+        if(isVerbose) cout<<j<<" Min element is located at: "<<(row+1)<<","<<(col+1)<<" and the value is "<<val<<endl;
+        //store index
+        trigIndex[col] = row;
+        //replace col i.e. remove matched mu
+        for(std::size_t i=col; i<tmp.size(); i=i+3){
+            tmp[i] = 999.9;
+        }
+        //replace row i.e. remove matched trigger object
+        for(std::size_t i=0; i<tmp.size(); i++){
+            if(i >= row*3 && i < row*3 + 3 ) tmp[i] = 999.9;
+        }
+        //print dP/P values
+        if(isVerbose){
+            for(std::size_t i=0; i<tmp.size(); i = i+3){
+                cout<<" "<< tmp[i] <<" | "<<tmp[i+1] <<" | "<<tmp[i+2] <<" | "<<endl;
+            } cout<<"\n";
+        }
+    }
+    if(isVerbose) {
+        for(int k=0; k<3; k++){
+            cout<<"mu "<<k<<" matches trigObj "<<trigIndex[k]<<" based on dP/P"<<endl;
+        } cout<<"\n";
+    }
+    return trigIndex;
+}
+
 Double_t ntupleClass_tau3mu::MuonFinder(Double_t pt, Double_t eta, Double_t phi){
     // Given the characteristics of a muon (pt, eta, phi), the function returns the index of the corresponding muon in the event
     

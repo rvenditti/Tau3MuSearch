@@ -462,6 +462,8 @@ public :
     virtual Bool_t   isPhi(std::vector<Double_t> dimu);
     virtual Bool_t   isOmega(std::vector<Double_t> dimu);
     virtual void     MatchIndex(TString type, Int_t ind, Int_t mu_Ind[NMU], Int_t mu[NMU]);
+    virtual std::vector< std::size_t > trigMatchDeltaR(Int_t tripIndex, std::vector< std::array<double, 3> > Muon_HLT, bool isVerbose);
+    virtual std::vector< std::size_t > trigMatchDeltaP(Int_t tripIndex, std::vector< std::array<double, 3> > Muon_HLT, bool isVerbose);
     virtual Double_t MuonFinder(Double_t pt, Double_t eta, Double_t phi);
     virtual Double_t MuonFinderGen(Int_t muind, Double_t pt, Double_t eta, Double_t phi);
     virtual Double_t MuonP(Double_t pt, Double_t eta, Double_t phi);
