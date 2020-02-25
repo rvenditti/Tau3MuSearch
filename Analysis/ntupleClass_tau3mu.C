@@ -51,6 +51,8 @@ void ntupleClass_tau3mu::Loop(TString type, TString datasetName){
    
     bool isMC = false;
     if(strcmp(type, "MC") == 0 ) isMC = true;
+
+    bool isVerbose = true;
  
     // Pile-up reweighting
     // data pileup from full 2017
@@ -203,8 +205,39 @@ void ntupleClass_tau3mu::Loop(TString type, TString datasetName){
 
         //Skip event if no good triplets
         if(NGoodTriplets->at(0) == 0) continue;
-        cout<<"========================\nevt "<<evt<<" run "<<run<<" lumi "<<lumi<<endl;
-        if(TripletVtx_Chi2->size() != FlightDistPVSV->size()) continue; //check on branch dimention, bug in ntuple maker        
+        cout<<"=================================\nevt "<<evt<<" run "<<run<<" lumi "<<lumi<<endl;
+
+        //Define vector of arrays (Pt, Eta, Phi) for trigger objects in the event 
+        std::vector< std::array<double, 3> > Muon_HLT;
+        for(std::size_t k=0; k<MuonPt_HLT->size(); k++){
+            std::array<double, 3> temp;
+            temp[0] = MuonPt_HLT->at(k); temp[1] = MuonEta_HLT->at(k); temp[2] = MuonPhi_HLT->at(k);
+            Muon_HLT.push_back(temp);
+        }
+        if(isVerbose){
+            cout<<"\nTriggerObjects in the event:\n | Pt | Eta | Phi "<<endl;
+            for( auto const& mu: Muon_HLT ){
+                for( auto const& var: mu ){
+                     cout<<" | "<<var;
+                }
+                cout<<"\n";
+            }
+            cout<<"\n";
+        }
+        //Sort the vector and removes the duplicates
+        std::sort(Muon_HLT.begin(), Muon_HLT.end());
+        Muon_HLT.erase(std::unique(Muon_HLT.begin(), Muon_HLT.end()), Muon_HLT.end());
+        if(isVerbose){
+            cout<<"After sorting and removing duplicates "<<endl;
+            for( auto const& mu: Muon_HLT ){
+                for( auto const& var: mu ){
+                     cout<<" | "<<var;
+                }
+                cout<<"\n";
+            }
+            cout<<"\n";
+        }
+
         //CUT 0 : Before cuts
         Ncut = 0; cutevt[Ncut]++; cut[Ncut] += TripletVtx_Chi2->size();
 
@@ -304,41 +337,79 @@ void ntupleClass_tau3mu::Loop(TString type, TString datasetName){
             //Matching between index of single mu of the triplet (mu#_Ind) & that of 'MUONID' (mu#)
             MatchIndex("ID", j, mu_Ind, mu);
 
+            if(isVerbose){
+                cout<<"triplet candidate "<<j<<"\n | Pt | Eta | Phi"<<endl;
+                cout<<" | "<<Mu1_Pt->at(j)<<" | "<<Mu1_Eta->at(j)<<" | "<<Mu1_Phi->at(j)<<endl;
+                cout<<" | "<<Mu2_Pt->at(j)<<" | "<<Mu2_Eta->at(j)<<" | "<<Mu2_Phi->at(j)<<endl;
+                cout<<" | "<<Mu3_Pt->at(j)<<" | "<<Mu3_Eta->at(j)<<" | "<<Mu3_Phi->at(j)<<endl;
+                cout<<" | invariant mass: "<<Triplet_Mass->at(j)<<endl;
+                cout<<" | muon IDs \n | isPF | isGlobal | isTrackerMuon "<<endl;
+                cout<<" | "<<Muon_isPF->at(mu[0])<<" | "<<Muon_isGlobal->at(mu[0])<<" | "<<Muon_isTrackerMuon->at(mu[0])<<endl;
+                cout<<" | "<<Muon_isPF->at(mu[1])<<" | "<<Muon_isGlobal->at(mu[1])<<" | "<<Muon_isTrackerMuon->at(mu[1])<<endl;
+                cout<<" | "<<Muon_isPF->at(mu[2])<<" | "<<Muon_isGlobal->at(mu[2])<<" | "<<Muon_isTrackerMuon->at(mu[2])<<endl;
+            }
+
+            //trigIndex contains the 3 indeces for the trigger objects with minimum deltaR
+            std::vector< std::size_t > trigIndex_deltaR = trigMatchDeltaR(j, Muon_HLT, isVerbose);
+
+            //trigIndex contains the 3 indeces for the trigger objects with minimum deltaP/P
+            std::vector< std::size_t > trigIndex_deltaP = trigMatchDeltaP(j, Muon_HLT, isVerbose);
+
+            ////comparing with the dP/P stored in the ntuples
+            //dPtriggerMatching = std::abs(Mu1_dPtReltriggerMatch->at(j))/MuonPt->at(mu[0]);
+            //cout<<" mu1 dP/P ntuples "<<dPtriggerMatching;
+            //dPtriggerMatching = std::abs(Muon_HLT[trigIndex_deltaR[0]][0] - MuonPt->at(mu[0]))/MuonPt->at(mu[0]);
+            //cout<<" mu1 dP/P new "<<dPtriggerMatching<<endl;
+            //dPtriggerMatching = std::abs(Mu2_dPtReltriggerMatch->at(j))/MuonPt->at(mu[1]); 
+            //cout<<" mu2 dP/P ntuples "<<dPtriggerMatching;
+            //dPtriggerMatching = std::abs(Muon_HLT[trigIndex_deltaR[1]][0] - MuonPt->at(mu[1]))/MuonPt->at(mu[1]);
+            //cout<<" mu2 dP/P new "<<dPtriggerMatching<<endl;
+            //dPtriggerMatching = std::abs(Mu3_dPtReltriggerMatch->at(j))/MuonPt->at(mu[2]);
+            //cout<<" mu3 dP/P ntuples "<<dPtriggerMatching;
+            //dPtriggerMatching = std::abs(Muon_HLT[trigIndex_deltaR[2]][0] - MuonPt->at(mu[2]))/MuonPt->at(mu[2]);
+            //cout<<" mu3 dP/P new "<<dPtriggerMatching<<endl;
+
             // Fill histograms before selections
             FillHistoBC("MC", j, hMass_tripl_BC, hChi2Vertex, hMassvsChi2, hMass_quad_BC, hMass_quad_Zero_BC, hMass_di_Zero_BC, hMass_di_Zero2_BC, hPtRes_BC, hPtRes_BC_mu, hPtResBarrel_BC, hPtResBarrel_BC_mu, hPtResEndcap_BC, hPtResEndcap_BC_mu, IdsummaryDaughter_Gen, IdsummaryMother_Gen, Idsummary2D_Gen);
 
             // CUT 3: Chi2 > 0
             if( TripletVtx_Chi2->at(j) < 0 ) continue;
             Ncut = 3; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<" passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
-            // CUT 4: SV displaced from the beamspot by at least 2 std dev
-            if( FlightDistBS_SV_Significance->at(j) < 0 ) continue;
+            // CUT 4: SV displaced from the beamspot by at least 3 std dev
+            //if( FlightDistBS_SV_Significance->at(j) < 3 ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"  passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 5 : all mu are PF
             if( (Muon_isPF->at(mu[0]) == 0) || (Muon_isPF->at(mu[1]) == 0) || (Muon_isPF->at(mu[2]) == 0) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"   passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             // CUT 6 // Check that mu1 is glb & pt>2 & |eta|<Etamax
-            if( !((Muon_isGlobal->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && (abs(Mu1_Eta->at(mu_Ind[0])) < EtaMax) )) continue;
+            if( !((Muon_isGlobal->at(mu[0]) == 1) && (MuonPt->at(mu[0]) > ptmin) && (abs(MuonEta->at(mu[0])) < EtaMax) )) continue;
                      // Check that mu2 is glb & pt>2 & |eta|<Etamax
-            if( !((Muon_isGlobal->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && (abs(Mu2_Eta->at(mu_Ind[1])) < EtaMax) )) continue;
+            if( !((Muon_isGlobal->at(mu[1]) == 1) && (MuonPt->at(mu[1]) > ptmin) && (abs(MuonEta->at(mu[1])) < EtaMax) )) continue;
                      // Check that mu3 is glb & pt>2 & |eta|<Etamax
-            if( !((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptmin) && (abs(Mu3_Eta->at(mu_Ind[2])) < EtaMax) )) continue;
+            if( !((Muon_isGlobal->at(mu[2]) == 1) && (MuonPt->at(mu[2]) > ptmin) && (abs(MuonEta->at(mu[2])) < EtaMax) )) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"    passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 7: check condition on trimuon mass
             if( !(Triplet_Mass->at(j) > 1.62 && Triplet_Mass->at(j) < 2) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"    passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 8: Loop on PAIRS of muons of the triplet & check DeltaR
             if( !(isPairDeltaRGood(j, DeltaRmax)) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"     passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 9: Check |Delta Z|
@@ -347,35 +418,38 @@ void ntupleClass_tau3mu::Loop(TString type, TString datasetName){
             Float_t vz3 = Muon_vz->at(mu[2]);
             if( !(isPairDeltaZGood(vz1, vz2, vz3, DeltaZmax)) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"      passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 10: VETO on Phi(1020) mass
             dimu = Compute_DimuonMass(mu_Ind, mu);
             if(isPhi(dimu)) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"       passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             //CUT 11: VETO on Omega(782) mass
             //if(isOmega(dimu)) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"        passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             // CUT 12: Mu1 Trigger Matching
-            dPtriggerMatching = std::abs(Mu1_dPtReltriggerMatch->at(j))/MuonPt->at(mu[0]);
             if( !(Mu1_dRtriggerMatch->at(j)<0.03) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"         passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             // CUT 13: Mu2 Trigger Matching
-            dPtriggerMatching = std::abs(Mu2_dPtReltriggerMatch->at(j))/MuonPt->at(mu[1]); 
             if( !(Mu2_dRtriggerMatch->at(j)<0.03) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"          passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
 
             // CUT 14: Mu3 Trigger Matching
-            dPtriggerMatching = std::abs(Mu3_dPtReltriggerMatch->at(j))/MuonPt->at(mu[2]);
             if( !(Mu3_dRtriggerMatch->at(j)<0.03) ) continue;
             Ncut++; cut[Ncut]++; cuttripl[Ncut]++;
+            if (isVerbose) cout<<j<<"           passed cut "<<Ncut<<endl;
             FillHistoStepByStep(isMC, j, mu_Ind, mu, Ncut, l1double_fired, l1triple_fired, hL1, hPt, hPt_mu, hEta, hEta_mu, hPhi, hVx, hVy, hVz, hMass_pair, hDeltaR_pair, hDeltaZ_pair, hPt_tripl, hEta_tripl, hPhi_tripl, hMass_tripl, hChi2_tripl, IdsummaryDaughter, IdsummaryMother, Idsummary2D);
  
            ntripl++; triplIndex.push_back(j);
@@ -405,33 +479,6 @@ void ntupleClass_tau3mu::Loop(TString type, TString datasetName){
             sort( trigPt.begin(), trigPt.end() );
             trigPt.erase( unique( trigPt.begin(), trigPt.end() ), trigPt.end() );
             hNtrigObj_AC_skimmed->Fill(trigPt.size());
-
-            ////Studying trigger object distributions
-            //cout<<"HLT objects "<<MuonPt_HLT->size()<<" n_l1fired "<<n_l1fired<<endl;
-            //cout<<"| pt | eta | phi |"<<endl;
-            //for(int k=0; k<MuonPt_HLT->size(); k++)
-            //    cout<<"| "<<MuonPt_HLT->at(k)<<" | "<<MuonEta_HLT->at(k)<<" | "<<MuonPhi_HLT->at(k)<<" |"<<endl;
-            //std::vector<double> trigPt = *MuonPt_HLT;
-            //cout<<" Pt HLT objects "<<trigPt.size()<<endl;
-            //sort( trigPt.begin(), trigPt.end() );
-            //trigPt.erase( unique( trigPt.begin(), trigPt.end() ), trigPt.end() );
-            //cout<<"Pt HLT objects "<<trigPt.size()<<endl;
-            //std::vector<double> trigEta = *MuonEta_HLT;
-            //cout<<"Eta HLT objects "<<trigEta.size()<<endl;
-            //sort( trigEta.begin(), trigEta.end() );
-            //trigEta.erase( unique( trigEta.begin(), trigEta.end() ), trigEta.end() );
-            //cout<<"Eta HLT objects "<<trigEta.size()<<endl;
-            //cout<<"MuonPt->size() "<<MuonPt->size()<<endl;
-            //cout<<"Triplet passing selections:"<<endl; 
-            //cout<<"| "<<MuonPt->at(mu[0])<<" | "<<MuonEta->at(mu[0])<<" | "<<MuonPhi->at(mu[0])<<" |"<<endl;
-            //cout<<"| "<<MuonPt->at(mu[1])<<" | "<<MuonEta->at(mu[1])<<" | "<<MuonPhi->at(mu[1])<<" |"<<endl;
-            //cout<<"| "<<MuonPt->at(mu[2])<<" | "<<MuonEta->at(mu[2])<<" | "<<MuonPhi->at(mu[2])<<" |"<<endl;
-            //cout<<" Mu1_dRtriggerMatch->at(ind) "<<Mu1_dRtriggerMatch->at(ind);
-            //cout<<" Mu2_dRtriggerMatch->at(ind) "<<Mu2_dRtriggerMatch->at(ind);
-            //cout<<" Mu3_dRtriggerMatch->at(ind) "<<Mu3_dRtriggerMatch->at(ind)<<endl;
-            //cout<<" Mu1_dPtReltriggerMatch->at(ind) "<<Mu1_dPtReltriggerMatch->at(ind);
-            //cout<<" Mu2_dPtReltriggerMatch->at(ind) "<<Mu2_dPtReltriggerMatch->at(ind);
-            //cout<<" Mu3_dPtReltriggerMatch->at(ind) "<<Mu3_dPtReltriggerMatch->at(ind)<<endl;
 
             // Resolution & final histograms
             //if(isMC) MatchIndex("Gen", ind, mu_Ind, muGen);
