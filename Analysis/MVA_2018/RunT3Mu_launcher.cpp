@@ -34,14 +34,14 @@ int main(int narg, char** cat){
     if (!f0 || !f0->IsOpen()) f0 = new TFile(inputpath_data);
     std::cout<<"Opened input file: "<<inputpath_data<<std::endl;
     if(category == "B+C") {
-        TChain* chain_data = new TChain("FinalTreeB_Bkg");
+        TChain* chain_data = new TChain("FinalTreeB_sgn");
         chain_data->Add(inputpath_data);
-        chain_data->Add(inputpath_data+"/FinalTreeC_Bkg");
+        chain_data->Add(inputpath_data+"/FinalTreeC_sgn");
         RunT3Mu class_data(chain_data);
         class_data.Loop(isMC, category);
     }
     else{
-        TChain* chain_data = new TChain("FinalTree"+category+"_Bkg");
+        TChain* chain_data = new TChain("FinalTree"+category+"_sgn");
         chain_data->Add(inputpath_data);
         RunT3Mu class_data(chain_data);
         class_data.Loop(isMC, category);
@@ -65,42 +65,42 @@ int main(int narg, char** cat){
         RunT3Mu class_Ds(chain_ds);
         class_Ds.Loop(isMC, category);
     }
-   // //MC B0
-   // isMC = 2;
-   // TFile *f2 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_B0);
-   // if (!f2 || !f2->IsOpen()) f2 = new TFile(inputpath_B0);
-   // std::cout<<"Opened input file: "<<inputpath_B0<<std::endl;
-   // if(category == "B+C") {
-   //     TChain* chain_b0 = new TChain("FinalTreeB_sgn");
-   //     chain_b0->Add(inputpath_B0);
-   //     chain_b0->Add(inputpath_B0+"/FinalTreeC_sgn");
-   //     RunT3Mu class_B0(chain_b0);
-   //     class_B0.Loop(isMC, category);
-   // }
-   // else{
-   //     TChain* chain_b0 = new TChain("FinalTree"+category+"_sgn");
-   //     chain_b0->Add(inputpath_B0);
-   //     RunT3Mu class_B0(chain_b0);
-   //     class_B0.Loop(isMC, category);
-   // }
-   // //MC Bp
-   // isMC = 3;
-   // TFile *f3 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
-   // if (!f3 || !f3->IsOpen()) f3 = new TFile(inputpath_Bp);
-   // std::cout<<"Opened input file: "<<inputpath_Bp<<std::endl;
-   // if(category == "B+C") {
-   //     TChain* chain_bp = new TChain("FinalTreeB_sgn");
-   //     chain_bp->Add(inputpath_Bp);
-   //     chain_bp->Add(inputpath_Bp+"/FinalTreeC_sgn");
-   //     RunT3Mu class_Bp(chain_bp);
-   //     class_Bp.Loop(isMC, category);
-   // }
-   // else{
-   //     TChain* chain_bp = new TChain("FinalTree"+category+"_sgn");
-   //     chain_bp->Add(inputpath_Bp);
-   //     RunT3Mu class_Bp(chain_bp);
-   //     class_Bp.Loop(isMC, category);
-   // }
+    //MC B0
+    isMC = 2;
+    TFile *f2 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_B0);
+    if (!f2 || !f2->IsOpen()) f2 = new TFile(inputpath_B0);
+    std::cout<<"Opened input file: "<<inputpath_B0<<std::endl;
+    if(category == "B+C") {
+        TChain* chain_b0 = new TChain("FinalTreeB_sgn");
+        chain_b0->Add(inputpath_B0);
+        chain_b0->Add(inputpath_B0+"/FinalTreeC_sgn");
+        RunT3Mu class_B0(chain_b0);
+        class_B0.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_b0 = new TChain("FinalTree"+category+"_sgn");
+        chain_b0->Add(inputpath_B0);
+        RunT3Mu class_B0(chain_b0);
+        class_B0.Loop(isMC, category);
+    }
+    //MC Bp
+    isMC = 3;
+    TFile *f3 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
+    if (!f3 || !f3->IsOpen()) f3 = new TFile(inputpath_Bp);
+    std::cout<<"Opened input file: "<<inputpath_Bp<<std::endl;
+    if(category == "B+C") {
+        TChain* chain_bp = new TChain("FinalTreeB_sgn");
+        chain_bp->Add(inputpath_Bp);
+        chain_bp->Add(inputpath_Bp+"/FinalTreeC_sgn");
+        RunT3Mu class_Bp(chain_bp);
+        class_Bp.Loop(isMC, category);
+    }
+    else{
+        TChain* chain_bp = new TChain("FinalTree"+category+"_sgn");
+        chain_bp->Add(inputpath_Bp);
+        RunT3Mu class_Bp(chain_bp);
+        class_Bp.Loop(isMC, category);
+    }
 
     //Add signals to inclusive distribution
     TFile *fout_update = new TFile(fout_path, "update");
@@ -109,19 +109,19 @@ int main(int narg, char** cat){
     TH1F *hTripletMassDs2, *hTripletMassB02, *hTripletMassBp2;
     hTripletMassDs1 = (TH1F*)fout_update->Get("signalDs"+category+"1");
     hTripletMassDs2 = (TH1F*)fout_update->Get("signalDs"+category+"2");
-   // hTripletMassB01 = (TH1F*)fout_update->Get("signalB0"+category+"1");
-   // hTripletMassB02 = (TH1F*)fout_update->Get("signalB0"+category+"2");
-   // hTripletMassBp1 = (TH1F*)fout_update->Get("signalBp"+category+"1");
-   // hTripletMassBp2 = (TH1F*)fout_update->Get("signalBp"+category+"2");
+    hTripletMassB01 = (TH1F*)fout_update->Get("signalB0"+category+"1");
+    hTripletMassB02 = (TH1F*)fout_update->Get("signalB0"+category+"2");
+    hTripletMassBp1 = (TH1F*)fout_update->Get("signalBp"+category+"1");
+    hTripletMassBp2 = (TH1F*)fout_update->Get("signalBp"+category+"2");
     //inclusive distribution
     TH1F * hSignal1 = new TH1F ("signal"+category+"1","Triplet mass "+category+"1",42, 1.600000, 2.020000);
     TH1F * hSignal2 = new TH1F ("signal"+category+"2","Triplet mass "+category+"2",42, 1.600000, 2.020000);
     hSignal1->Add(hTripletMassDs1);
-    //hSignal1->Add(hTripletMassB01);
-    //hSignal1->Add(hTripletMassBp1);
+    hSignal1->Add(hTripletMassB01);
+    hSignal1->Add(hTripletMassBp1);
     hSignal2->Add(hTripletMassDs2);
-    //hSignal2->Add(hTripletMassB02);
-    //hSignal2->Add(hTripletMassBp2);
+    hSignal2->Add(hTripletMassB02);
+    hSignal2->Add(hTripletMassBp2);
     hSignal1->Write();
     hSignal2->Write();
     fout_update->Close();

@@ -13,7 +13,7 @@
 #include "TSystem.h"
 #include "TROOT.h"
 
-//#include "TMVA/CrossValidation.h"
+#include "TMVA/CrossValidation.h"
 #include "TMVA/DataLoader.h"
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
@@ -24,12 +24,14 @@
 using namespace TMVA;
 
 
-void MVA_code_2018(TString categ){
+void MVA_code_2018_CV(TString categ){
     //Check on input argument
     if(!categ.Contains("A") && !categ.Contains("B") && !categ.Contains("C")){
         cout << "Please choose between any combination of 'A', 'B' and 'C'" << endl;
         return;
     }
+
+    doCV = true;
 
     // Output file
     TFile *fout = new TFile("TMVA_"+TMVA_outputpath+categ+".root", "RECREATE");
@@ -116,7 +118,7 @@ void MVA_code_2018(TString categ){
     // Spectators declaration
     dataloader->AddSpectator("tripletMass", 'F'); // triplet invariant mass
     dataloader->AddSpectator("puFactor", 'F'); // event-by-event PU weight //1 for data
-
+    dataloader->AddSpectator("evt := evt % 8192", 'I'); // triplet invariant mass
     // Variables declaration
     dataloader->AddVariable(var_Pmu3,       "Pmu3", "", 'F');
     dataloader->AddVariable(var_cLP,        "cLP", "", 'F');
@@ -214,15 +216,14 @@ void MVA_code_2018(TString categ){
     
 
     dataloader->SetSignalWeightExpression( "puFactor" );
-
     TCut cutS = "tripletMass<2.0 && tripletMass>1.62"; //Signal -> MC full range 
     TCut cutB = "(tripletMass<1.75 && tripletMass>1.62) || (tripletMass<2.0 && tripletMass>1.80)"; //Background -> data sidebands
     TCut preselCut = "";
 
     //TCut preselCut = "";
     TString prepareTrainTestOptions = "";
-    if(doCV) prepareTrainTestOptions = "nTest_Signal=1"
-                                       ":nTest_Background=1"
+    if(doCV) prepareTrainTestOptions = "nTest_Signal=1" //with CV the test set is unused. For this reason, we assign 1 event only to it (0 cannot be used, would split test/training 50/50//
+                                       ":nTest_Background=1" //same comment as above
                                        ":SplitMode=Random"
                                        ":NormMode=NumEvents"
                                        ":!V";
@@ -231,31 +232,33 @@ void MVA_code_2018(TString categ){
                                        ":!V";
     dataloader->PrepareTrainingAndTestTree(preselCut&&cutS, preselCut&&cutB, prepareTrainTestOptions);
 
-    Int_t numFolds = 5;
+    UInt_t numFolds = 5;
     TString analysisType = "Classification";
-    TString splitExpr = "";
+    TString splitExpr = "int(fabs([evt]))%int([numFolds])";
     //TString outputEnsembling = "Avg";
-    TString foldFileOutput = "False";
+    //TString foldFileOutput = "False";
     TString cvOptions = Form("!V"
                            ":!Silent"
                            ":ModelPersistence"
                            ":AnalysisType=%s"
                            ":NumFolds=%i"
-                           ":SplitExpr=%s"
+                           ":SplitExpr=%s",
       //                     ":OutputEnsembling=%s"
-                           ":FoldFileOutput=%s",
-                           analysisType.Data(), numFolds,
-                           splitExpr.Data(), 
+      //                     ":FoldFileOutput=%s",
+                           analysisType.Data(), 
+                           numFolds,
+                           splitExpr.Data()
+                           );
                            //outputEnsembling.Data(), 
-                           foldFileOutput.Data());
+                           //foldFileOutput.Data());
     
-//    TMVA::CrossValidation cv{"TMVACrossValidation", dataloader, fout, cvOptions};
-/*
+    TMVA::CrossValidation cv{"TMVACrossValidation", dataloader, fout, cvOptions};
+
     if(doCV){
-        // Booking of MVA methods : BDT
-        cv.BookMethod( TMVA::Types::kBDT, "BDT",
-             "!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=50");
-             //"!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=50" );
+        // Booking of MVA methods : BDTG
+        cv.BookMethod( TMVA::Types::kBDT, "BDTG",
+             "!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost"
+             ":AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=50");
 
         cv.Evaluate();
 
@@ -272,40 +275,30 @@ void MVA_code_2018(TString categ){
             }
         }
     }
-    else*/ {
+    else {
         // Booking of MVA methods : BDT
         factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT", 
              "!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=50" );
-             //"!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=2:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=50" );
-
-        // Booking of MVA methods : MLP
-        //factory->BookMethod( dataloader, TMVA::Types::kMLP, "MLP", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator" );
- 
         // Training the MVA methods
         factory->TrainAllMethods();
-        
         // Testing the MVA methods
         factory->TestAllMethods();
-        
         // Evaluating the MVA methods
         factory->EvaluateAllMethods();
     } 
 
     // Save the output
     fout->Close();
+
+    std::cout << "==> Wrote root file: " << fout->GetName() << std::endl;
+    std::cout << "==> TMVACrossValidation is done!" << std::endl;
     
-    delete factory;
-    delete dataloader;
-    // Launch the GUI for the root macros
-    if (!gROOT->IsBatch()){
-        TMVAGui("TMVA_"+TMVA_outputpath+categ+".root");
-      /*  if(doCV){
-            // Draw cv-specific graphs
-            // cv.GetResults()[0].DrawAvgROCCurve(kTRUE, "Avg ROC for BDTG");
-            for(int i=0; i<numFolds; i++){
-                TString s = std::to_string(i);
-               // TMVAGui("BDT_fold"+s+".root");
-            }
-        } */
+//    delete factory;
+//    delete dataloader;
+
+    if (!gROOT->IsBatch()) {
+        TMVA::TMVAGui(fout->GetName());
     }
+
+    return 0;
 }
