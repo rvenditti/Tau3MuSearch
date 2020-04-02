@@ -30,6 +30,12 @@ double TH1_integral(TH1F *h, float xmin, float xmax){
     return integral;
 }
 
+double log_significance(double S, double B){
+    double significance = 0;
+    significance = sqrt(2*( (S+B) * log( 1+S/B ) - S));
+    //cout<<"log sign is "<<significance<<" while S/sqrt(S + B) gives "<< S/sqrt(S + B) <<endl;
+    return significance;
+}
 
 BDTcut Get_BDT_cut(TString categ, TH1F *h_test_signal, TH1F *h_test_bkg, bool make_plot) 
 {
@@ -50,7 +56,13 @@ BDTcut Get_BDT_cut(TString categ, TH1F *h_test_signal, TH1F *h_test_bkg, bool ma
     cout<<"For BDT cut: avg normalization factor "<<sig_norm<<" (corrected by factor "<<Ds_correction<<")"<<endl;
 
     //Signal is normalized to "sig_norm" factor
-    h_test_signal->Scale(sig_norm);
+    //h_test_signal->Scale(sig_norm);
+
+    //Bkg is scaled depending on category to fit signal mass window
+    double bkg_scale = 1;
+    if(strcmp(categ, "A") == 0) bkg_scale = 4. * 12./(380.);
+    if(strcmp(categ, "B") == 0) bkg_scale = 4. * 19./(380.);
+    if(strcmp(categ, "C") == 0) bkg_scale = 4. * 25./(380.);
 
     double X_min = std::min(h_test_signal->GetXaxis()->GetXmin(), h_test_signal->GetXaxis()->GetXmin());
     double X_max = std::max(h_test_signal->GetXaxis()->GetXmax(), h_test_signal->GetXaxis()->GetXmax());
@@ -66,18 +78,25 @@ BDTcut Get_BDT_cut(TString categ, TH1F *h_test_signal, TH1F *h_test_bkg, bool ma
             //computing areas in range [a;X_max]
 	    N_s_1 = TH1_integral(h_test_signal,a,X_max);
 	    N_b_1 = TH1_integral(h_test_bkg,a,X_max);
-            //skip iteration if integral in the tails is < 0.05% of total (sensitive to fluctuations!)
-            if(N_s_1 < TH1_integral(h_test_signal,X_min,X_max)*0.005) continue;
-            if(N_b_1 < TH1_integral(h_test_bkg,X_min,X_max)*0.005) continue;
+            //skip iteration if integral in the tails is < 0.01% of total (sensitive to fluctuations!)
+            if(N_s_1 < TH1_integral(h_test_signal,X_min,X_max)*0.0001) continue;
+            if(N_b_1 < TH1_integral(h_test_bkg,X_min,X_max)*0.0001) continue;
             //computing areas in range [b;a]
 	    N_s_2 = TH1_integral(h_test_signal,b,a);
             N_b_2 = TH1_integral(h_test_bkg,b,a);
-            //skip iteration if integral in cat 2 is < 0.1% of total (sensitive to fluctuations!)
-            if(N_s_2 < TH1_integral(h_test_signal,X_min,X_max)*0.001) continue;
-            if(N_b_2 < TH1_integral(h_test_bkg,X_min,X_max)*0.001) continue;
+            //skip iteration if integral in cat 2 is < 0.01% of total (sensitive to fluctuations!)
+            if(N_s_2 < TH1_integral(h_test_signal,X_min,X_max)*0.0001) continue;
+            if(N_b_2 < TH1_integral(h_test_bkg,X_min,X_max)*0.0001) continue;
+            //scale n(b) depending on category
+            N_b_1 = N_b_1*bkg_scale;
+            N_b_2 = N_b_2*bkg_scale;
  	    if ( (N_b_1)>0 && (N_b_2)>0 ) {
-                S1 = N_s_1 / sqrt(N_s_1 + N_b_1);
-		S2 = N_s_2 / sqrt(N_s_2 + N_b_2);
+                double S = log_significance(N_s_1, N_b_1);
+                S1 = log_significance(N_s_1, N_b_1);
+                S2 = log_significance(N_s_2, N_b_2);
+                //S1 = N_s_1 / sqrt(N_s_1 + N_b_1);
+		//S2 = N_s_2 / sqrt(N_s_2 + N_b_2);
+
 	        //Combined significance
 	        S = sqrt(S1*S1 + S2*S2);
 	        a_list.push_back(a);
@@ -109,8 +128,10 @@ BDTcut Get_BDT_cut(TString categ, TH1F *h_test_signal, TH1F *h_test_bkg, bool ma
         TCanvas *c3 = new TCanvas("c3","c3",150,10,990,660);
         TGraph2D *g2d = new TGraph2D(dim, &a_list[0], &b_list[0], &S_list[0]);
         g2d->SetTitle(categ+";a;b");
+        g2d->GetZaxis()->SetRangeUser(0.3, 1);
         g2d->Draw("colz");    
-        //g2d->GetHistogram()->SetMinimum(0.25);
+        g2d->GetZaxis()->SetRangeUser(0.3, 1);
+        g2d->SetMinimum(0.25);
         c3->Update();
         TLine l;
         l.DrawLine(a_max,X_min,a_max,X_max);

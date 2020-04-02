@@ -1,22 +1,22 @@
 #include "TH1F.h"
 #include <cmath>
 #include <string> 
-
+#include "T3M_common.h"
 
 void plot_BDT_inputvariables() 
 {
     TString cat[3] = {"A","B","C"};
     TString var[] = {"Pmu3","cLP","tKink","segmComp","fv_nC","fv_dphi3D","fv_d3Dsig","d0sig","mindca_iso","trkRel","nMatchesMu3"};
     cout<<"Opening data file"<<endl;
-    TFile *f_data = new TFile("Analysed_07nov/AnalysedTree_data_2017_merged_tau3mu_07nov.root","READ");
+    TFile *f_data = new TFile(inputpath_data,"READ");
     cout<<"Opened data file"<<endl;
     cout<<"Opening MC file"<<endl;
-    TFile *f_mc = new TFile("Analysed_07nov/AnalysedTree_MC_merged_tau3mu_07nov.root","READ");
+    TFile *f_mc = new TFile(inputpath_MC,"READ");
     cout<<"Opened MC file"<<endl;
     
-    TTree *tdata_A = (TTree*)f_data->Get("FinalTreeA_Bkg");
-    TTree *tdata_B = (TTree*)f_data->Get("FinalTreeB_Bkg");
-    TTree *tdata_C = (TTree*)f_data->Get("FinalTreeC_Bkg");
+    TTree *tdata_A = (TTree*)f_data->Get("FinalTreeA_sgn");
+    TTree *tdata_B = (TTree*)f_data->Get("FinalTreeB_sgn");
+    TTree *tdata_C = (TTree*)f_data->Get("FinalTreeC_sgn");
 
     TTree *tmc_A = (TTree*)f_mc->Get("FinalTreeA_sgn");
     TTree *tmc_B = (TTree*)f_mc->Get("FinalTreeB_sgn");
@@ -32,7 +32,7 @@ void plot_BDT_inputvariables()
     TH1F *hmc_C[n];
     
     TString binning;
-    TString invmass_selection = "(tripletMass<1.73 && tripletMass>1.65) || (tripletMass<1.90 && tripletMass>1.82)";
+    TString invmass_selection = "(tripletMass<1.75 && tripletMass>1.62) || (tripletMass<2.0 && tripletMass>1.80)";
  
    for(int i = 0; i<n; i++){
         TString varname = var[i];
@@ -42,15 +42,15 @@ void plot_BDT_inputvariables()
 
         TString binning;
         if(varname=="Pmu3") binning = "(250,0,50)";
-        if(varname=="cLP") binning = "(250,0,5000)";
+        if(varname=="cLP") binning = "(250,0,1000)";
         if(varname=="segmComp") binning = "(100,-0.1,1.1)";
         if(varname=="tKink") binning = "(250,0,2000)";
-        if(varname=="fv_nC") binning = "(250,-0.5,5.5)";
+        if(varname=="fv_nC") binning = "(250,-0.5,50.5)";
         if(varname=="fv_dphi3D") binning = "(100,-0.1,2)";
         if(varname=="fv_d3Dsig") binning = "(250,-0.1,1000)";
         if(varname=="d0sig") binning = "(150,-0.1,65)";
         if(varname=="mindca_iso") binning = "(150,-0.1,2)";
-        if(varname=="trkRel") binning = "(150,-0.1,10)";
+        if(varname=="trkRel") binning = "(150,-0.5,50)";
         if(varname=="nMatchesMu3") binning = "(20,0,10)";
         tdata_A->Draw(varname+">>hdata_A"+s+binning, invmass_selection);
         tdata_B->Draw(varname+">>hdata_B"+s+binning, invmass_selection);
@@ -104,14 +104,14 @@ void plot_BDT_inputvariables()
         hdata_C[i]->Draw("same");
  
         TLegend*leg = new TLegend(0.4,0.7,0.7,0.9);
-        leg->AddEntry(hdata_A[i],varname+" dataA","f");
-        leg->AddEntry(hdata_B[i],varname+" dataB","f");
-        leg->AddEntry(hdata_C[i],varname+" dataC","f");
+        leg->AddEntry(hdata_A[i],"2018 "+varname+" dataA","f");
+        leg->AddEntry(hdata_B[i],"2018 "+varname+" dataB","f");
+        leg->AddEntry(hdata_C[i],"2018 "+varname+" dataC","f");
         leg->Draw();
 
         c1->SetLogy();
         c1->Update();
-        c1->SaveAs("Data_"+varname+".png");
+        c1->SaveAs(TMVA_inputpath+"A/Data_"+varname+".png");
 
         //MC
         TCanvas *c2 = new TCanvas("c2","c2",150,10,990,660);
@@ -139,14 +139,14 @@ void plot_BDT_inputvariables()
 
 //        if(i==5) hmc_A[i]->GetXaxis()->SetRangeUser(-0.1, 5);
         TLegend*leg2 = new TLegend(0.4,0.7,0.7,0.9);
-        leg2->AddEntry(hmc_A[i],varname+" mcA","f");
-        leg2->AddEntry(hmc_B[i],varname+" mcB","f");
-        leg2->AddEntry(hmc_C[i],varname+" mcC","f");
+        leg2->AddEntry(hmc_A[i],"2018 "+varname+" mcA","f");
+        leg2->AddEntry(hmc_B[i],"2018 "+varname+" mcB","f");
+        leg2->AddEntry(hmc_C[i],"2018 "+varname+" mcC","f");
         leg2->Draw();
 
         c2->SetLogy();
         c2->Update();
-        c2->SaveAs("MC_"+varname+".png");
+        c2->SaveAs(TMVA_inputpath+"A/MC_"+varname+".png");
         
     }
 }

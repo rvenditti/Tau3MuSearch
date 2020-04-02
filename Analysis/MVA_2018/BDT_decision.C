@@ -2,20 +2,28 @@
 #include "BDT_decision.h"
 #include "T3M_common.h"
 #include "BDT_optimal_cut.h"
-#include <TH2.h>
-#include <TStyle.h>
-#include <TCanvas.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <string>
+
+#include "TChain.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TString.h"
+#include "TObjString.h"
+#include "TSystem.h"
+#include "TROOT.h"
+
+#include "TMVA/Factory.h"
+#include "TMVA/DataLoader.h"
 #include "TMVA/Tools.h"
+#include "TMVA/TMVAGui.h"
+
 #include "TMVA/Reader.h"
 #include "TMVA/MethodCuts.h"
 #include "TMVA/CrossValidation.h"
-#include "TMVA/MethodCrossValidation.h"
-#include <stdio.h>
-#include <iostream>
-#include <string.h>
-#include <algorithm>
-#include "TMVA/Factory.h"
-#include "TMVA/DataLoader.h"
 
 using namespace std;
 
@@ -61,7 +69,7 @@ void BDT_decision::Loop(int isMC, TString category){
 
    //TMVA Reader initialization
    TMVA::Tools::Instance();
-   TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" );
+   TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent:!V" );
    float  forBDTevaluation1; 
    float  forBDTevaluation2; 
    float  forBDTevaluation3; 
@@ -74,25 +82,39 @@ void BDT_decision::Loop(int isMC, TString category){
    float  forBDTevaluation10;
    float  forBDTevaluation11;
    float  forBDTevaluation12;
+   float  forBDTevaluation13;
+   Int_t  forBDTevaluation14;
 
-   reader->TMVA::Reader::AddVariable( "Pmu3", &forBDTevaluation1 );
-   reader->TMVA::Reader::AddVariable( "cLP", &forBDTevaluation2 );
-   reader->TMVA::Reader::AddVariable( "tKink", &forBDTevaluation3 );
-   reader->TMVA::Reader::AddVariable( "segmComp", &forBDTevaluation4 );
-   reader->TMVA::Reader::AddVariable( "fv_nC", &forBDTevaluation5 );
-   reader->TMVA::Reader::AddVariable( "fv_dphi3D", &forBDTevaluation6 );
-   reader->TMVA::Reader::AddVariable( "fv_d3Dsig", &forBDTevaluation7 );
-   reader->TMVA::Reader::AddVariable( "d0sig", &forBDTevaluation8 );
-   reader->TMVA::Reader::AddVariable( "mindca_iso", &forBDTevaluation9 );
-   reader->TMVA::Reader::AddVariable( "trkRel", &forBDTevaluation10 );
-   reader->TMVA::Reader::AddVariable( "nMatchesMu3", &forBDTevaluation11 );
-   reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation12 );
+    reader->TMVA::Reader::AddVariable(var_Pmu3,       &forBDTevaluation1 ) ;
+    reader->TMVA::Reader::AddVariable(var_cLP,        &forBDTevaluation2 ) ;
+    reader->TMVA::Reader::AddVariable(var_tKink,      &forBDTevaluation3 ) ;
+    reader->TMVA::Reader::AddVariable(var_segmComp,   &forBDTevaluation4 ) ;
+    reader->TMVA::Reader::AddVariable(var_fv_nC,      &forBDTevaluation5 ) ;
+    reader->TMVA::Reader::AddVariable(var_fv_dphi3D,  &forBDTevaluation6 ) ;
+    reader->TMVA::Reader::AddVariable(var_fv_d3Dsig,  &forBDTevaluation7 ) ;
+    reader->TMVA::Reader::AddVariable(var_d0sig,      &forBDTevaluation8 ) ;
+    reader->TMVA::Reader::AddVariable(var_mindca_iso, &forBDTevaluation9 ) ;
+    reader->TMVA::Reader::AddVariable(var_trkRel,     &forBDTevaluation10 ) ;
+    reader->TMVA::Reader::AddVariable( "nMatchesMu3", &forBDTevaluation11 );
+    //Spectator variables
+    reader->TMVA::Reader::AddSpectator( "tripletMass", &forBDTevaluation12 );
+    reader->TMVA::Reader::AddSpectator( "puFactor", &forBDTevaluation13 );
+    reader->TMVA::Reader::AddSpectator( "evt := evt % 8192", &forBDTevaluation14 );
 
 
-   //BDT weights
-   TString weight_path = TMVA_inputpath+"ABC"+TMVA_weightfilename;
-   reader->TMVA::Reader::BookMVA("BDT", weight_path);
-   cout<<"Using weights in "<<weight_path<<endl;
+   //Book TMVA method
+   TString weight_path = TMVA_inputpath+category+TMVA_weightfilename;
+   Bool_t weightfileExists = (gSystem->AccessPathName(weight_path) == kFALSE);
+   if (weightfileExists) {
+      reader->TMVA::Reader::BookMVA(method, weight_path);
+      cout<<"Using weights in "<<weight_path<<endl;
+   } else {
+      std::cout << "Weightfile " <<weight_path<<" for method " << method << " not found."
+                   " Did you run TMVACrossValidation with a specified"
+                   " splitExpr?" << std::endl;
+      exit(0);
+   }
+
 
    //Start event Loop
    for (Long64_t jentry=0; jentry<nentries; jentry++) {
@@ -112,15 +134,17 @@ void BDT_decision::Loop(int isMC, TString category){
       forBDTevaluation10 = trkRel;
       forBDTevaluation11 = nMatchesMu3;
       forBDTevaluation12 = tripletMass;
+      forBDTevaluation13 = puFactor;
+      forBDTevaluation14 = evt % 8192;
 
       //Backgroud
-      if( !isMC && (tripletMass >= 1.65 && tripletMass <= 1.73 || tripletMass >= 1.82 && tripletMass <= 1.90) ){
-          hBDTdecision->Fill(reader->EvaluateMVA("BDT"));
+      if( (isMC==0) && (tripletMass >= 1.62 && tripletMass <= 1.75 || tripletMass >= 1.80 && tripletMass <= 2.0 )){
+          hBDTdecision->Fill(reader->EvaluateMVA(method));
           //cout<<"data in SB - BDT = "<<reader->EvaluateMVA("BDT")<<endl;
       }
       //Signal
-      if( isMC>0 && (tripletMass > 1.73 && tripletMass < 1.82) ){
-          hBDTdecision->Fill(reader->EvaluateMVA("BDT"));
+      if( isMC>0  && (tripletMass > 1.62 && tripletMass < 2.0) ){
+          hBDTdecision->Fill(reader->EvaluateMVA(method), puFactor);
           //cout<<"signal - BDT = "<<reader->EvaluateMVA("BDT")<<endl;
       }
 
@@ -130,8 +154,8 @@ void BDT_decision::Loop(int isMC, TString category){
         //Normalizing Monte Carlo 
         Double_t wNormMC = 1;
         if(isMC == 1) wNormMC = wNormDs * Ds_correction*Dplus_correction; //Ds
-        if(isMC == 2) wNormMC = wNormB0 * Ds_correction*Dplus_correction; //B0
-        if(isMC == 3) wNormMC = wNormBp * Ds_correction*Dplus_correction; //Bp
+        if(isMC == 2) wNormMC = wNormB0 * Ds_correction*Bs_correction*f_correction; //B0
+        if(isMC == 3) wNormMC = wNormBp * Ds_correction*Bs_correction*f_correction; //Bp
         cout<<"Normalization factor "<<wNormMC<<endl;
         hBDTdecision->Scale(wNormMC);
     } 

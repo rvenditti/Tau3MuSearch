@@ -22,6 +22,9 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
+   UInt_t          evt;
+   UInt_t          run;
+   UInt_t          lumi;
    Double_t        Pmu3;
    Double_t        cLP;
    Float_t         tKink;
@@ -121,9 +124,13 @@ public :
    Double_t        trVeto03;
    Double_t        trVeto05;
    Double_t        tripletMass;
+   Double_t        puFactor;
    Double_t        tripletMassReso;
 
    // List of branches
+   TBranch        *b_evt;   //!
+   TBranch        *b_run;   //!
+   TBranch        *b_lumi;   //!
    TBranch        *b_Pmu3;   //!
    TBranch        *b_cLP;   //!
    TBranch        *b_tKink;   //!
@@ -223,6 +230,7 @@ public :
    TBranch        *b_trVeto03;   //!
    TBranch        *b_trVeto05;   //!
    TBranch        *b_tripletMass;   //!
+   TBranch        *b_puFactor;   //!
    TBranch        *b_tripletMassReso;   //!
 
    RunT3Mu(TTree *tree=0);
@@ -296,6 +304,9 @@ void RunT3Mu::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
+   fChain->SetBranchAddress("evt", &evt, &b_evt);
+   fChain->SetBranchAddress("run", &run, &b_run);
+   fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("Pmu3", &Pmu3, &b_Pmu3);
    fChain->SetBranchAddress("cLP", &cLP, &b_cLP);
    fChain->SetBranchAddress("tKink", &tKink, &b_tKink);
@@ -395,6 +406,7 @@ void RunT3Mu::Init(TTree *tree)
    fChain->SetBranchAddress("trVeto03", &trVeto03, &b_trVeto03);
    fChain->SetBranchAddress("trVeto05", &trVeto05, &b_trVeto05);
    fChain->SetBranchAddress("tripletMass", &tripletMass, &b_tripletMass);
+   fChain->SetBranchAddress("puFactor", &puFactor, &b_puFactor);
    Notify();
 }
 
