@@ -15,7 +15,11 @@ export STORE=/lustre/cms/store/user/fsimone/
 #eval `scramv1 runtime -sh`
 #cd /lustrehome/fsimone/MVA_2017
 
-echo "run TMVA from ROOT > 6.14 (>CMSSW_10_6_0)"
+#set env. variables if needed
+#export HOME=/cvmfs/cms.cern.ch/slc7_amd64_gcc630/lcg/root/6.10.08/etc/
+
+#export ROOTSYS=/lustrehome/fsimone/root/
+#source $ROOTSYS/bin/thisroot.sh 
 
 g++ -I $ROOTSYS/include -I $ROOTSYS/include BDT_decision_launcher.cpp `root-config --glibs` `root-config --libs` `root-config --cflags` -lTMVA -L $ROOTSYS/lib -o BDT_decision_exe
 sleep 1
