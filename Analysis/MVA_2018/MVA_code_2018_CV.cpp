@@ -234,6 +234,7 @@ void MVA_code_2018_CV(TString categ){
 
     UInt_t numFolds = 5;
     TString analysisType = "Classification";
+    TString splitType = "Deterministic";
     TString splitExpr = "int(fabs([evt]))%int([numFolds])";
     //TString outputEnsembling = "Avg";
     //TString foldFileOutput = "False";
@@ -242,11 +243,13 @@ void MVA_code_2018_CV(TString categ){
                            ":ModelPersistence"
                            ":AnalysisType=%s"
                            ":NumFolds=%i"
+                           ":SplitType=%s"
                            ":SplitExpr=%s",
       //                     ":OutputEnsembling=%s"
       //                     ":FoldFileOutput=%s",
                            analysisType.Data(), 
                            numFolds,
+                           splitType.Data(),
                            splitExpr.Data()
                            );
                            //outputEnsembling.Data(), 
@@ -297,8 +300,25 @@ void MVA_code_2018_CV(TString categ){
 //    delete dataloader;
 
     if (!gROOT->IsBatch()) {
-        TMVA::TMVAGui(fout->GetName());
+       // Draw cv-specific graphs
+       cv.GetResults()[0].DrawAvgROCCurve(kTRUE, "Avg ROC for BDTG");
+       // gui
+       cout<<"TMVA::TMVAGui("<<fout->GetName()<<")"<<endl;
+       TMVA::TMVAGui(fout->GetName());
     }
+
+    size_t iMethod = 0;
+    for (auto && result : cv.GetResults()) {
+      std::cout << "Summary for method " << cv.GetMethods()[iMethod++].GetValue<TString>("MethodName")
+                << std::endl;
+      for (UInt_t iFold = 0; iFold<cv.GetNumFolds(); ++iFold) {
+         std::cout << "\tFold " << iFold << ": "
+                   << "ROC int: " << result.GetROCValues()[iFold]
+                   << ", "
+                   << "BkgEff@SigEff=0.3: " << result.GetEff30Values()[iFold]
+                   << std::endl;
+      }
+   }
 
     return 0;
 }
