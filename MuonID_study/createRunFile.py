@@ -16,7 +16,8 @@ parser.add_argument("--run", type=str, default='', choices=[
                                                             ], help="run in data")
 parser.add_argument("--n", type=int, default=255, help="number of .root files per job")
 parser.add_argument("--massregion", type=str, default='', choices=['sgn', 'bkg'], help="Specify invariant mass range")
-parser.add_argument("--MCprocess", type=str, default='', choices=['2018BdToKK', '2018BdToPiPi',
+parser.add_argument("--MCprocess", type=str, default='', choices=['2018BdToKK',                 '2018BdToPiPi', '2018BdToKPi', '2018BdToKPi_2',
+                                                                  '2018BsToKK', '2018BsToKK_2', '2018BsToPiPi', '2018BsToKPi',
                                                                   '2018Ds', '2018B0', '2018Bp'
                                                                   ], help="process in Monte Carlo")
 args = parser.parse_args()
@@ -56,25 +57,42 @@ if args.anatype == 'muonid':
       path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v4/200217_112055'
 
 if args.dataset == 'MC' and args.MCprocess == '2018BdToKK':
-      path = '/lustre/cms/store/user/rosma/BdToKK_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToKK_SoftQCDnonD_2018_CMSSW_10_2_1/200405_093309'
+      path = '/lustre/cms/store/user/rosma/BdToKK_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToKK_SoftQCDnonD_2018_CMSSW_10_2_1_v2/'
+      #path = '/lustre/cms/store/user/rosma/BdToKK_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToKK_SoftQCDnonD_2018_CMSSW_10_2_1/200405_093309'
 if args.dataset == 'MC' and args.MCprocess == '2018BdToPiPi':
-      path = '/lustre/cms/store/user/rosma/BdToPiPi_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToPiPi_2018_CMSSW_10_2_1/200405_093443'
+      path = '/lustre/cms/store/user/rosma/BdToPiPi_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToPiPi_2018_CMSSW_10_2_1_v2/'
+      #path = '/lustre/cms/store/user/rosma/BdToPiPi_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToPiPi_2018_CMSSW_10_2_1/200405_093443'
+if args.dataset == 'MC' and args.MCprocess == '2018BdToKPi':
+      path = '/lustre/cms/store/user/rosma/BdToKPi_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToKPi_SoftQCDnonD_2018_CMSSW_10_2_1_v2/'
+if args.dataset == 'MC' and args.MCprocess == '2018BdToKPi_2':
+      path = '/lustre/cms/store/user/rosma/BdToKPi_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BdToKPi_2018_CMSSW_10_2_1_v2/'
+
+if args.dataset == 'MC' and args.MCprocess == '2018BsToKK':
+      path = '/lustre/cms/store/user/rosma/BsToKK_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BsToKK_2018_CMSSW_10_2_1_v2/'
+if args.dataset == 'MC' and args.MCprocess == '2018BsToKK_2':
+      path = '/lustre/cms/store/user/rosma/BsToKK_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BsToKK_2_2018_CMSSW_10_2_1_v2/'
+if args.dataset == 'MC' and args.MCprocess == '2018BsToPiPi':
+      path = '/lustre/cms/store/user/rosma/BsToPiPi_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/SkimMuID_BsToPiPi_2018_CMSSW_10_2_1_v2/'
+if args.dataset == 'MC' and args.MCprocess == '2018BsToKPi':
+      path = ''
 
 if args.dataset == 'MC' and args.MCprocess == '2018Ds':
-      path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu_March2020/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_March2020_v8/200330_080934'
+      path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu_March2020/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_March2020_v9/'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu_March2020/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_March2020_v8/200330_080934'
       #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_Jianv2_v8/200217_121547'
 
 if args.dataset == 'MC' and args.MCprocess == '2018B0':
-      path = '/lustre/cms/store/user/rosma/B0ToTau_TauTo3Mu/SkimTau3Mu_B0ToTauTo3Mu_2018_CMSSW_10_2_1_v8/200330_132303'
+      path = '/lustre/cms/store/user/rosma/B0ToTau_TauTo3Mu/SkimTau3Mu_B0ToTauTo3Mu_2018_CMSSW_10_2_1_v9/'
+      #path = '/lustre/cms/store/user/rosma/B0ToTau_TauTo3Mu/SkimTau3Mu_B0ToTauTo3Mu_2018_CMSSW_10_2_1_v8/200330_132303'
       #path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122205'
 
 if args.dataset == 'MC' and args.MCprocess == '2018Bp':
       path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122234'
 
-if args.MCprocess == '2018BdToPiPi':
-    args.MCprocess = '2018Bd'
-if args.MCprocess == '2018BdToKK':
-    args.MCprocess = '2018Bd'
+if args.MCprocess == '2018BdToPiPi' or args.MCprocess == '2018BdToKK' or args.MCprocess == '2018BdToKPi' or args.MCprocess == '2018BdToKPi_2':
+    args.MCprocess = '2018Bkg'
+if args.MCprocess == '2018BsToPiPi' or args.MCprocess == '2018BsToKK' or args.MCprocess == '2018BsToKK_2' or args.MCprocess == '2018BsToKPi':
+    args.MCprocess = '2018Bkg'
 
 #generating the list of all .root files in given directory and subdirectories
 fileList = []

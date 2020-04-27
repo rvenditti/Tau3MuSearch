@@ -15,7 +15,7 @@ cd /lustrehome/fsimone/TreeMakerRosma/CMSSW_9_4_4/src/
 eval `scramv1 runtime -sh`
 #set env. variables if needed
 export HOME=/cvmfs/cms.cern.ch/slc7_amd64_gcc630/lcg/root/6.10.08/etc/
-cd /lustrehome/fsimone/MuonID_study
+cd /lustrehome/fsimone/Analysis
 #export ROOTSYS=/lustrehome/fsimone/root/
 #source $ROOTSYS/bin/thisroot.sh 
 #export HOME=$ROOTSYS/etc/

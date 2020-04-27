@@ -1,4 +1,4 @@
-//root -l MVA_code_2018.cpp\(\"A\"\)
+//root -l MVA_muonid.cpp\(\"category\"\)
 
 #include <cstdlib>
 #include <iostream>
@@ -26,10 +26,10 @@ using namespace TMVA;
 
 void MVA_muonid(TString categ){
     //Check on input argument
-    //if(!categ.Contains("A") && !categ.Contains("B") && !categ.Contains("C")){
-    //    cout << "Please choose between any combination of 'A', 'B' and 'C'" << endl;
-    //    return;
-    //}
+    if(!categ.Contains("barrel") && !categ.Contains("endcap")){
+        cout << "Please choose between any combination of 'barrel' and 'endcap'" << endl;
+        return;
+    }
 
     // Output file
     TFile *fout = new TFile("TMVA_"+TMVA_outputpath+categ+".root", "RECREATE");
@@ -37,21 +37,20 @@ void MVA_muonid(TString categ){
     std::vector<TTree*> sigTree, bkgTree;
 
     // Get the signal and background trees from TFile source(s);
-    // SIGNAL tree
     //signal
-    TString treeName_sig = "FinalTree";
+    TString treeName = "FinalTree";
     //Ds
     TFile *f_sig_ds = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Ds);
     if (!f_sig_ds || !f_sig_ds->IsOpen()) {
          f_sig_ds = new TFile(inputpath_Ds);
     }
-    sigTree.push_back( (TTree*)f_sig_ds->Get(treeName_sig));
-    ////B0
-    //TFile *f_sig_b0 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_B0);
-    //if (!f_sig_b0 || !f_sig_b0->IsOpen()) {
-    //    f_sig_b0 = new TFile(inputpath_B0);
-    //}
-    //sigTree.push_back( (TTree*)f_sig_b0->Get(treeName_sig));
+    sigTree.push_back( (TTree*)f_sig_ds->Get(treeName));
+    //B0
+    TFile *f_sig_b0 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_B0);
+    if (!f_sig_b0 || !f_sig_b0->IsOpen()) {
+        f_sig_b0 = new TFile(inputpath_B0);
+    }
+    sigTree.push_back( (TTree*)f_sig_b0->Get(treeName));
     ////Bp
     //TFile *f_sig_bp = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
     //if (!f_sig_bp || !f_sig_bp->IsOpen()) {
@@ -60,19 +59,15 @@ void MVA_muonid(TString categ){
     //sigTree.push_back( (TTree*)f_sig_bp->Get(treeName_sig));
 
     //background
-    TString treeName_bkg = "FinalTree";
-    //BdToPiPi
-    TFile *f_bkg1 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_BdToPiPi);
-    if (!f_bkg1 || !f_bkg1->IsOpen()) {
-        f_bkg1 = new TFile(inputpath_BdToPiPi);
+    size_t n_bkg = sizeof(inputpath_bkg)/sizeof(inputpath_bkg[0]);
+    //Loop on samples
+    for(int j = 0; j<n_bkg; j++){
+        TFile *f_bkg = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_bkg[j]);
+        if (!f_bkg || !f_bkg->IsOpen()) {
+            f_bkg = new TFile(inputpath_bkg[j]);
+        }
+        bkgTree.push_back((TTree*)f_bkg->Get(treeName));
     }
-    bkgTree.push_back((TTree*)f_bkg1->Get(treeName_bkg));
-    //BdToKK
-    TFile *f_bkg2 = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_BdToKK);
-    if (!f_bkg2 || !f_bkg2->IsOpen()) {
-        f_bkg2 = new TFile(inputpath_BdToKK);
-    }
-    bkgTree.push_back((TTree*)f_bkg2->Get(treeName_bkg));
 
     // Set the event weights per tree
     Double_t sigWeight  = 1.0;
@@ -97,16 +92,28 @@ void MVA_muonid(TString categ){
     for(int k = 0; k<var_names.size(); k++){
         dataloader->AddVariable(var_names.at(k), var_names.at(k), "", 'F');
     }
-
+    //signal muons
     TCut cutS = "abs(mu_simPdgId)==13 && abs(mu_simMotherPdgId)==15"; 
-    TCut cutB = "";
-    TCut preselCut = "mu_isGlobal == 1 && mu_pt > 2 && abs(mu_eta)<2.4";
+    //bkg muons = pions, kaon, muons frmo decay in flight
+    TCut cutB_pi = "( abs(mu_simPdgId) == 211 )"; //pion
+    TCut cutB_k = "( abs(mu_simPdgId) == 321 )"; //kaon
+    TCut cutB_mu_from_pi = "( abs(mu_simPdgId) == 13 && abs(mu_simMotherPdgId) == 211 )"; //true mu from pion decay
+    TCut cutB_mu_from_k = "( abs(mu_simPdgId) == 13 && abs(mu_simMotherPdgId) == 321 )"; //true mu from kaon decay
+    //running on global muons with associated simInfo
+    TCut preselCut = "mu_simType != 0 && mu_isGlobal == 1 && mu_pt > 2 && abs(mu_eta)<2.4";
+    //training separately on endcap and barrel
+    TCut etarange = "abs(mu_eta)<0"; //always false
+    TCut barrel = "abs(mu_eta)<1.2";
+    TCut endcap = "abs(mu_eta)>=1.2";
+    if(categ.Contains("endcap")) etarange = etarange || endcap;
+    if(categ.Contains("barrel")) etarange = etarange || barrel;
 
-    //TCut preselCut = "";
+    dataloader->SetBackgroundWeightExpression("ptetaWeight");
+
     TString prepareTrainTestOptions = ":SplitMode=Random"
                                        ":NormMode=NumEvents"
                                        ":!V";
-    dataloader->PrepareTrainingAndTestTree(preselCut&&cutS, preselCut&&cutB, prepareTrainTestOptions);
+    dataloader->PrepareTrainingAndTestTree(preselCut&&etarange&&cutS, preselCut&&etarange&&(cutB_pi||cutB_k||cutB_mu_from_pi||cutB_mu_from_k), prepareTrainTestOptions);
     
     // Booking of MVA methods : BDT
     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT", 

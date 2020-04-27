@@ -40,7 +40,8 @@ int main(int narg, char** arg){
         return -1;
     }
     if((strcmp(type, "MC") == 0 || strcmp(type, "MC_sgn") == 0 ) && 
-        strcmp(datasetName, "2018BdToKK") != 0 && strcmp(datasetName, "2018BdToPiPi") != 0 &&
+        strcmp(datasetName, "2018BdToKK") != 0 && strcmp(datasetName, "2018BdToPiPi") != 0 && strcmp(datasetName, "2018BdToKPi") != 0 && strcmp(datasetName, "2018BdToKPi_2") != 0 &&
+        strcmp(datasetName, "2018BsToKK") != 0 && strcmp(datasetName, "2018BsToKK_2") != 0 && strcmp(datasetName, "2018BsToPiPi") != 0 && strcmp(datasetName, "2018BsToKPi") != 0 &&
         strcmp(datasetName, "2018Ds") != 0 && strcmp(datasetName, "2018B0") != 0 && strcmp(datasetName, "2018Bp") != 0 && 
         strcmp(datasetName, "MiniBias") != 0){
         cout << "The second argument is wrong!" << endl;
@@ -82,11 +83,12 @@ int main(int narg, char** arg){
         class_MC.Loop(type, datasetName);
         }
         // BdKK or BdPiPi
-        if (strcmp(datasetName, "2018BdToPiPi") == 0 || strcmp(datasetName, "2018BdToKK") == 0){
-            cout << "MC Dataset : Bd to KK or Bd to PiPi for muon ID studies" << endl << endl;
+        if (strcmp(datasetName, "2018BdToKK") == 0 || strcmp(datasetName, "2018BdToPiPi") == 0 || strcmp(datasetName, "2018BdToKPi") == 0 || strcmp(datasetName, "2018BdToKPi_2") == 0 ||
+            strcmp(datasetName, "2018BsToKK") == 0 || strcmp(datasetName, "2018BsToKK_2") == 0 || strcmp(datasetName, "2018BsToPiPi") == 0 || strcmp(datasetName, "2018BsToKPi") == 0){
+            cout << "MC Dataset : Bd/Bs to KK/PiPi/KPi for muon ID studies" << endl << endl;
             TChain* chain = new TChain("TreeMakerBkg/ntuple");
-        //AddFile_MC2018Bd_muonid
-        //OutFile_MC2018Bd_muonid
+        //AddFile_MC2018Bkg_muonid
+        //OutFile_MC2018Bkg_muonid
 
         ntupleClass_muonid class_MC(chain, fileout);
         class_MC.Loop(type, datasetName);
