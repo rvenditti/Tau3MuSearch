@@ -143,7 +143,7 @@ void ntupleClass_muonid::Loop(TString type, TString datasetName){
              if(!doWeights || isT3M) ptetaWeight = 1;
              else{
                  //compute weights
-                 if(abs(MuonEta->at(j))<1.4) {
+                 if(abs(MuonEta->at(j))<1.2) {
                      bin_pt =  h_weights_barrel->GetXaxis()->FindBin(MuonPt->at(j)); 
                      bin_eta = h_weights_barrel->GetYaxis()->FindBin(MuonEta->at(j)); 
                      ptetaWeight = h_weights_barrel->GetBinContent(bin_pt, bin_eta);

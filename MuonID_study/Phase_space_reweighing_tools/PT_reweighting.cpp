@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <TPad.h>
 #include "../T3M_common.h"
 
 //root -l PT_reweighting.cpp\(\"barrel\"\)
@@ -10,6 +11,8 @@ void PT_reweighting(TString categ){
         cout << "Please choose between any combination of 'barrel' and 'endcap'" << endl;
         return;
     }
+
+    bool draw = true;
     
     //open input files
     size_t n_bkg = sizeof(inputpath_bkg)/sizeof(inputpath_bkg[0]);
@@ -111,7 +114,82 @@ void PT_reweighting(TString categ){
     TH2D *hweight_pteta = (TH2D*)hsgn_pteta->Clone("hweight_pteta");
     hweight_pteta->Sumw2();
     hweight_pteta->Divide(hbkg_pteta);
-     // Write and close the file
+
+   //TH1D * hsgn_pt  = hsgn_pteta->ProjectionX();
+   //TH1D * hsgn_eta = hsgn_pteta->ProjectionY();
+   //TH1D * hbkg_pt  = hbkg_pteta->ProjectionX();
+   //TH1D * hbkg_eta = hbkg_pteta->ProjectionY();
+
+   if(draw){
+         //Draw signal pt-eta space and projections
+         TCanvas *c1 = new TCanvas("c1", "c1",900,900);
+         gStyle->SetOptStat(0);
+         
+         // Create the three pads
+         TPad *center_pad = new TPad("center_pad", "center_pad",0.0,0.0,0.7,0.7);
+         center_pad->Draw();
+
+         TPad *right_pad = new TPad("right_pad", "right_pad",0.65,0.0,1.0,0.7);
+         right_pad->Draw();
+
+         TPad *top_pad = new TPad("top_pad", "top_pad",0.0,0.65,0.7,1.0);
+         top_pad->Draw();
+
+         // Drawing
+         center_pad->cd();
+         hbkg_pteta->Draw("COLZ");
+
+         top_pad->cd();
+         hbkg_pt->SetFillStyle(3351);
+         hbkg_pt->SetLineColor(kRed);
+         hbkg_pt->SetLineWidth(3);
+         hbkg_pt->Draw("bar");
+
+         right_pad->cd();
+         hbkg_eta->SetFillStyle(3315);
+         hbkg_eta->SetLineColor(kBlue);
+         hbkg_eta->SetLineWidth(3);
+         hbkg_eta->Draw("hbar2");
+         
+         c1->cd();
+         c1->SaveAs("bkg_pteta_"+categ+".png");
+
+         //Draw signal and background pt-eta space and projections
+         TCanvas *c2 = new TCanvas("c2", "c2",900,900);
+         c2->cd();
+         gStyle->SetOptStat(0);
+         
+         // Create the three pads
+         TPad *center_pad2 = new TPad("center_pad2", "center_pad2",0.0,0.0,0.7,0.7);
+         center_pad2->Draw();
+
+         TPad *right_pad2 = new TPad("right_pad2", "right_pad2",0.65,0.0,1.0,0.7);
+         right_pad2->Draw();
+
+         TPad *top_pad2 = new TPad("top_pad2", "top_pad2",0.0,0.65,0.7,1.0);
+         top_pad2->Draw();
+
+         // Drawing
+         center_pad2->cd();
+         hsgn_pteta->Draw("COLZ");
+
+         top_pad2->cd();
+         hsgn_pt->SetFillStyle(3351);
+         hsgn_pt->SetLineColor(kRed);
+         hsgn_pt->SetLineWidth(3);
+         hsgn_pt->Draw("bar");
+
+         right_pad2->cd();
+         hsgn_eta->SetFillStyle(3315);
+         hsgn_eta->SetLineColor(kBlue);
+         hsgn_eta->SetLineWidth(3);
+         hsgn_eta->Draw("hbar2");
+         
+         c2->cd();
+         c2->SaveAs("sgn_pteta_"+categ+".png");
+    }
+
+    // Write and close the file
     fout->Write();
 
 }
