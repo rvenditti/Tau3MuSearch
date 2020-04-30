@@ -89,9 +89,11 @@ void MVA_muonid(TString categ){
     }
 
     // Variables declaration
-    for(int k = 0; k<var_names.size(); k++){
-        dataloader->AddVariable(var_names.at(k), var_names.at(k), "", 'F');
+    for(int k = 0; k<var_train_names.size(); k++){
+        dataloader->AddVariable(var_train_def.at(k), var_train_names.at(k), "", 'F');
     }
+
+
     //signal muons
     TCut cutS = "abs(mu_simPdgId)==13 && abs(mu_simMotherPdgId)==15"; 
     //bkg muons = pions, kaon, muons frmo decay in flight
@@ -101,6 +103,13 @@ void MVA_muonid(TString categ){
     TCut cutB_mu_from_k = "( abs(mu_simPdgId) == 13 && abs(mu_simMotherPdgId) == 321 )"; //true mu from kaon decay
     //running on global muons with associated simInfo
     TCut preselCut = "mu_simType != 0 && mu_isGlobal == 1 && mu_pt > 2 && abs(mu_eta)<2.4";
+    //loose preselection cuts on input variables
+    TCut cleanInputVar = "mu_combinedQuality_staRelChi2 > 0 &&"
+                         "mu_combinedQuality_trkRelChi2 > 0 &&"
+                         "mu_GLhitPattern_numberOfValidMuonHits > 0 &&"
+                         "mu_validMuonHitComb > 0 &&"
+                         "mu_segmentCompatibility > 0.05";
+
     //training separately on endcap and barrel
     TCut etarange = "abs(mu_eta)<0"; //always false
     TCut barrel = "abs(mu_eta)<1.2";
@@ -113,7 +122,7 @@ void MVA_muonid(TString categ){
     TString prepareTrainTestOptions = ":SplitMode=Random"
                                        ":NormMode=NumEvents"
                                        ":!V";
-    dataloader->PrepareTrainingAndTestTree(preselCut&&etarange&&cutS, preselCut&&etarange&&(cutB_pi||cutB_k||cutB_mu_from_pi||cutB_mu_from_k), prepareTrainTestOptions);
+    dataloader->PrepareTrainingAndTestTree(preselCut&&cleanInputVar&&etarange&&cutS, preselCut&&cleanInputVar&&etarange&&(cutB_pi||cutB_k||cutB_mu_from_pi||cutB_mu_from_k), prepareTrainTestOptions);
     
     // Booking of MVA methods : BDT
     factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT", 
@@ -141,4 +150,6 @@ void MVA_muonid(TString categ){
     if (!gROOT->IsBatch()){
         TMVAGui("TMVA_"+TMVA_outputpath+categ+".root");
     }
+    cout<<"Exiting ROOT"<<endl;
+    gApplication->Terminate();
 }
