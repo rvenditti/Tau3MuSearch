@@ -1,7 +1,10 @@
 #include <iostream>
 
 //TMVA Training options
-    TString TMVA_outputpath = "dataset_2018_22april_"; //name to give to TMVA output files
+
+
+    TString chi2cut = "";
+    TString TMVA_outputpath = "dataset_2018_27april_Chi2_"+chi2cut+"_"; //name to give to TMVA output files
     //change it to perform 5-fold Cross Validation
     bool doCV = false;
     TString method = "BDT";
@@ -12,7 +15,7 @@
    //TString TMVA_weightfilename = "/weights/TMVACrossValidation_BDTG.weights.xml"; //name given training BDT with crossvalidation
     
 //TMVA Evaluating options
-    TString TMVA_inputpath = "dataset_2018_22april_";  //name to load TMVA results for evaluation
+    TString TMVA_inputpath = "dataset_2018_27april_Chi2_"+chi2cut+"_";  //name to load TMVA results for evaluation
 
 //data rootfiles
 
@@ -24,6 +27,7 @@
            "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018D_tau3mu_21april.root",
            };
 
+    //TString inputpath_data = "AnalysedTree_data_2018_merged_21april.root";
     TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018Ds_tau3mu_21april.root";
     TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018B0_tau3mu_21april.root";
     TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_MC_2018Bp_tau3mu_21april.root";
@@ -47,16 +51,16 @@
 //TMVA settings
 //
 // Variables declaration
-    TString var_Pmu3 =       "Pmu3>45?45:Pmu3";
-    TString var_cLP =        "cLP>30?30:cLP";
-    TString var_tKink =      "tKink>80?80:tKink";
-    TString var_segmComp =   "segmComp<0.2?0.2:segmComp";
-    TString var_fv_nC =      "fv_nC>25?25:fv_nC";
-    TString var_fv_dphi3D =  "fv_dphi3D>0.15?0.15:fv_dphi3D"; 
-    TString var_fv_d3Dsig =  "fv_d3Dsig>100?100:fv_d3Dsig";
-    TString var_d0sig =      "d0sig>15?15:d0sig";
-    TString var_mindca_iso = "mindca_iso>0.5?0.5:mindca_iso";
-    TString var_trkRel =     "trkRel>10?10:trkRel";
+//    TString var_Pmu3 =       "Pmu3>45?45:Pmu3";
+//    TString var_cLP =        "cLP>30?30:cLP";
+//    TString var_tKink =      "tKink>80?80:tKink";
+//    TString var_segmComp =   "segmComp<0.2?0.2:segmComp";
+//    TString var_fv_nC =      "fv_nC>25?25:fv_nC";
+//    TString var_fv_dphi3D =  "fv_dphi3D>0.15?0.15:fv_dphi3D"; 
+//    TString var_fv_d3Dsig =  "fv_d3Dsig>100?100:fv_d3Dsig";
+//    TString var_d0sig =      "d0sig>15?15:d0sig";
+//    TString var_mindca_iso = "mindca_iso>0.5?0.5:mindca_iso";
+//    TString var_trkRel =     "trkRel>10?10:trkRel";
 
 
 
@@ -73,7 +77,9 @@
                                       "d0sig>15?15:d0sig",
                                       "mindca_iso>0.5?0.5:mindca_iso",
                                       "trkRel>10?10:trkRel",
-                                      "nMatchesMu3"
+                                      "nMatchesMu3",
+                                   //  "muID2",
+                                   //   "muID3"
                                       };
     std::vector<TString> var_names = {
                                       "Pmu3",
@@ -86,12 +92,15 @@
                                       "d0sig",
                                       "mindca_iso",
                                       "trkRel",
-                                      "nMatchesMu3"
+                                      "nMatchesMu3",
+                                  //    "muID2",
+                                  //    "muID3"
                                       };
 
 
     std::vector<TString> var_spec_names = {
                                       "tripletMass",
+//                                      "tripletMassReso",
                                       "puFactor",
                                      // "evt",
                                      // "evt % 8192",
