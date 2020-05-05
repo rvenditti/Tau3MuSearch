@@ -75,28 +75,40 @@ if args.anatype == 'tau3mu':
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2016Hv3_v0/200104_151137'
 
    if args.dataset == 'data' and args.run == '2017B':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017B_AOD_v7/191120_150348'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017B_AOD_v8/200403_175023/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017B_AOD_v7/191120_150348'
    if args.dataset == 'data' and args.run == '2017C':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017C_AOD_v7/191120_151537'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017C_AOD_v8-bis/200406_135655/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017C_AOD_v8/200215_184354/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017C_AOD_v7/191120_151537'
    if args.dataset == 'data' and args.run == '2017D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017D_AOD_v7/191120_160824'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017D_AOD_v8/200406_133445/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017D_AOD_v7/191120_160824'
    if args.dataset == 'data' and args.run == '2017E':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017E_AOD_v7/191120_155344'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017E_AOD_v8/200406_134450/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017E_AOD_v7/191120_155344'
    if args.dataset == 'data' and args.run == '2017F':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v7/191120_155750'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v8/200406_135435/'
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2017F_AOD_v7/191120_155750'
 
    if args.dataset == 'data' and args.run == '2018A':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v4/200217_120328'
+      path = ''
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_Mini_v1/200427_162535/' #MiniAOD
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_Mini/200421_184022'    #MiniAOD
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v4/200217_120328'
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v3/200119_100145'
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018A_AOD_v2/191122_153230/'
    if args.dataset == 'data' and args.run == '2018B':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v4/200217_120246'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v5/200429_184137/' #new variables
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v4/200217_120246'
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018B_AOD_v2/191122_153359/'
    if args.dataset == 'data' and args.run == '2018C':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v4/200217_120028'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v5/200429_184043/' #new variables
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v4/200217_120028'
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018C_AOD_v2/191122_153443/'
    if args.dataset == 'data' and args.run == '2018D':
-      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v4/200217_112055'
+      path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v5/200429_183916/' #new variables
+      #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v4/200217_112055'
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimTau3Mu_DoubleMuonLowMass_Run2018D_AOD_v2/191122_153513/'
 
 if args.anatype == 'control':
@@ -117,16 +129,19 @@ if args.anatype == 'control':
       #path = '/lustre/cms/store/user/rosma/DoubleMuonLowMass/SkimPhiPi_DoubleMuonLowMass_Run2017F_19Aug_newSplit/190819_222432'
 
 if args.dataset == 'MC' and args.MCprocess == '2017Ds':
+   path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v8/200403_140244/'
    #no HLT! #path = '/lustre/cms/store/user/fsimone/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignal_2017_noHLT_v2/191202_100003/'
-   path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v7/191120_145101'
+   #path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v7/191120_145101'
    #path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v6/191106_163531'
    #path = '/lustre/cms/store/user/rosma/DsToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_DsSignalOfficial_2017_v4_newSplit/190927_121422/0000/'
 if args.dataset == 'MC' and args.MCprocess == '2017B0':
-   path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v7/191120_145848'
+   path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v8/200403_181258/'
+   #path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v7/191120_145848'
    #path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v6/191106_163824'
    #path = '/lustre/cms/store/user/rosma/BdToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BdSignalOfficial_2017_v3_newSplit/190905_085548'
 if args.dataset == 'MC' and args.MCprocess == '2017Bp':
-   path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v7/191120_145654'
+   path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v8/200403_181414/'
+   #path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v7/191120_145654'
    #path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v6/191107_075024'
    #path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignalOfficial_2017_v3_newSplit/'
 if args.dataset == 'MC' and args.MCprocess == 'DsPhiPi':
@@ -146,14 +161,19 @@ if args.dataset == 'MC' and args.MCprocess == '2016Bp':
       #path = '/lustre/cms/store/user/rosma/BuToTau_To3Mu_MuFilter_TuneCUEP8M1_13TeV-pythia8/TreeMaker_BuSignal_2016_v0/200112_114249/'
 
 if args.dataset == 'MC' and args.MCprocess == '2018Ds':
-      path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_Jianv2_v8/200217_121547'
+      path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu_March2020/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_March2020_v9/200414_092747/' #new variables
+      #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu_March2020/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_March2020_v8/200330_080934'
+      #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_Jianv2_v8/200217_121547'
       #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_CMSSW_10_2_1_v4/191228_143705'
       #path = '/lustre/cms/store/user/rosma/DsToTau_TauTo3Mu/SkimTau3Mu_DsToTauTo3Mu_2018_v1/191128_165636'
 if args.dataset == 'MC' and args.MCprocess == '2018B0':
-      path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122205'
+      path = '/lustre/cms/store/user/rosma/B0ToTau_TauTo3Mu/SkimTau3Mu_B0ToTauTo3Mu_2018_CMSSW_10_2_1_v9/200414_092736/' #new variables
+      #path = '/lustre/cms/store/user/rosma/B0ToTau_TauTo3Mu/SkimTau3Mu_B0ToTauTo3Mu_2018_CMSSW_10_2_1_v8/200330_132303'
+      #path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122205'
       #path = '/lustre/cms/store/user/rosma/BdTau3Mu/SkimTau3Mu_BdToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_090425/0000/'
 if args.dataset == 'MC' and args.MCprocess == '2018Bp':
-      path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122234'
+      path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v9/200430_082303/' #new variables
+      #path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122234'
       #path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v6/200122_091603/0000/'
 
 #generating the list of all .root files in given directory and subdirectories
@@ -164,9 +184,10 @@ for r, d, f in os.walk(path): # r=root, d=directories, f = files
             fileList.append(os.path.join(r, file))
 
 #prepare final script
-final_script = open(output_folder+"submit_analysis_"+startTime+".sh", "w")
+final_script_path = output_folder+startTime+"/submit_analysis_"+startTime+".sh"
+final_script = open(final_script_path, "w")
 final_script.write("#!/bin/bash\n")
-final_script.write("chmod 777 -R "+output_folder+"/*\n")
+final_script.write("chmod 777 -R "+output_folder+startTime+"/*\n")
 final_script.write("chmod 777 -R "+code_folder+"/*\n")
 final_script.write("cd "+output_folder+startTime+"\n")
 
@@ -229,4 +250,4 @@ for file_index in range(n_chunk+1):
 
 final_script.write("cd "+code_folder+"\n")
 final_script.close()
-print("to submit analysis to batch system do:\nsource "+output_folder+"submit_analysis_"+startTime+".sh\n")
+print("to submit analysis to batch system do:\nsource "+final_script_path+"\n")

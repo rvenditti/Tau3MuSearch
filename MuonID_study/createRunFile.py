@@ -89,10 +89,11 @@ if args.dataset == 'MC' and args.MCprocess == '2018B0':
 if args.dataset == 'MC' and args.MCprocess == '2018Bp':
       path = '/lustre/cms/store/user/rosma/BuTau3Mu/SkimTau3Mu_BuToTauTo3Mu_2018_CMSSW_10_2_1_v8/200217_122234'
 
+process_label = ''
 if args.MCprocess == '2018BdToPiPi' or args.MCprocess == '2018BdToKK' or args.MCprocess == '2018BdToKPi' or args.MCprocess == '2018BdToKPi_2':
-    args.MCprocess = '2018Bkg'
+    process_label = '2018Bkg'
 if args.MCprocess == '2018BsToPiPi' or args.MCprocess == '2018BsToKK' or args.MCprocess == '2018BsToKK_2' or args.MCprocess == '2018BsToKPi':
-    args.MCprocess = '2018Bkg'
+    process_label = '2018Bkg'
 
 #generating the list of all .root files in given directory and subdirectories
 fileList = []
@@ -129,10 +130,10 @@ for file_index in range(n_chunk+1):
       cpp_filename = "Analysis_"+args.dataset+args.massregion+"_"+args.run+args.MCprocess+"_"+args.anatype+"_chunk"+str(file_index)+".cpp"
       with open(cpp_filename, "w") as out_file:
           for lb in buf:
-              if lb == '        //AddFile_'+args.dataset+args.MCprocess+'_'+args.anatype+'\n':
+              if lb == '        //AddFile_'+args.dataset+process_label+'_'+args.anatype+'\n':
                   #write group of files
                   out_file.write(chunk)
-              elif lb == '        //OutFile_'+args.dataset+args.MCprocess+'_'+args.anatype+'\n':
+              elif lb == '        //OutFile_'+args.dataset+process_label+'_'+args.anatype+'\n':
                   #write output file name
                   out_file.write('        fileout = "'+out_filename+str(file_index)+'.root";\n')
               else: out_file.write(lb)
