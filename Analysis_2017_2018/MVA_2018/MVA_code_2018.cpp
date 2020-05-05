@@ -23,7 +23,6 @@
 
 using namespace TMVA;
 
-
 void MVA_code_2018(TString categ){
     //Check on input argument
     if(!categ.Contains("A") && !categ.Contains("B") && !categ.Contains("C")){
@@ -52,21 +51,35 @@ void MVA_code_2018(TString categ){
         f_sig_b0 = new TFile(inputpath_B0);
     }
     sigTree.push_back( (TTree*)f_sig_b0->Get(treeName));
-    //Bp
-    TFile *f_sig_bp = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
-    if (!f_sig_bp || !f_sig_bp->IsOpen()) {
-       f_sig_bp = new TFile(inputpath_Bp);
-    }
-    sigTree.push_back( (TTree*)f_sig_bp->Get(treeName));
+//    //Bp
+//    TFile *f_sig_bp = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_Bp);
+//    if (!f_sig_bp || !f_sig_bp->IsOpen()) {
+//       f_sig_bp = new TFile(inputpath_Bp);
+//    }
+//    sigTree.push_back( (TTree*)f_sig_bp->Get(treeName));
 
+    //add TTreeFriend
+    TString friendTreeName[] = {"TreeMu1=TreeMu1", "TreeMu2=TreeMu2", "TreeMu3=TreeMu3"};
+    for(int i=0; i<3; i++){
+        sigTree.at(0)->AddFriend(friendTreeName[i], inputpath_Ds);
+        sigTree.at(1)->AddFriend(friendTreeName[i], inputpath_B0);
+    //    sigTree.at(2)->AddFriend(friendTreeName[i], inputpath_Bp);
+    }
     //background
     //Loop on run
-    for(int j = 0; j<4; j++){
+    int n_bkg = sizeof(inputpath_datarun)/sizeof(inputpath_datarun[0]);
+    for(int j = 0; j<n_bkg; j++){
         TFile *f_bkg = (TFile*)gROOT->GetListOfFiles()->FindObject(inputpath_datarun[j]);
         if (!f_bkg || !f_bkg->IsOpen()) {
             f_bkg = new TFile(inputpath_datarun[j]);
         }
         bkgTree.push_back((TTree*)f_bkg->Get(treeName));
+    }
+    //add TTreeFriend
+    for(int i=0; i<3; i++){
+        for(int j=0; j<n_bkg; j++){
+            bkgTree.at(j)->AddFriend(friendTreeName[i], inputpath_datarun[j]);
+        }
     }
 
     // Set the event weights per tree
@@ -85,20 +98,38 @@ void MVA_code_2018(TString categ){
     
     dataloader->AddSignalTree(sigTree.at(0), sigWeight1);
     dataloader->AddSignalTree(sigTree.at(1), sigWeight2);
-    dataloader->AddSignalTree(sigTree.at(2), sigWeight3);
+    //dataloader->AddSignalTree(sigTree.at(2), sigWeight3);
     dataloader->AddBackgroundTree(bkgTree.at(0), bkgWeight1);
     dataloader->AddBackgroundTree(bkgTree.at(1), bkgWeight2);
     dataloader->AddBackgroundTree(bkgTree.at(2), bkgWeight3);
-    dataloader->AddBackgroundTree(bkgTree.at(3), bkgWeight4);
+    //dataloader->AddBackgroundTree(bkgTree.at(3), bkgWeight4);
 
+    std::vector<TString> var_train_name;
+    std::vector<TString> var_train_def;
+    std::vector<TString> var_spec_name;
+    std::vector<TString> var_spec_def;
+    TString BDTinVar;
+    if(categ.Contains("A")) BDTinVar = BDTinVar_A;
+    if(categ.Contains("B")) BDTinVar = BDTinVar_B;
+    if(categ.Contains("C")) BDTinVar = BDTinVar_C;
+    
+    readVarName(var_train_name, var_train_def, BDTinVar);
+    readVarName(var_spec_name, var_spec_def, BDTspecVar);
+ 
     // Spectators declaration
-    for(int k = 0; k<var_spec_names.size(); k++){
-        dataloader->AddSpectator(var_spec_names.at(k), var_spec_names.at(k), "", 'F');
+    cout<<"Declaration of spectator variables - category "<<categ<<" from file:"<<BDTinVar<<endl;
+    for(int k = 0; k<var_spec_name.size(); k++){
+        if(var_spec_name.at(k)=="" || var_spec_def.at(k)=="") continue;
+        cout<<k<<" - "<<var_spec_name.at(k)<<" - "<<var_spec_def.at(k)<<endl;
+        dataloader->AddSpectator(var_spec_def.at(k), var_spec_name.at(k), "", 'D');
     }
 
     // Variables declaration
-    for(int k = 0; k<var_names.size(); k++){
-        dataloader->AddVariable(var_BDT.at(k), var_names.at(k), "", 'F');
+    cout<<"Declaration of variables for training - category "<<categ<<" from file:"<<BDTspecVar<<endl;
+    for(int k = 0; k<var_train_name.size(); k++){
+        if(var_train_name.at(k)=="" || var_train_def.at(k)=="") continue;
+        cout<<k<<" - "<<var_train_name.at(k)<<" - "<<var_train_def.at(k)<<endl;
+        dataloader->AddVariable(var_train_def.at(k), var_train_name.at(k), "", 'D');
     }
 
     //dataloader->SetSignalWeightExpression( "puFactor" );
@@ -120,7 +151,7 @@ void MVA_code_2018(TString categ){
     prepareTrainTestOptions = ":SplitMode=Random"
                               ":NormMode=NumEvents"
                               ":!V";
-    dataloader->PrepareTrainingAndTestTree(reso_cat&&preselCut&&cutS, reso_cat&&preselCut&&cutB, prepareTrainTestOptions);
+    dataloader->PrepareTrainingAndTestTree(reso_cat&&preselCut&&cutS&&chi2cut, reso_cat&&preselCut&&cutB&&chi2cut, prepareTrainTestOptions);
 
      // Booking of MVA methods : BDT
      factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT", 
@@ -148,4 +179,6 @@ void MVA_code_2018(TString categ){
     if (!gROOT->IsBatch()){
         TMVAGui("TMVA_"+TMVA_outputpath+categ+".root");
     }
+    cout<<"Exiting ROOT"<<endl;
+    gApplication->Terminate();
 }
