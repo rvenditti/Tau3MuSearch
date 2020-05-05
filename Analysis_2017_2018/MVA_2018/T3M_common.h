@@ -1,36 +1,44 @@
 #include <iostream>
+#include <fstream>
+
+using namespace std;
 
 //TMVA Training options
 
-
     TString chi2cut = "";
-    TString TMVA_outputpath = "dataset_2018_27april_Chi2_"+chi2cut+"_"; //name to give to TMVA output files
+    TString TMVA_outputpath = "dataset_2018_4may_"; //name to give to TMVA output files
     //change it to perform 5-fold Cross Validation
     bool doCV = false;
     TString method = "BDT";
     TString TMVA_weightfilename = "/weights/TMVA_new_BDT.weights.xml"; //name given training BDT in "normal" way
-    
+ 
    // if(doCV)
    //TString method = "BDTG";
    //TString TMVA_weightfilename = "/weights/TMVACrossValidation_BDTG.weights.xml"; //name given training BDT with crossvalidation
     
 //TMVA Evaluating options
-    TString TMVA_inputpath = "dataset_2018_27april_Chi2_"+chi2cut+"_";  //name to load TMVA results for evaluation
+    TString TMVA_inputpath = "dataset_2018_4may_";  //name to load TMVA results for evaluation
 
 //data rootfiles
 
     //21 april: muonID in miniTree
     TString inputpath_datarun[] = {
-           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_data_2018A_tau3mu_21april.root",
-           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018B_tau3mu_21april.root",
-           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018C_tau3mu_21april.root",
-           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018D_tau3mu_21april.root",
+           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200430_1121/AnalysedTree_data_2018B_tau3mu_30april.root",
+           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200430_1121/AnalysedTree_data_2018C_tau3mu_30april.root",
+           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200430_1121/AnalysedTree_data_2018D_tau3mu_30april.root",
+           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_data_2018A_tau3mu_21april.root",
+           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018B_tau3mu_21april.root",
+           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018C_tau3mu_21april.root",
+           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018D_tau3mu_21april.root",
            };
 
     //TString inputpath_data = "AnalysedTree_data_2018_merged_21april.root";
-    TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018Ds_tau3mu_21april.root";
-    TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018B0_tau3mu_21april.root";
-    TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_MC_2018Bp_tau3mu_21april.root";
+    TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200430_1123/AnalysedTree_MC_2018Ds_tau3mu_30april.root";
+    TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200430_1123/AnalysedTree_MC_2018B0_tau3mu_30april.root";
+    TString inputpath_Bp = "";
+    //TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018Ds_tau3mu_21april.root";
+    //TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018B0_tau3mu_21april.root";
+    //TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_MC_2018Bp_tau3mu_21april.root";
 
 
 //Coefficients for signal normalisation
@@ -49,60 +57,20 @@
 
 
 //TMVA settings
-//
-// Variables declaration
-//    TString var_Pmu3 =       "Pmu3>45?45:Pmu3";
-//    TString var_cLP =        "cLP>30?30:cLP";
-//    TString var_tKink =      "tKink>80?80:tKink";
-//    TString var_segmComp =   "segmComp<0.2?0.2:segmComp";
-//    TString var_fv_nC =      "fv_nC>25?25:fv_nC";
-//    TString var_fv_dphi3D =  "fv_dphi3D>0.15?0.15:fv_dphi3D"; 
-//    TString var_fv_d3Dsig =  "fv_d3Dsig>100?100:fv_d3Dsig";
-//    TString var_d0sig =      "d0sig>15?15:d0sig";
-//    TString var_mindca_iso = "mindca_iso>0.5?0.5:mindca_iso";
-//    TString var_trkRel =     "trkRel>10?10:trkRel";
+    TString BDTinVar_A = "BDTinputVar_"+TMVA_outputpath+"A.txt"; 
+    TString BDTinVar_B = "BDTinputVar_"+TMVA_outputpath+"B.txt"; 
+    TString BDTinVar_C = "BDTinputVar_"+TMVA_outputpath+"C.txt"; 
+    TString BDTspecVar = "BDTspecVar_"+TMVA_outputpath+".txt";
 
-
-
-//TMVA settings
-// Variables
-    std::vector<TString> var_BDT = {
-                                      "Pmu3>45?45:Pmu3",
-                                      "cLP>30?30:cLP",
-                                      "tKink>80?80:tKink",
-                                      "segmComp<0.2?0.2:segmComp",
-                                      "fv_nC>25?25:fv_nC",
-                                      "fv_dphi3D>0.15?0.15:fv_dphi3D",
-                                      "fv_d3Dsig>100?100:fv_d3Dsig",
-                                      "d0sig>15?15:d0sig",
-                                      "mindca_iso>0.5?0.5:mindca_iso",
-                                      "trkRel>10?10:trkRel",
-                                      "nMatchesMu3",
-                                   //  "muID2",
-                                   //   "muID3"
-                                      };
-    std::vector<TString> var_names = {
-                                      "Pmu3",
-                                      "cLP",
-                                      "tKink",
-                                      "segmComp",
-                                      "fv_nC",
-                                      "fv_dphi3D",
-                                      "fv_d3Dsig",
-                                      "d0sig",
-                                      "mindca_iso",
-                                      "trkRel",
-                                      "nMatchesMu3",
-                                  //    "muID2",
-                                  //    "muID3"
-                                      };
-
-
-    std::vector<TString> var_spec_names = {
-                                      "tripletMass",
-//                                      "tripletMassReso",
-                                      "puFactor",
-                                     // "evt",
-                                     // "evt % 8192",
-                                      };
-
+//Utility to read variables from text file
+void readVarName(std::vector<TString> &var_name, std::vector<TString> &var_def,  TString filename ){
+     TString var[2];
+     ifstream inputVar;
+     inputVar.open(filename);
+     while (!inputVar.fail() && !inputVar.eof()){
+         inputVar >> var[0] >> var[1];
+         var_name.push_back(var[0]);
+         var_def.push_back(var[1]);
+     }
+     inputVar.close();
+}
