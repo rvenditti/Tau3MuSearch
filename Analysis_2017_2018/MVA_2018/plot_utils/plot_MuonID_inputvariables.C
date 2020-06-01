@@ -53,24 +53,25 @@ void plot_MuonID_inputvariables(TString muon)
                                       "mu_trackerVetoPt03" 
                                       };
 
-    TString run[] = {"A", "B", "C", "D"};
-    size_t nrun = sizeof(run)/sizeof(run[0]);
+    size_t nrun = sizeof(inputpath_datarun)/sizeof(inputpath_datarun[0]);
     //open input files
     TString treename = "Tree"+muon;
     //data
+    cout<<"Data"<<endl;
     TChain *tdata = new TChain(treename);
     for(auto i=0; i<nrun; i++){
         tdata->Add(inputpath_datarun[i]);
         std::cout<<"Opened input file: "<<inputpath_datarun[i]<<std::endl;
     }
     //MC 
+    cout<<"MC"<<endl;
     TChain *tmc = new TChain(treename);
     tmc->Add(inputpath_Ds);
     tmc->Add(inputpath_B0);
-    //tmc->Add(inputpath_Bp);
+    tmc->Add(inputpath_Bp);
     std::cout<<"Opened input file: "<<inputpath_Ds<<std::endl;
     std::cout<<"Opened input file: "<<inputpath_B0<<std::endl;
-    //std::cout<<"Opened input file: "<<inputpath_Bp<<std::endl;
+    std::cout<<"Opened input file: "<<inputpath_Bp<<std::endl;
 
     int n = sizeof(var)/sizeof(var[0]);
     TH1F *hdata[n];

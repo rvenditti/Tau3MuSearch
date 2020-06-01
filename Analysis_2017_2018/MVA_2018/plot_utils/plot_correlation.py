@@ -25,39 +25,48 @@ df = read_root(args.inputFile, '/'+datasetName+'/'+"TestTree")
 
 df_signal = df[df.classID==0]
 df_bkg = df[df.classID==1]
-
+print(df_signal)
+print(df_bkg)
 drop_columns = [
                 'classID',
                 'className', 
-                'Pmu3_45_45:Pmu3_Pmu3',
+#                'Pmu3_45_45:Pmu3_Pmu3',
                 'cLP_30_30:cLP_cLP',
+                'tKink_80_80:tKink_tKink',
                 'fv_nC_25_25:fv_nC_fv_nC',
                 'fv_dphi3D_0.15_0.15:fv_dphi3D_fv_dphi3D',
                 'fv_d3Dsig_100_100:fv_d3Dsig_fv_d3Dsig',
-                'tKink_80_80:tKink_tKink',
                 'segmComp_0.2_0.2:segmComp_segmComp',
                 'd0sig_15_15:d0sig_d0sig',
                 'mindca_iso_0.5_0.5:mindca_iso_mindca_iso',
                 'trkRel_10_10:trkRel_trkRel', 
                 'weight', 
+                'puFactor', 
+                'evt', 
+                'tripletMassReso', 
                 'BDT'
                 ]
 df_signal = df_signal.drop(drop_columns, axis=1)
 df_bkg = df_bkg.drop(drop_columns, axis=1)
+print(df_signal)
+print(df_bkg)
 
 #print(df_bkg)
 rename_columns = [
-                  "Pmu3",
+ #                 "Pmu3",
                   "cLP",
                   "tKink", 
-                  "segmComp",
                   "fv_nC",
                   "fv_dphi3D",
                   "d3Dsig",
                   "d0sig",
                   "mindca_iso",
                   "trkRel", 
-                  "nMatchesMu3",
+                  "segmComp",
+                  "MuID1",
+                  "MuID2",
+                  "MuID3",
+                  "Pt_tripl",
                   "m3m",
                   ]
 df_signal.columns = rename_columns

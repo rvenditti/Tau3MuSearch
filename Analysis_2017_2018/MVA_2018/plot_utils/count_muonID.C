@@ -6,6 +6,12 @@
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
 
+double log_significance(double S, double B){
+    double significance = 0;
+    significance = sqrt(2*( (S+B) * log( 1+S/B ) - S));
+    //cout<<"log sign is "<<significance<<" while S/sqrt(S + B) gives "<< S/sqrt(S + B) <<endl;
+    return significance;
+}
 void count_muonID() 
 {
     TString run[] = {"A", "B", "C", "D"};
@@ -79,7 +85,7 @@ void count_muonID()
     //count reparately for each category
     for(auto j = 0; j<3; j++){
         cout<<"category "<<category[j]<<endl;
-        cout<<"muonID\tS/sqrt(B)\tB\tS"<<endl; 
+        cout<<"MuonID\tsignificance\tbkg\tsignal"<<endl; 
         //for each muonID i count the events, sum up the entries, apply normalisation and compute the sensitivity before BDT
         for(auto i = 0; i<n; i++){
 
@@ -110,13 +116,14 @@ void count_muonID()
             entries_data = entries_data / 330.0 * 50.0;
 
             sensitivity[i] = entries_signal / sqrt(entries_data); 
-            cout<<muonID[i]<<"\t"<<sensitivity[i]<<"\t"<<entries_data<<"\t"<<entries_signal<<endl; 
+            double signif = log_significance(entries_signal, entries_data); 
+            cout<<muonID[i]<<"\t"<<signif<<"\t"<<entries_data<<"\t"<<entries_signal<<endl; 
 
         }
     cout<<"__________________________________________"<<endl;
     }
     cout<<"all categories"<<endl;
-    cout<<"muonID\tS/sqrt(B)\tB\tS"<<endl; 
+    cout<<"muonID\tsignificance\tbkg\tsignal"<<endl; 
     //for each muonID i count the events, sum up the entries, apply normalisation and compute the sensitivity before BDT
     for(auto i = 0; i<n; i++){
 
@@ -147,6 +154,8 @@ void count_muonID()
         entries_data = entries_data / 330.0 * 50.0;
 
         sensitivity[i] = entries_signal / sqrt(entries_data); 
+        double signif = log_significance(entries_signal, entries_data); 
+        cout<<muonID[i]<<"\t"<<signif<<"\t"<<entries_data<<"\t"<<entries_signal<<endl; 
         cout<<muonID[i]<<"\t"<<sensitivity[i]<<"\t"<<entries_data<<"\t"<<entries_signal<<endl; 
 
     }
