@@ -3,7 +3,7 @@
 #include "TH1F.h"
 #include <cmath>
 #include <string> 
-#include "T3M_common.h"
+#include "../T3M_common.h"
 
 void plot_TMVA_bdtcorr(TString category) 
 {
@@ -22,7 +22,7 @@ void plot_TMVA_bdtcorr(TString category)
                                  };
 
     cout<<"Opening data file"<<endl;
-    TFile *f_tmva = new TFile("TMVA_"+TMVA_filename+".root","READ");
+    TFile *f_tmva = new TFile("../TMVA_"+TMVA_filename+".root","READ");
     cout<<"Opened TMVA file"<<endl;
     
     TTree *tTrain = (TTree*)f_tmva->Get(TMVA_filename+"/TrainTree");
@@ -65,7 +65,7 @@ void plot_TMVA_bdtcorr(TString category)
 
     gPad->Modified();
     c1->Update();
-    c1->SaveAs(TMVA_inputpath+category+"/"+TMVA_inputpath+category+"_"+varname+"correlation_signal.png");
+    c1->SaveAs("../"+TMVA_inputpath+category+"/"+TMVA_inputpath+category+"_"+varname+"correlation_signal.png");
 
     //BACKGROUND
     TCanvas *c2 = new TCanvas("c2","Bkg - cat "+category,150,10,990,660);
@@ -95,5 +95,5 @@ void plot_TMVA_bdtcorr(TString category)
 
     gPad->Modified();
     c2->Update();
-    c2->SaveAs(TMVA_inputpath+category+"/"+TMVA_inputpath+category+"_"+varname+"correlation_bkg.png");
+    c2->SaveAs("../"+TMVA_inputpath+category+"/"+TMVA_inputpath+category+"_"+varname+"correlation_bkg.png");
 }

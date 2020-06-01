@@ -2,7 +2,7 @@
 #include "TH1F.h"
 #include <cmath>
 #include <string> 
-#include "T3M_common.h"
+#include "../T3M_common.h"
 
 double TH1_integral(TH1F *h, float xmin, float xmax){
     TAxis *axis = h->GetXaxis();
@@ -18,9 +18,10 @@ double TH1_integral(TH1F *h, float xmin, float xmax){
 void plot_TMVA_inputvariables(TString category) 
 {
     TString TMVA_filename = TMVA_inputpath+category;
-    TString var[] = {"Pmu3","cLP","tKink","segmComp","fv_nC","fv_dphi3D","fv_d3Dsig","d0sig","mindca_iso","trkRel", "nMatchesMu3"};
+    TString var[] = {"cLP","tKink","segmComp","fv_nC","fv_dphi3D","fv_d3Dsig","d0sig","mindca_iso","trkRel","fv_d3D", "abs(dxy1/dxyErr1)", "abs(dxy2/dxyErr2)", "abs(dxy3/dxyErr3)"};
+    //TString var[] = {"Pmu3","cLP","tKink","segmComp","fv_nC","fv_dphi3D","fv_d3Dsig","d0sig","mindca_iso","trkRel","nMatchesMu3", "fv_d3D", "abs(dxy1/dxyErr1)", "abs(dxy2/dxyErr2)", "abs(dxy3/dxyErr3)"};
     cout<<"Opening data file"<<endl;
-    TFile *f_tmva = new TFile("TMVA_"+TMVA_filename+".root","READ");
+    TFile *f_tmva = new TFile("../TMVA_"+TMVA_filename+".root","READ");
     cout<<"Opened TMVA file"<<endl;
     
     TTree *tTrain = (TTree*)f_tmva->Get(TMVA_filename+"/TrainTree");
@@ -46,6 +47,7 @@ void plot_TMVA_inputvariables(TString category)
         if(varname=="fv_nC") binning = "(40, 0, 25)"; //binning AN
         if(varname=="fv_dphi3D") binning = "(40, 0, 0.16)"; //binning AN
         if(varname=="fv_d3Dsig") binning = "(40, 0, 100)"; //binning AN
+        if(varname=="fv_d3D") binning = "(50, 0, 5)"; //binning AN
         if(varname=="d0sig") binning = "(40, 0, 10)"; //binning AN
         if(varname=="mindca_iso") binning = "(40,0,0.5)"; //binning AN
         if(varname=="trkRel") binning = "(40,0,10)"; //binning AN 
@@ -107,7 +109,7 @@ void plot_TMVA_inputvariables(TString category)
 
         //c1->SetLogy();
         c1->Update();
-        c1->SaveAs(TMVA_inputpath+category+"/TMVA_train_"+varname+".png");
+        c1->SaveAs("../"+TMVA_inputpath+category+"/TMVA_train_"+varname+".png");
 
     }
 }
