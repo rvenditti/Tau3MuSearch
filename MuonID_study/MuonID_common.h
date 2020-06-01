@@ -113,13 +113,13 @@
 
 
     std::vector<TString> var_MuonID_spec_names = {
-                                      "abs(mu_eta)",
+                                      "mu_eta",
                                       "mu_pt",
                                       "mu_phi",
-                                      "mu_simPdgId",
-                                      "mu_simMotherPdgId",
-                                      "mu_simType",
-                                      "mu_isGlobal",
+                                    //  "mu_simPdgId",
+                                    //  "mu_simMotherPdgId",
+                                    //  "mu_simType",
+                                    //  "mu_isGlobal",
                                       "mu_SoftMVA"
                                       //"ptetaWeight"
                                       };
