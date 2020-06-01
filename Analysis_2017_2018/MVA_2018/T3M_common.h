@@ -43,61 +43,13 @@ using namespace std;
            "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1713/AnalysedTree_data_2018B_tau3mu_6may.root",
            "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1713/AnalysedTree_data_2018C_tau3mu_6may.root",
            "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1713/AnalysedTree_data_2018D_tau3mu_6may.root",
-           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_data_2018A_tau3mu_21april.root",
-           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018B_tau3mu_21april.root",
-           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018C_tau3mu_21april.root",
-           //"/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0826/AnalysedTree_data_2018D_tau3mu_21april.root",
            };
 
     TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1715/AnalysedTree_MC_2018Ds_tau3mu_6may.root";
     TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1716/AnalysedTree_MC_2018B0_tau3mu_6may.root";
     TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200506_1716/AnalysedTree_MC_2018Bp_tau3mu_6may.root";
-    //TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018Ds_tau3mu_21april.root";
-    //TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0824/AnalysedTree_MC_2018B0_tau3mu_21april.root";
-    //TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200421_0825/AnalysedTree_MC_2018Bp_tau3mu_21april.root";
 
-//    //4 april = 12 march + new Ds and B0 signal amples
-//    TString inputpath_datarun[] = {
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1436/AnalysedTree_data_2018A_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1035/AnalysedTree_data_2018B_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1036/AnalysedTree_data_2018C_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1037/AnalysedTree_data_2018D_tau3mu_12march.root",
-//           };
-//
-//    //Has to be the merging of the previous 4
-//    TString inputpath_data = "AnalysedTree_data_2018_merged_12march.root";
-//    
-////          TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200405_2009/AnalysedTree_MC_2018Ds_tau3mu_5april.root";
-////          TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200405_2018/AnalysedTree_MC_2018B0_tau3mu_5april.root";
-////          TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1039/AnalysedTree_MC_2018Bp_tau3mu_12march.root";
-//    TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200414_1613/AnalysedTree_MC_2018Ds_tau3mu_14april_l1filter.root";
-//    TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200414_1613/AnalysedTree_MC_2018B0_tau3mu_14april_l1filter.root";
-//    TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200414_1613/AnalysedTree_MC_2018Bp_tau3mu_14april_l1filter.root";
-
-    ////Has to be the merging of the previous 3 //just for plotting!!!
-    //TString inputpath_MC = "AnalysedTree_MC_2018_merged_tau3mu_12march.root";
-
-//    //12 march
-//    TString inputpath_datarun[] = {
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1436/AnalysedTree_data_2018A_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1035/AnalysedTree_data_2018B_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1036/AnalysedTree_data_2018C_tau3mu_12march.root",
-//           "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1037/AnalysedTree_data_2018D_tau3mu_12march.root",
-//           };
-//
-//    //Has to be the merging of the previous 4
-//    TString inputpath_data = "AnalysedTree_data_2018_merged_12march.root";
-//    
-//   //       TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200405_2009/AnalysedTree_MC_2018Ds_tau3mu_5april.root";
-//   //       TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200405_2018/AnalysedTree_MC_2018B0_tau3mu_5april.root";
-//    TString inputpath_Ds = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1038/AnalysedTree_MC_2018Ds_tau3mu_12march.root";
-//    TString inputpath_B0 = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1038/AnalysedTree_MC_2018B0_tau3mu_12march.root";
-//    TString inputpath_Bp = "/lustre/cms/store/user/fsimone/Tau3Mu/Analysis/20200312_1039/AnalysedTree_MC_2018Bp_tau3mu_12march.root";
-//
-//    ////Has to be the merging of the previous 3 //just for plotting!!!
-//    TString inputpath_MC = "AnalysedTree_MC_2018_merged_tau3mu_12march.root";
-
-//Coefficients for signal normalisation
+    //Coefficients for signal normalisation
     Double_t Dplus_correction = 1.05; // to be applied to D signal  
     Double_t Bs_correction = 1.12; // to be applied to B0 and Bp signal  
     Double_t f_correction = 1.; // to be applied to B0 and Bp signal  
@@ -113,9 +65,6 @@ using namespace std;
 
 
 //TMVA settings
-    //TString BDTinVar_A = "BDTinputVar_dataset_mu3_v2.txt"; 
-    //TString BDTinVar_B = "BDTinputVar_dataset_mu3_v2.txt"; 
-    //TString BDTinVar_C = "BDTinputVar_dataset_2018_6may_optimised_v2_C.txt"; 
     TString BDTinVar_A = "BDTinputVar_dataset_2018_6may_optimised_v2_A.txt"; 
     TString BDTinVar_B = "BDTinputVar_dataset_2018_6may_optimised_v2_B.txt"; 
     TString BDTinVar_C = "BDTinputVar_dataset_2018_6may_optimised_v2_C.txt"; 
