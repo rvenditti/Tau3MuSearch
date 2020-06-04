@@ -85,7 +85,7 @@ void MVA_muonid(TString categ){
 
     // Spectators declaration
     for(int k = 0; k<var_MuonID_spec_names.size(); k++){
-        dataloader->AddSpectator(var_MuonID_spec_names.at(k), var_MuonID_spec_names.at(k), "", 'F');
+        dataloader->AddSpectator(var_MuonID_spec_def.at(k), var_MuonID_spec_names.at(k), "", 'F');
     }
 
     // Variables declaration

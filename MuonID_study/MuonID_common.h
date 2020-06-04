@@ -2,7 +2,7 @@
 #include <vector>
 
 //TMVA Training options
-    TString TMVA_MuonID_outputpath = "MuonMVA_02may_"; //name to give to TMVA output files
+    TString TMVA_MuonID_outputpath = "MuonMVA_04june_TLWM_"; //name to give to TMVA output files
     //change it to perform 5-fold Cross Validation
     bool doCV_MuonID = false;
     TString method_MuonID = "BDT";
@@ -13,7 +13,7 @@
    //TString TMVA_MuonID_weightfilename = "/weights/TMVACrossValidation_BDTG.weights.xml"; //name given training BDT with crossvalidation
     
 //TMVA Evaluating options
-    TString TMVA_MuonID_inputpath = "MuonMVA_02may_";  //name to load TMVA results for evaluation
+    TString TMVA_MuonID_inputpath = "MuonMVA_04june_TLWM_";  //name to load TMVA results for evaluation
 
 //data rootfiles
     TString inputpath_MuonID_bkg[] = {
@@ -50,9 +50,9 @@
                                       "mu_combinedQuality_glbTrackProbability>150?150:mu_combinedQuality_glbTrackProbability",
 
                                       //collection of hits in the HitPattern
-                                      "mu_Numberofvalidtrackerhits", //Valid Tracker Hits
+                                      //"mu_Numberofvalidtrackerhits", //Valid Tracker Hits
                                       "mu_Numberofvalidpixelhits",
-                                      //"mu_trackerLayersWithMeasurement",
+                                      "mu_trackerLayersWithMeasurement",
                                       //"mu_GLhitPattern_numberOfValidMuonHits",
                                       "mu_validMuonHitComb", //Hits in DT, CSC, RPC 
 
@@ -87,9 +87,9 @@
                                       "mu_combinedQuality_glbTrackProbability",
                                    
                                       //collection of hits in the HitPattern
-                                      "mu_Numberofvalidtrackerhits", //Valid Tracker Hits
+                                     // "mu_Numberofvalidtrackerhits", //Valid Tracker Hits
                                       "mu_Numberofvalidpixelhits",
-                                     //"mu_trackerLayersWithMeasurement",
+                                      "mu_trackerLayersWithMeasurement",
                                      //"mu_GLhitPattern_numberOfValidMuonHits",
                                       "mu_validMuonHitComb", //Hits in DT, CSC, RPC
                                    
@@ -111,6 +111,17 @@
                                      //custom variables track multiplicity
                                      };
 
+    std::vector<TString> var_MuonID_spec_def = {
+                                      "mu_eta",
+                                      "mu_pt",
+                                      "mu_phi",
+                                    //  "mu_simPdgId",
+                                    //  "mu_simMotherPdgId",
+                                    //  "mu_simType",
+                                    //  "mu_isGlobal",
+                                      "mu_SoftMVA"
+                                      //"ptetaWeight"
+                                      };
 
     std::vector<TString> var_MuonID_spec_names = {
                                       "mu_eta",
