@@ -1,5 +1,4 @@
-#include "ntupleClass_MC.C"
-#include "ntupleClass_data.C"
+#include "ntupleClass_tau3mu.C"
 #include "ntupleClass_Control.C"
 #include <TROOT.h>
 #include <stdio.h>
@@ -60,32 +59,32 @@ int main(int narg, char** arg){
         // Ds -> Tau -> 3Mu
         if ( strcmp(datasetName, "2017Ds") == 0 ){
             cout << "MC Dataset : Ds -> Tau -> 3Mu" << endl << endl;
-            TChain* chain = new TChain("Tree3Mu/ntuple");
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
         //AddFile_MC2017Ds_tau3mu
         //OutFile_MC2017Ds_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
         // B0 -> Tau -> 3Mu
         if ( strcmp(datasetName, "2017B0") == 0 ){
             cout << "MC Dataset : B0 -> Tau -> 3Mu" << endl << endl;
-            TChain* chain = new TChain("Tree3Mu/ntuple");
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
         //AddFile_MC2017B0_tau3mu
         //OutFile_MC2017B0_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
         // Bp -> Tau -> 3Mu
         if ( strcmp(datasetName, "2017Bp") == 0 ){
             cout << "MC Dataset : Bp -> Tau -> 3Mu" << endl << endl;
-            TChain* chain = new TChain("Tree3Mu/ntuple");
+            TChain* chain = new TChain("TreeMakerBkg/ntuple");
         //AddFile_MC2017Bp_tau3mu
         //OutFile_MC2017Bp_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
 
         // Ds -> Tau -> 3Mu
@@ -97,8 +96,8 @@ int main(int narg, char** arg){
         //OutFile_MC2016Ds_tau3mu
         //OutFile_MC2018Ds_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
         // B0 -> Tau -> 3Mu
         if (strcmp(datasetName, "2016B0") == 0 || strcmp(datasetName, "2018B0") == 0){
@@ -109,8 +108,8 @@ int main(int narg, char** arg){
         //OutFile_MC2016B0_tau3mu
         //OutFile_MC2018B0_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
         // Bp -> Tau -> 3Mu
         if (strcmp(datasetName, "2016Bp") == 0 || strcmp(datasetName, "2018Bp") == 0){
@@ -121,8 +120,8 @@ int main(int narg, char** arg){
         //OutFile_MC2016Bp_tau3mu
         //OutFile_MC2018Bp_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
 
         // Minimum bias
@@ -132,8 +131,8 @@ int main(int narg, char** arg){
         //AddFile_MCMiniBias_tau3mu
         //OutFile_MCMiniBias_tau3mu
 
-        ntupleClass_MC class_MC(chain, fileout);
-        class_MC.LoopMC_New(type, datasetName);
+        ntupleClass_tau3mu class_MC(chain, fileout);
+        class_MC.Loop(type, datasetName);
         }
     }
     // Ds -> Phi -> Pi
@@ -142,9 +141,11 @@ int main(int narg, char** arg){
         TChain* chain = new TChain("Tree3Mu/ntuple");
         //AddFile_MCDsPhiPi_control
         //OutFile_MCDsPhiPi_control
+        //AddFile_MC2017DsPhiPi_control
+        //OutFile_MC2017DsPhiPi_control
 
         ntupleClass_Control class_Control(chain, fileout);
-        class_Control.LoopControl();
+        class_Control.LoopControl(type, datasetName);
     }
     
     // ##################### Data
@@ -155,8 +156,8 @@ int main(int narg, char** arg){
         //AddFile_data_tau3mu
         //OutFile_data_tau3mu
 
-        ntupleClass_MC class_Data(chain, fileout);
-        class_Data.LoopData_New(type, datasetName);
+        ntupleClass_tau3mu class_Data(chain, fileout);
+        class_Data.Loop(type, datasetName);
     }
     
     // ##################### Data Control
@@ -169,7 +170,7 @@ int main(int narg, char** arg){
         //OutFile_data_control
 
         ntupleClass_Control class_Data(chain, fileout);
-        class_Data.LoopControl_Data(type, datasetName);
+        class_Data.LoopControl(type, datasetName);
     }
     
     return 0;
